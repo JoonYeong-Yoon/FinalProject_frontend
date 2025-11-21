@@ -1,0 +1,74 @@
+/* 전체 섹션 */
+.preview-wrapper {
+  width: 100%;
+  padding: 80px 0;
+  background: #dcdde1; /* 은은한 밝은 회색 배경 */
+  text-align: center;
+}
+
+/* 제목 */
+.preview-title {
+  font-size: 38px;
+  font-weight: 800;
+  color: #111;
+  margin-bottom: 10px;
+}
+
+.preview-sub {
+  font-size: 18px;
+  color: #333;
+  margin-bottom: 50px;
+}
+
+/* 그리드 */
+.preview-grid {
+  width: 90%;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 50px;
+}
+
+/* 개별 카드 wrapper */
+.slanted-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+/* 대각선 이미지 */
+.slanted-img {
+  width: 100%;
+  max-width: 420px;
+  border-radius: 22px;
+  object-fit: cover;
+
+  /* 🔥 기본 기울기 */
+  transform: rotate(-12deg);
+  box-shadow: 0 20px 35px rgba(0,0,0,0.35);
+  transition: 0.4s ease;
+}
+
+/* 호버 시 확대 & 고정 */
+.slanted-img:hover {
+  transform: rotate(-12deg) scale(1.07);
+  box-shadow: 0 30px 50px rgba(0,0,0,0.45);
+  z-index: 10;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 900px) {
+  .preview-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .preview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .slanted-img {
+    max-width: 90%;
+    margin: 0 auto;
+  }
+}

@@ -1,0 +1,107 @@
+.calorie-container {
+  padding: 20px 40px 60px;
+}
+
+.calorie-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+/* 상단 메뉴 */
+.top-menu {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.menu-item {
+  padding: 12px 20px;
+  background: #f1f5f9;
+  border: 1px solid #d4d4d8;
+  border-radius: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.menu-item:hover {
+  background: #e2e8f0;
+}
+
+.menu-item.active {
+  background: #dbeafe;
+  border-color: #60a5fa;
+  color: #2563eb;
+}
+
+/* 입력 패널 */
+.calorie-panel {
+  background: #f8fafc;
+  padding: 30px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  width: 100%;
+  max-width: 900px;
+}
+
+.panel-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+/* 입력 박스 */
+.input-box {
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  margin-bottom: 18px;
+  font-size: 15px;
+  background: white;
+}
+
+.row {
+  display: flex;
+  gap: 15px;
+}
+
+.small {
+  flex: 1;
+}
+
+.calc-btn {
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: bold;
+  background: #1e293b;
+  color: white;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: 0.2s;
+}
+
+.calc-btn:hover {
+  background: #0f172a;
+}
+
+/* 결과 박스 */
+.result-box {
+  margin-top: 20px;
+  padding: 18px;
+  background: #e2e8f0;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.fire {
+  font-size: 22px;
+}

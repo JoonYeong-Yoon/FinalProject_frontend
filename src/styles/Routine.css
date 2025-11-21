@@ -1,0 +1,224 @@
+/* 전체 페이지 */
+.routine-container {
+  width: 100%;
+  padding: 20px 40px;
+}
+
+/* ---------------------- 상단 메뉴 ---------------------- */
+.top-menu {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.menu-item {
+  padding: 14px 20px;
+  background: #f1f5f9;
+  border: 1px solid #d4d4d8;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.menu-item:hover {
+  background: #e2e8f0;
+}
+
+.menu-item.active {
+  background: #dbeafe;
+  border-color: #60a5fa;
+  color: #2563eb;
+}
+
+/* ---------------------- 제목 ---------------------- */
+.routine-title {
+  font-size: 26px;
+  font-weight: bold;
+  margin-bottom: 25px;
+}
+
+/* ---------------------- 탭 버튼 ---------------------- */
+.routine-select-tabs {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.tab-btn {
+  padding: 14px 24px;
+  border-radius: 12px;
+  border: 1px solid #d1d5db;
+  background: #f3f4f6;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.tab-btn.active {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+/* ---------------------- 공통 콘텐츠 박스 ---------------------- */
+.content-box {
+  background: #f8fafc;
+  padding: 25px;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  animation: fadeIn 0.25s ease;
+}
+
+.content-box.ai {
+  background: #f1fdf1;
+  border-color: #bbf7d0;
+}
+
+/* fade animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------------------- 텍스트 ---------------------- */
+.subtitle {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.subtext {
+  color: #475569;
+  margin-bottom: 18px;
+}
+
+/* ---------------------- 루틴 카드 ---------------------- */
+.routine-list {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+}
+
+.routine-card {
+  background: #e7efff;
+  padding: 20px;
+  border-radius: 12px;
+  border-left: 6px solid #2563eb;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.routine-card:hover {
+  background: #d9e6ff;
+}
+
+/* ---------------------- AI 체크박스 ---------------------- */
+.checkbox-group {
+  display: flex;
+  gap: 30px;
+  margin: 12px 0 20px;
+  font-size: 16px;
+}
+
+.checkbox-group input {
+  margin-right: 6px;
+}
+
+/* AI 정보창 */
+.info-box {
+  background: #fef9c3;
+  padding: 18px;
+  border-radius: 10px;
+  border: 1px solid #facc15;
+  margin-bottom: 20px;
+}
+
+/* AI 버튼 */
+.ai-btn {
+  width: 100%;
+  padding: 15px;
+  background: #22c55e;
+  color: white;
+  font-size: 17px;
+  font-weight: bold;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+}
+
+.ai-btn:hover {
+  background: #16a34a;
+}
+
+/* ---------------------- 반응형 ---------------------- */
+@media (max-width: 768px) {
+  .routine-list {
+    grid-template-columns: 1fr;
+  }
+
+  .checkbox-group {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+.routine-card h4 {
+  color: #0f172a !important;   /* 거의 검정 */
+  font-weight: 700;
+}
+
+.routine-card p {
+  color: #334155 !important;   /* 진한 회색 */
+}
+
+/* ---------------------- AI 추천 섹션 ---------------------- */
+.content-box.ai {
+  background: #ecfdf5; /* 더 밝은 민트톤 */
+  border: 1px solid #a7f3d0;
+}
+
+/* 제목 */
+.content-box.ai .subtitle {
+  color: #065f46;        /* 짙은 초록 */
+  font-weight: 700;
+}
+
+/* 설명 텍스트 */
+.content-box.ai .subtext {
+  color: #374151;        /* 진한 회색 */
+  font-size: 15px;
+}
+
+/* 체크박스 라인 */
+.checkbox-group label {
+  color: #374151 !important;  /* 짙은 회색 */
+  font-weight: 500;
+}
+
+/* 체크박스 크기 살짝 키움 */
+.checkbox-group input[type="checkbox"] {
+  transform: scale(1.15);
+  margin-right: 6px;
+}
+
+/* 노란 박스 */
+.info-box {
+  background: #fef3c7;        /* 더 부드럽고 따뜻한 노랑 */
+  border: 1px solid #fcd34d;
+  color: #92400e;             /* 읽기 좋은 진한 갈색 */
+  font-weight: 500;
+}
+
+/* 버튼 */
+.ai-btn {
+  background: #10b981;        /* 조금 더 녹색 느낌 */
+  font-weight: 700;
+}
+
+.ai-btn:hover {
+  background: #059669;
+}

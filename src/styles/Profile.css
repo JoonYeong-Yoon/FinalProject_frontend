@@ -1,0 +1,301 @@
+/* 기본 배경 톤을 어두운 그라데이션 계열로 변경 - 기존과 조화 */
+
+.profile-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 24px;
+  color: white;
+  background: linear-gradient(135deg, #111827, #1f2937);
+  border-radius: 20px;
+  box-shadow: 0 0 60px rgb(77 77 77 / 0.9);
+  min-height: 90vh;
+  position: relative;
+  font-family: 'Nanum Gothic', 'Noto Sans KR', sans-serif;
+}
+
+/* 좌우 카드 크기 균형 및 여백 보강 */
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 36px;
+}
+
+/* 좌측 카드 아바타 크기 및 버튼 개선 */
+
+.profile-avatar-wrapper {
+  width: 140px;
+  height: 140px;
+  margin: 0 auto 28px auto;
+  position: relative;
+}
+
+.profile-avatar {
+  border-radius: 50%;
+  overflow: hidden;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 30px rgba(102, 126, 234, 0.9);
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-button {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  background-color: #3b82f6;
+  border-radius: 50%;
+  border: 2px solid #1f2937;
+  padding: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgb(59 130 246 / 0.6);
+  transition: background-color 0.3s ease;
+}
+
+.avatar-button:hover {
+  background-color: #60a5fa;
+}
+
+/* 텍스트 및 입력 박스 색상 개선 */
+
+.profile-input {
+  background-color: #374151;
+  border: 1px solid #4b5563;
+  border-radius: 10px;
+  color: #f8fafc;
+  padding: 10px 14px;
+  font-size: 1rem;
+}
+
+.profile-input::placeholder {
+  color: #a1a1aa;
+}
+
+.profile-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 8px #3b82f6;
+  outline: none;
+}
+
+/* 프로필 텍스트 색상, 폰트 스타일 조정 */
+
+.profile-text {
+  font-size: 1rem;
+  color: #d1d5db;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+}
+
+/* 버튼 스타일 통일 및 라운드 정도 증가 */
+
+.profile-edit-btn,
+.profile-save-btn {
+  border-radius: 24px;
+  font-size: 1.05rem;
+  padding: 10px 26px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 8px 20px rgba(0, 106, 255, 0.6);
+  font-weight: 700;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.profile-edit-btn {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+}
+
+.profile-edit-btn.cancel {
+  background-color: #374151;
+  color: #d1d5db;
+  box-shadow: none;
+}
+
+.profile-edit-btn:hover {
+  background-color: #1e40af;
+  box-shadow: 0 10px 32px rgba(30, 64, 175, 0.75);
+}
+
+.profile-edit-btn.cancel:hover {
+  background-color: #1f2937;
+}
+
+/* 프로필 저장 버튼 */
+
+.profile-save-btn {
+  background: linear-gradient(to right, #2563eb, #1d4ed8);
+  border: none;
+  color: white;
+  margin-top: 36px;
+  width: 100%;
+}
+
+.profile-save-btn:hover {
+  opacity: 0.9;
+  box-shadow: 0 10px 25px rgba(38, 78, 167, 0.9);
+}
+
+/* 신체 정보 제목 스타일 조정 */
+
+.card-title {
+  font-size: 22px;
+  font-weight: 900;
+  margin-bottom: 28px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  color: #60a5fa;
+}
+
+.title-bar {
+  width: 5px;
+  height: 28px;
+  background-color: #2563eb;
+  border-radius: 2px;
+}
+
+/* 신체 정보 그리드 간격 늘림 */
+
+.profile-body-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 28px 36px;
+}
+
+/* BMI 상태 색상 보강 및 폰트 크기 조정 */
+
+.bmi-box {
+  grid-column: span 2;
+}
+
+.bmi-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.body-value {
+  font-size: 32px;
+  font-weight: 900;
+  color: #e0e7ff;
+}
+
+.unit {
+  color: #9ca3af;
+  font-weight: 700;
+}
+
+/* 상태 배경 별 색상 */
+
+.bmi-status.저체중 {
+  background-color: #1e40af;
+}
+
+.bmi-status.정상 {
+  background-color: #15803d;
+}
+
+.bmi-status.과체중 {
+  background-color: #a16207;
+}
+
+.bmi-status.비만 {
+  background-color: #7f1d1d;
+}
+
+.bmi-status {
+  padding: 10px 18px;
+  border-radius: 16px;
+  font-weight: 700;
+  font-size: 16px;
+  color: #f8fafc;
+  user-select: none;
+}
+
+/* 홈 버튼 */
+
+.go-home-btn {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  background: #2563eb;
+  color: white;
+  padding: 14px 28px;
+  border-radius: 30px;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 8px 26px rgba(38, 78, 167, 0.75);
+  transition: background-color 0.25s ease;
+  z-index: 999;
+}
+
+.go-home-btn:hover {
+  background: #1e40af;
+}
+
+.go-home-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* 반응형 */
+
+/* 작아질 때 간격과 카드 크기 유지 */
+
+@media (max-width: 900px) {
+  .profile-container {
+    padding: 20px 16px;
+    min-height: auto;
+    border-radius: 16px;
+  }
+
+  .profile-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .profile-avatar-wrapper {
+    width: 130px;
+    height: 130px;
+  }
+
+  .body-value {
+    font-size: 26px;
+  }
+
+  .profile-edit-btn,
+  .profile-save-btn {
+    padding: 10px 22px;
+    font-size: 1rem;
+  }
+
+  .go-home-btn {
+    bottom: 24px;
+    right: 24px;
+    padding: 12px 24px;
+    font-size: 14px;
+    gap: 8px;
+  }
+
+  .go-home-icon {
+    width: 18px;
+    height: 18px;
+  }
+}

@@ -1,0 +1,195 @@
+/* 전체 화면 */
+.login-container {
+  min-height: 100vh;
+  background: #0a0a0a;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 30px;
+}
+
+.login-mainCard {
+  width: 100%;
+  max-width: 1200px;
+  height: 85vh;
+  background: rgba(20,20,20,0.85);
+  display: flex;
+  border-radius: 35px;
+  border: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(18px);
+
+  /* 오버레이 충돌 방지 */
+  overflow: visible;
+  position: relative;
+}
+
+/* LEFT */
+.login-left {
+  width: 50%;
+  padding: 60px;
+  color: #fff;
+
+  /* 오른쪽 슬라이더가 침범 못하게 */
+  position: relative;
+  z-index: 10;
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.logo-icon {
+  font-size: 38px;
+}
+
+.logo-text {
+  font-weight: 800;
+  font-size: 24px;
+  margin-left: 8px;
+}
+
+.login-title {
+  font-size: 38px;
+  margin-top: 15px;
+}
+
+.login-subtitle {
+  color: #bababa;
+  margin-top: 10px;
+}
+
+.login-form {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.form-group input {
+  background: rgba(40,40,40,0.5);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 15px;
+  border-radius: 12px;
+  color: #fff;
+}
+
+.login-submit {
+  background: #fff;
+  padding: 16px;
+  border-radius: 35px;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+  transition: 0.2s;
+}
+
+.login-submit:hover {
+  background: #e0e0e0;
+  transform: translateY(-3px);
+}
+
+.login-footer {
+  margin-top: 20px;
+  text-align: center;
+  color: #bdbdbd;
+}
+
+.footer-link {
+  color: #4da3ff;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+/* RIGHT -------------------------------------------------- */
+.login-right {
+  width: 50%;
+  background: linear-gradient(135deg, #1b1b1b, #262626);
+  border-left: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  /* 슬라이더 누락 영역 표시 */
+  overflow: visible;
+  position: relative;
+  z-index: 1;
+}
+
+/* SLIDER */
+.login-slider-wrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-slider {
+  width: 100%;
+  height: 300%;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.7s ease;
+}
+
+.slider-card {
+  width: 100%;
+  height: 33.333%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 50px;
+  text-align: center;
+}
+
+.slider-img {
+  width: 260px;
+  height: 260px;
+  border-radius: 20px;
+  object-fit: cover;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.45);
+}
+
+.slider-date {
+  margin-top: 25px;
+  color: #bdbdbd;
+  font-size: 14px;
+}
+
+.slider-title {
+  margin-top: 10px;
+  font-size: 28px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.slider-desc {
+  margin-top: 15px;
+  color: #cccccc;
+  line-height: 1.6;
+  max-width: 420px;
+}
+
+/* dots */
+.login-pagination {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  background: #555;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.dot.active {
+  background: #4da3ff;
+  width: 24px;
+  border-radius: 8px;
+}
