@@ -1,15 +1,27 @@
-import React, { useState, useRef, useEffect } from "react";
-import { User, Mail, Phone, Edit3, Save, X, Camera, Home } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import {
+  User,
+  Mail,
+  Phone,
+  Calendar,
+  Edit3,
+  UserCircle,
+  Home,
+  Camera,
+  Save,
+  X,
+  Trash2,
+} from "lucide-react";
 import "../styles/Profile.css";
+import api from "../api/api";
 
 export default function Profile() {
-  const nav = useNavigate();
+  const fileRef = useRef(null);
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [avatarPreview, setAvatarPreview] = useState(null);
-  const fileInputRef = useRef(null);
-
+  const [editing, setEditing] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState(null); // 화면 표시용
+  const [avatarFile, setAvatarFile] = useState(null); // 실제 서버 업로드용
+  const [isLoading, setIsLoading] = useState(false);
   const [profile, setProfile] = useState({
     name: "",
     email: "",
@@ -17,265 +29,225 @@ export default function Profile() {
     age: "",
     height: "",
     weight: "",
-    gender: "male",
+    gender: "",
     avatar: "",
+    created_at: "",
   });
 
   const [editData, setEditData] = useState(profile);
+  const token = localStorage.getItem("token");
+  const API_BASE_URL = "http://localhost:8000";
 
-  // 🔵 로컬 저장된 프로필 불러오기
+  // 프로필 로드
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("profileData"));
-    if (saved) {
-      setProfile(saved);
-      setEditData(saved);
-      setAvatarPreview(saved.avatar);
-    }
-  }, []);
+    if (!token) return;
 
-  const handleEdit = () => {
-    setIsEditing(true);
-    setEditData(profile);
-  };
+    const loadProfile = async () => {
+      try {
+        const res = await api.get("/web/users/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = res.data;
 
-  const handleCancel = () => {
-    setIsEditing(false);
-  };
+        if (data.avatar && !data.avatar.startsWith("http")) {
+          data.avatar = API_BASE_URL + data.avatar;
+        }
 
-  const handleSave = () => {
-    const updatedProfile = {
-      ...editData,
-      avatar: avatarPreview || profile.avatar,
+        setProfile(data);
+        setEditData(data);
+
+        // 이미 사용자가 새로 선택한 아바타가 있으면 덮어쓰지 않음
+        setAvatarPreview(prev => prev || data.avatar);
+      } catch (err) {
+        console.error("프로필 불러오기 실패:", err);
+      }
     };
 
-    setProfile(updatedProfile);
-    setIsEditing(false);
+    loadProfile();
+  }, [token]);
 
-    localStorage.setItem("profileData", JSON.stringify(updatedProfile));
-  };
-
-  const handleChange = (field, value) => {
-    setEditData({ ...editData, [field]: value });
-  };
-
-  // 🔵 이미지 업로드
-  const handleAvatarChange = (e) => {
+  // 아바타 선택 핸들러
+  const handleAvatar = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    const imgURL = URL.createObjectURL(file);
-    setAvatarPreview(imgURL);
+
+    setAvatarFile(file);
+    setAvatarPreview(URL.createObjectURL(file)); // 즉시 미리보기
   };
 
-  // 🔵 BMI 계산
-  const calculateBMI = () => {
-    if (profile.height && profile.weight) {
-      return (profile.weight / ((profile.height / 100) ** 2)).toFixed(1);
+  // BMI 계산
+  const bmi = () => {
+    if (!editData.height || !editData.weight) return "-";
+    return (editData.weight / (editData.height / 100) ** 2).toFixed(1);
+  };
+
+  const change = (field, value) => setEditData({ ...editData, [field]: value });
+
+  // 저장
+  const handleSave = async () => {
+    if (!token) {
+      alert("로그인 정보가 없습니다.");
+      return;
     }
-    return "-";
+
+    setIsLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("username", editData.name);
+      formData.append("email", editData.email);
+      if (editData.phone) formData.append("phone", editData.phone);
+      if (editData.age) formData.append("age", editData.age);
+      if (editData.gender) formData.append("gender", editData.gender);
+      if (avatarFile) formData.append("avatar", avatarFile);
+
+      const res = await api.put("/web/users/update", formData, {
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
+      });
+
+      const updatedData = { ...editData };
+      if (res.data.avatar && !res.data.avatar.startsWith("http")) {
+        updatedData.avatar = API_BASE_URL + res.data.avatar;
+      } else if (res.data.avatar) {
+        updatedData.avatar = res.data.avatar;
+      }
+
+      setProfile(updatedData);
+      setEditData(updatedData);
+      setAvatarPreview(updatedData.avatar);
+      setAvatarFile(null);
+      setEditing(false);
+      alert("저장되었습니다!");
+    } catch (err) {
+      console.error("저장 실패:", err);
+      alert("저장 실패");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const getBMIStatus = () => {
-    const bmi = parseFloat(calculateBMI());
-    if (isNaN(bmi)) return "-";
+  // 취소
+  const handleCancel = () => {
+    setEditData(profile);
+    setAvatarPreview(profile.avatar); // 원래 아바타로 복원
+    setAvatarFile(null);
+    setEditing(false);
+  };
 
-    if (bmi < 18.5) return "저체중";
-    if (bmi < 25) return "정상";
-    if (bmi < 30) return "과체중";
-    return "비만";
+  // 계정 탈퇴
+  const handleDeleteAccount = async () => {
+    if (!window.confirm("⚠️ 계정을 삭제하시겠습니까?")) return;
+    setIsLoading(true);
+    try {
+      await api.delete("/web/users/delete", { headers: { Authorization: `Bearer ${token}` } });
+      localStorage.removeItem("token");
+      sessionStorage.clear();
+      window.location.href = "/login";
+    } catch (err) {
+      console.error("계정 삭제 실패:", err);
+      alert("계정 삭제 실패");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="profile-container">
-      {/* 헤더 */}
-      <div className="profile-header">
-        <div className="profile-title-box">
-          <User className="profile-title-icon" />
-          <h1 className="profile-title">마이 프로필</h1>
+    <div className="profile-wrapper">
+      <header className="profile-header">
+        <div className="profile-header-content">
+          <h1 className="profile-header-title">프로필 요약</h1>
         </div>
+      </header>
 
-        <button
-          className={`profile-edit-btn ${isEditing ? "cancel" : ""}`}
-          onClick={isEditing ? handleCancel : handleEdit}
-        >
-          {isEditing ? (
-            <>
-              <X /> 취소
-            </>
-          ) : (
-            <>
-              <Edit3 /> 수정
-            </>
-          )}
-        </button>
-      </div>
-
-      <div className="profile-grid">
-        {/* LEFT CARD */}
+      <div className="profile-container">
         <div className="profile-card">
-          <div className="profile-avatar-wrapper">
-            <div className="profile-avatar">
-              {avatarPreview ? (
-                <img src={avatarPreview} alt="avatar" className="avatar-img" />
-              ) : (
-                <User className="avatar-icon" />
+          <div className="profile-left">
+            <div className="avatar">
+              {avatarPreview ? <img src={avatarPreview} alt="avatar" className="avatar-img" /> : <UserCircle className="avatar-icon" />}
+              {editing && (
+                <button className="avatar-edit" onClick={() => fileRef.current.click()} disabled={isLoading}>
+                  <Camera size={16} />
+                </button>
               )}
+              <input type="file" ref={fileRef} style={{ display: "none" }} accept="image/*" onChange={handleAvatar} disabled={isLoading} />
             </div>
 
-            {isEditing && (
-              <button
-                className="avatar-button"
-                onClick={() => fileInputRef.current.click()}
-              >
-                <Camera className="avatar-button-icon" />
-              </button>
-            )}
-
-            <input
-              type="file"
-              accept="image/*"
-              ref={fileInputRef}
-              onChange={handleAvatarChange}
-              style={{ display: "none" }}
-            />
+            <div className="info">
+              <div className="info-item">
+                <label><User size={14} /> 이름</label>
+                {editing ? <input type="text" value={editData.name} onChange={(e) => change("name", e.target.value)} className="info-input" /> : <p>{profile.name || "-"}</p>}
+              </div>
+              <div className="info-item">
+                <label><Mail size={14} /> 이메일</label>
+                {editing ? <input type="email" value={editData.email} onChange={(e) => change("email", e.target.value)} className="info-input" /> : <p>{profile.email || "-"}</p>}
+              </div>
+              <div className="info-item">
+                <label><Phone size={14} /> 전화번호</label>
+                {editing ? <input type="tel" value={editData.phone} onChange={(e) => change("phone", e.target.value)} className="info-input" /> : <p>{profile.phone || "-"}</p>}
+              </div>
+              <div className="info-item">
+                <label><Calendar size={14} /> 계정 생성일</label>
+                <p>{profile.created_at || "-"}</p>
+              </div>
+            </div>
           </div>
 
-          {/* 기본 정보 */}
-          <div className="profile-info-list">
-            <label className="profile-label">이름</label>
-            {isEditing ? (
-              <input
-                className="profile-input"
-                value={editData.name}
-                onChange={(e) => handleChange("name", e.target.value)}
-              />
+          <div className="edit-section">
+            {!editing ? (
+              <button className="edit-btn" onClick={() => setEditing(true)}><Edit3 size={18} /> 수정</button>
             ) : (
-              <p className="profile-text">{profile.name || "-"}</p>
-            )}
-
-            <label className="profile-label icon-label">
-              <Mail /> 이메일
-            </label>
-            {isEditing ? (
-              <input
-                className="profile-input"
-                value={editData.email}
-                onChange={(e) => handleChange("email", e.target.value)}
-              />
-            ) : (
-              <p className="profile-text">{profile.email || "-"}</p>
-            )}
-
-            <label className="profile-label icon-label">
-              <Phone /> 전화번호
-            </label>
-            {isEditing ? (
-              <input
-                className="profile-input"
-                value={editData.phone}
-                onChange={(e) => handleChange("phone", e.target.value)}
-              />
-            ) : (
-              <p className="profile-text">{profile.phone || "-"}</p>
-            )}
-
-            {isEditing && (
-              <button className="profile-save-btn" onClick={handleSave}>
-                <Save /> 저장하기
-              </button>
+              <div className="edit-buttons">
+                <button className="cancel-btn" onClick={handleCancel}><X size={18} /> 취소</button>
+                <button className="save-btn" onClick={handleSave} disabled={isLoading}>{isLoading ? "저장 중..." : <><Save size={18} /> 저장</>}</button>
+              </div>
             )}
           </div>
         </div>
 
-        {/* RIGHT CARD */}
-        <div className="profile-card">
-          <h2 className="card-title">
-            <div className="title-bar"></div> 신체 정보
-          </h2>
-
-          <div className="profile-body-grid">
-            <div>
-              <label className="body-label">나이</label>
-              {isEditing ? (
-                <input
-                  type="number"
-                  className="profile-input"
-                  value={editData.age}
-                  onChange={(e) => handleChange("age", e.target.value)}
-                />
-              ) : (
-                <p className="profile-text">{profile.age || "-"}</p>
-              )}
+        {/* 신체 정보 */}
+        <div className="body-card">
+          <h2 className="section-title">신체 정보</h2>
+          <div className="body-grid">
+            <div className="body-item">
+              <label>나이</label>
+              {editing ? <input type="number" value={editData.age} onChange={(e) => change("age", e.target.value)} className="body-input" /> : <p>{profile.age || "-"}</p>}
             </div>
-
-            <div>
-              <label className="body-label">키(cm)</label>
-              {isEditing ? (
-                <input
-                  type="number"
-                  className="profile-input"
-                  value={editData.height}
-                  onChange={(e) => handleChange("height", e.target.value)}
-                />
-              ) : (
-                <p className="profile-text">{profile.height || "-"}</p>
-              )}
+            <div className="body-item">
+              <label>키(cm)</label>
+              {editing ? <input type="number" value={editData.height} onChange={(e) => change("height", e.target.value)} className="body-input" /> : <p>{profile.height || "-"}</p>}
             </div>
-
-            <div>
-              <label className="body-label">체중(kg)</label>
-              {isEditing ? (
-                <input
-                  type="number"
-                  className="profile-input"
-                  value={editData.weight}
-                  onChange={(e) => handleChange("weight", e.target.value)}
-                />
-              ) : (
-                <p className="profile-text">{profile.weight || "-"}</p>
-              )}
+            <div className="body-item">
+              <label>체중(kg)</label>
+              {editing ? <input type="number" value={editData.weight} onChange={(e) => change("weight", e.target.value)} className="body-input" /> : <p>{profile.weight || "-"}</p>}
             </div>
-
-            <div>
-              <label className="body-label">성별</label>
-              {isEditing ? (
-                <select
-                  className="profile-input"
-                  value={editData.gender}
-                  onChange={(e) => handleChange("gender", e.target.value)}
-                >
+            <div className="body-item">
+              <label>성별</label>
+              {editing ? (
+                <select value={editData.gender} onChange={(e) => change("gender", e.target.value)} className="body-select">
+                  <option value="">선택</option>
                   <option value="male">남성</option>
                   <option value="female">여성</option>
                 </select>
               ) : (
-                <p className="profile-text">
-                  {profile.gender === "male" ? "남성" : "여성"}
-                </p>
+                <p>{profile.gender === "male" ? "남성" : profile.gender === "female" ? "여성" : "-"}</p>
               )}
             </div>
-
-            {/* BMI */}
             <div className="bmi-box">
-              <label className="body-label">BMI</label>
-
+              <label>BMI</label>
               <div className="bmi-row">
-                <span className="body-value">{calculateBMI()}</span>
-                <span className="unit">kg/m²</span>
-
-                <span
-                  className={`bmi-status ${getBMIStatus()}`}
-                >
-                  {getBMIStatus()}
-                </span>
+                <span className="bmi-value">{editData.height && editData.weight ? bmi() : "-"}</span>
+                <span className="bmi-unit">kg/m²</span>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* 🔥 오른쪽 하단 고정 홈 버튼 */}
-      <button className="go-home-btn" onClick={() => nav("/")}>
-        <Home className="go-home-icon" /> 홈으로
-      </button>
+        {/* 계정 탈퇴 */}
+        <div className="delete-section">
+          <button className="delete-btn" onClick={handleDeleteAccount} disabled={isLoading}><Trash2 size={18} /> 계정 탈퇴</button>
+        </div>
+
+        <button className="home-btn" onClick={() => (window.location.href = "/")}><Home size={20} /> 홈</button>
+      </div>
     </div>
   );
 }

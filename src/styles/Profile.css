@@ -1,43 +1,131 @@
-/* 기본 배경 톤을 어두운 그라데이션 계열로 변경 - 기존과 조화 */
+/* ============================================
+   프로필 페이지 스타일
+   ============================================ */
 
-.profile-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 32px 24px;
-  color: white;
-  background: linear-gradient(135deg, #111827, #1f2937);
-  border-radius: 20px;
-  box-shadow: 0 0 60px rgb(77 77 77 / 0.9);
-  min-height: 90vh;
-  position: relative;
-  font-family: 'Nanum Gothic', 'Noto Sans KR', sans-serif;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-/* 좌우 카드 크기 균형 및 여백 보강 */
-
-.profile-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-  gap: 36px;
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* 좌측 카드 아바타 크기 및 버튼 개선 */
+/* ============================================
+   메인 컨테이너
+   ============================================ */
 
-.profile-avatar-wrapper {
-  width: 140px;
-  height: 140px;
-  margin: 0 auto 28px auto;
-  position: relative;
+.profile-wrapper {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f0f4f8 0%, #d9e8f5 50%, #c7d9f0 100%);
 }
 
-.profile-avatar {
-  border-radius: 50%;
-  overflow: hidden;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+/* ============================================
+   헤더
+   ============================================ */
+
+.profile-header {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid #e0e0e0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.profile-header-content {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 30px rgba(102, 126, 234, 0.9);
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.profile-header-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #333;
+  text-align: center;
+}
+
+/* ============================================
+   프로필 컨테이너
+   ============================================ */
+
+.profile-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+/* ============================================
+   프로필 카드
+   ============================================ */
+
+.profile-card {
+  background: white;
+  border-radius: 0.75rem;
+  border: 2px solid #e0e0e0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+@media (max-width: 768px) {
+  .profile-card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1.5rem;
+    gap: 1.5rem;
+  }
+}
+
+/* ============================================
+   프로필 왼쪽 섹션
+   ============================================ */
+
+.profile-left {
+  display: flex;
+  gap: 2rem;
+  flex: 1;
+  align-items: flex-start;
+}
+
+@media (max-width: 768px) {
+  .profile-left {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+}
+
+/* ============================================
+   아바타
+   ============================================ */
+
+.avatar {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 4px solid #e0e0e0;
+  background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .avatar-img {
@@ -46,256 +134,610 @@
   object-fit: cover;
 }
 
-.avatar-button {
+.avatar-icon {
+  width: 80px;
+  height: 80px;
+  color: white;
+}
+
+.avatar-edit {
   position: absolute;
-  bottom: 2px;
-  right: 2px;
-  background-color: #3b82f6;
+  bottom: 8px;
+  right: 8px;
+  width: 40px;
+  height: 40px;
+  background: #3b82f6;
+  color: white;
+  border: none;
   border-radius: 50%;
-  border: 2px solid #1f2937;
-  padding: 8px;
   cursor: pointer;
-  box-shadow: 0 4px 15px rgb(59 130 246 / 0.6);
-  transition: background-color 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s;
 }
 
-.avatar-button:hover {
-  background-color: #60a5fa;
+.avatar-edit:hover:not(:disabled) {
+  background: #2563eb;
+  transform: scale(1.1);
 }
 
-/* 텍스트 및 입력 박스 색상 개선 */
+.avatar-edit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 
-.profile-input {
-  background-color: #374151;
-  border: 1px solid #4b5563;
-  border-radius: 10px;
-  color: #f8fafc;
-  padding: 10px 14px;
+/* ============================================
+   정보 섹션
+   ============================================ */
+
+.info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  text-align: left;
+}
+
+.info-item label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.info-item p {
   font-size: 1rem;
+  color: #666;
+  padding: 0.5rem 0;
 }
 
-.profile-input::placeholder {
-  color: #a1a1aa;
+.info-input {
+  padding: 0.75rem;
+  border: 1px solid #d0d0d0;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.profile-input:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 8px #3b82f6;
+.info-input:focus {
   outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-/* 프로필 텍스트 색상, 폰트 스타일 조정 */
+.info-input:disabled {
+  background-color: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
+}
 
-.profile-text {
+/* ============================================
+   편집 섹션
+   ============================================ */
+
+.edit-section {
+  display: flex;
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .edit-section {
+    width: 100%;
+    flex-direction: column;
+  }
+}
+
+/* ============================================
+   버튼 공통 스타일
+   ============================================ */
+
+.edit-btn,
+.cancel-btn,
+.save-btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0.5rem;
   font-size: 1rem;
-  color: #d1d5db;
-  min-height: 36px;
-  display: flex;
-  align-items: center;
-}
-
-/* 버튼 스타일 통일 및 라운드 정도 증가 */
-
-.profile-edit-btn,
-.profile-save-btn {
-  border-radius: 24px;
-  font-size: 1.05rem;
-  padding: 10px 26px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  box-shadow: 0 8px 20px rgba(0, 106, 255, 0.6);
-  font-weight: 700;
+  font-weight: 500;
   cursor: pointer;
-  user-select: none;
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+  min-height: 44px;
+  white-space: nowrap;
 }
 
-.profile-edit-btn {
-  background-color: #2563eb;
+/* ============================================
+   수정 버튼
+   ============================================ */
+
+.edit-btn {
+  background: #3b82f6;
   color: white;
-  border: none;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  padding: 0.75rem 2rem;
 }
 
-.profile-edit-btn.cancel {
-  background-color: #374151;
-  color: #d1d5db;
-  box-shadow: none;
+.edit-btn:hover:not(:disabled) {
+  background: #2563eb;
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+  transform: translateY(-2px);
 }
 
-.profile-edit-btn:hover {
-  background-color: #1e40af;
-  box-shadow: 0 10px 32px rgba(30, 64, 175, 0.75);
+.edit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
-.profile-edit-btn.cancel:hover {
-  background-color: #1f2937;
-}
+/* ============================================
+   편집 버튼 그룹
+   ============================================ */
 
-/* 프로필 저장 버튼 */
-
-.profile-save-btn {
-  background: linear-gradient(to right, #2563eb, #1d4ed8);
-  border: none;
-  color: white;
-  margin-top: 36px;
+.edit-buttons {
+  display: flex;
+  gap: 0.75rem;
   width: 100%;
 }
 
-.profile-save-btn:hover {
-  opacity: 0.9;
-  box-shadow: 0 10px 25px rgba(38, 78, 167, 0.9);
+@media (max-width: 768px) {
+  .edit-buttons {
+    flex-direction: column-reverse;
+  }
 }
 
-/* 신체 정보 제목 스타일 조정 */
+/* ============================================
+   취소 버튼
+   ============================================ */
 
-.card-title {
-  font-size: 22px;
-  font-weight: 900;
-  margin-bottom: 28px;
+.cancel-btn {
+  background: white;
+  color: #333;
+  border: 1px solid #d0d0d0;
+  flex: 1;
+}
+
+.cancel-btn:hover:not(:disabled) {
+  background: #f9f9f9;
+  border-color: #999;
+}
+
+.cancel-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ============================================
+   저장 버튼
+   ============================================ */
+
+.save-btn {
+  background: #3b82f6;
+  color: white;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  flex: 1;
+}
+
+.save-btn:hover:not(:disabled) {
+  background: #2563eb;
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+  transform: translateY(-2px);
+}
+
+.save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ============================================
+   신체 정보 카드
+   ============================================ */
+
+.body-card {
+  background: white;
+  border-radius: 0.75rem;
+  border: 2px solid #e0e0e0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+  .body-card {
+    padding: 1.5rem;
+  }
+}
+
+/* ============================================
+   섹션 제목
+   ============================================ */
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 1.5rem;
+}
+
+/* ============================================
+   신체 정보 그리드
+   ============================================ */
+
+.body-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .body-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+}
+
+/* ============================================
+   신체 정보 항목
+   ============================================ */
+
+.body-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.body-item label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.body-item p {
+  font-size: 1rem;
+  color: #666;
+  padding: 0.75rem;
+  background: #f9f9f9;
+  border-radius: 0.5rem;
+  border: 1px solid #f0f0f0;
+  min-height: 44px;
   display: flex;
   align-items: center;
-  gap: 11px;
-  color: #60a5fa;
 }
 
-.title-bar {
-  width: 5px;
-  height: 28px;
-  background-color: #2563eb;
-  border-radius: 2px;
+/* ============================================
+   입력 필드
+   ============================================ */
+
+.body-input,
+.body-select {
+  padding: 0.75rem;
+  border: 1px solid #d0d0d0;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  min-height: 44px;
 }
 
-/* 신체 정보 그리드 간격 늘림 */
-
-.profile-body-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 28px 36px;
+.body-input:focus,
+.body-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-/* BMI 상태 색상 보강 및 폰트 크기 조정 */
+.body-input:disabled,
+.body-select:disabled {
+  background-color: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
+}
+
+/* ============================================
+   BMI 박스
+   ============================================ */
 
 .bmi-box {
-  grid-column: span 2;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #f0f4f8 0%, #e0e8f5 100%);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #d0d0d0;
+}
+
+.bmi-box label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #333;
 }
 
 .bmi-row {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 0.75rem;
 }
 
-.body-value {
-  font-size: 32px;
-  font-weight: 900;
-  color: #e0e7ff;
-}
-
-.unit {
-  color: #9ca3af;
+.bmi-value {
+  font-size: 1.5rem;
   font-weight: 700;
+  color: #3b82f6;
 }
 
-/* 상태 배경 별 색상 */
-
-.bmi-status.저체중 {
-  background-color: #1e40af;
+.bmi-unit {
+  font-size: 0.75rem;
+  color: #666;
 }
 
-.bmi-status.정상 {
-  background-color: #15803d;
+.bmi-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+  min-width: 50px;
 }
 
-.bmi-status.과체중 {
-  background-color: #a16207;
+.bmi-badge.저체중 {
+  background: #e0f2fe;
+  color: #0369a1;
 }
 
-.bmi-status.비만 {
-  background-color: #7f1d1d;
+.bmi-badge.정상 {
+  background: #dcfce7;
+  color: #166534;
 }
 
-.bmi-status {
-  padding: 10px 18px;
-  border-radius: 16px;
-  font-weight: 700;
-  font-size: 16px;
-  color: #f8fafc;
-  user-select: none;
+.bmi-badge.과체중 {
+  background: #fef3c7;
+  color: #92400e;
 }
 
-/* 홈 버튼 */
+.bmi-badge.비만 {
+  background: #fee2e2;
+  color: #991b1b;
+}
 
-.go-home-btn {
-  position: fixed;
-  bottom: 32px;
-  right: 32px;
-  background: #2563eb;
+.bmi-badge.- {
+  background: #f3f4f6;
+  color: #666;
+}
+
+/* ============================================
+   홈 버튼
+   ============================================ */
+
+.home-btn {
+  width: 100%;
+  padding: 1rem;
+  background: #3b82f6;
   color: white;
-  padding: 14px 28px;
-  border-radius: 30px;
-  font-size: 16px;
-  font-weight: 700;
   border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 10px;
-  box-shadow: 0 8px 26px rgba(38, 78, 167, 0.75);
-  transition: background-color 0.25s ease;
-  z-index: 999;
+  justify-content: center;
+  gap: 0.75rem;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  transition: all 0.2s;
+  min-height: 48px;
 }
 
-.go-home-btn:hover {
-  background: #1e40af;
+.home-btn:hover:not(:disabled) {
+  background: #2563eb;
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+  transform: translateY(-2px);
 }
 
-.go-home-icon {
-  width: 20px;
-  height: 20px;
+.home-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
-/* 반응형 */
+.home-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
 
-/* 작아질 때 간격과 카드 크기 유지 */
+/* ============================================
+   다크 모드 (선택사항)
+   ============================================ */
 
-@media (max-width: 900px) {
-  .profile-container {
-    padding: 20px 16px;
-    min-height: auto;
-    border-radius: 16px;
+@media (prefers-color-scheme: dark) {
+  body {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1f1f1f 100%);
   }
 
-  .profile-grid {
-    grid-template-columns: 1fr;
-    gap: 30px;
+  .profile-wrapper {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1f1f1f 100%);
   }
 
-  .profile-avatar-wrapper {
-    width: 130px;
-    height: 130px;
+  .profile-header {
+    background: rgba(30, 30, 30, 0.8);
+    border-bottom-color: #444;
   }
 
-  .body-value {
-    font-size: 26px;
+  .profile-header-title {
+    color: #e0e0e0;
   }
 
-  .profile-edit-btn,
-  .profile-save-btn {
-    padding: 10px 22px;
-    font-size: 1rem;
+  .profile-card,
+  .body-card {
+    background: #2a2a2a;
+    border-color: #444;
   }
 
-  .go-home-btn {
-    bottom: 24px;
-    right: 24px;
-    padding: 12px 24px;
-    font-size: 14px;
-    gap: 8px;
+  .section-title {
+    color: #e0e0e0;
   }
 
-  .go-home-icon {
-    width: 18px;
-    height: 18px;
+  .info-item label {
+    color: #e0e0e0;
+  }
+
+  .info-item p {
+    color: #999;
+  }
+
+  .info-input,
+  .body-input,
+  .body-select {
+    background: #333;
+    border-color: #444;
+    color: #e0e0e0;
+  }
+
+  .info-input:focus,
+  .body-input:focus,
+  .body-select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  }
+
+  .info-input:disabled,
+  .body-input:disabled,
+  .body-select:disabled {
+    background-color: #1f1f1f;
+    color: #666;
+  }
+
+  .body-item p {
+    background: #333;
+    border-color: #444;
+    color: #999;
+  }
+
+  .cancel-btn {
+    background: #333;
+    color: #e0e0e0;
+    border-color: #444;
+  }
+
+  .cancel-btn:hover:not(:disabled) {
+    background: #3a3a3a;
+    border-color: #555;
+  }
+
+  .bmi-box {
+    background: linear-gradient(135deg, #2a2a2a 0%, #333 100%);
+    border-color: #444;
+  }
+
+  .bmi-value {
+    color: #60a5fa;
+  }
+
+  .bmi-unit {
+    color: #999;
+  }
+}
+
+/* ============================================
+   접근성
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ============================================
+   포커스 스타일 (키보드 네비게이션)
+   ============================================ */
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* ============================================
+   변경 이력 표시 (흐릿하게)
+   ============================================ */
+
+.history-note {
+  display: flex;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: #888;
+  opacity: 0.7;
+}
+
+.history-label {
+  font-weight: 600;
+}
+
+/* ============================================
+   계정 탈퇴 섹션
+   ============================================ */
+
+.delete-section {
+  display: flex;
+  justify-content: center;
+  margin: 1.5rem 0;
+}
+
+.delete-btn {
+  padding: 0.75rem 1.5rem;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
+}
+
+.delete-btn:hover:not(:disabled) {
+  background: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(239, 68, 68, 0.4);
+}
+
+.delete-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* 다크 모드 대응 */
+@media (prefers-color-scheme: dark) {
+  .history-note {
+    color: #aaa;
+  }
+
+  .delete-btn {
+    background: #ef4444;
+    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
+  }
+
+  .delete-btn:hover:not(:disabled) {
+    background: #dc2626;
+    box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
   }
 }
