@@ -24,14 +24,37 @@ export default function Signup() {
     }
 
     try {
-      const res = await api.post("/web/users/register", {
+      // 1️⃣ 회원가입
+      const signupRes = await api.post("/web/users/register", {
         username: formData.username,
         email: formData.email,
         password: formData.password,
       });
 
-      alert("회원가입 성공! 로그인 페이지로 이동합니다.");
-      window.location.href = "/login";
+      console.log("회원가입 성공:", signupRes.data);
+
+      // 2️⃣ 자동 로그인 진행
+      const loginRes = await api.post("/web/users/login", {
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (loginRes.data?.access_token) {
+        localStorage.setItem("token", loginRes.data.access_token);
+      }
+
+      // 3️⃣ 로그인한 유저 정보 불러오기
+      const meRes = await api.get("/web/users/me", {
+        headers: { Authorization: `Bearer ${loginRes.data.access_token}` },
+      });
+
+      // 4️⃣ localStorage에 user 저장 → 홈 화면에서 로그인 유지
+      localStorage.setItem("user", JSON.stringify(meRes.data));
+
+      alert("회원가입 완료! 세부정보를 입력해 주세요.");
+
+      // 5️⃣ 세부사항 페이지로 이동
+      window.location.href = "/detail-extra";
 
     } catch (err) {
       console.error("🔥 회원가입 실패:", err);

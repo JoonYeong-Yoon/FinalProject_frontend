@@ -134,7 +134,7 @@ html, body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5rem 2rem;
+  padding: 0rem 2.5rem;
   position: fixed;
   top: 0;
   left: 0;
@@ -1034,7 +1034,30 @@ a:focus-visible {
 }
 
 .header .avatar {
-  width: 45px !important;
-  height: 45px !important;
-  border-width: 2px !important;
+  width: 60px !important;
+  height: 60px !important;
+  border-width: 0px !important;
+}
+
+.header .avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;      /* 동그라미 마스킹 */
+  object-fit: cover;       /* 사진 꽉 차게 */
+  overflow: hidden;        /* 초과된 부분 숨김 */
+  clip-path: circle(50%);  /* 렌더링 단계에서도 완전한 원형 유지 */
+  background-color: #eee;  /* 기본 이미지 없을 때 회색 */
+}
+
+
+.header-avatar {
+  margin-top: 24px;
+}
+
+
+.header-right .user-menu .avatar {
+  width: 60px !important;
+  height: 60px !important;
+  border-width: 0 !important;
+  object-fit: cover;
 }

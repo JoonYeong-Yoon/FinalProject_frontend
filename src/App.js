@@ -9,11 +9,14 @@ import Facilities from "./pages/Facilities";
 import Calorie from "./pages/Calorie";
 import Products from "./pages/Products";
 import Profile from "./pages/Profile";
+import DetailExtra from "./pages/DetailExtra";
+
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/detail-extra" element={<DetailExtra />} />
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />

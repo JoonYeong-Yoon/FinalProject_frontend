@@ -4,7 +4,8 @@ import { useNavigate } from "react-router-dom";
 import api from "../api/api";
 import { Moon, Sun, Check } from "lucide-react";
 
-const defaultAvatar = "/default-avatar.png";
+const defaultLight = "/default-avatar-light.png";
+const defaultDark = "/default-avatar-dark.png";
 
 // 스크롤 기반 메시지들
 const heroMessages = [
@@ -29,24 +30,28 @@ const heroMessages = [
 const features = [
   {
     title: "AI 맞춤 운동 계획",
-    description: "인공지능이 당신의 체력 수준, 목표, 선호도를 분석하여 최적화된 운동 루틴을 자동으로 생성합니다. 매일 변화하는 컨디션에 맞춰 실시간으로 조정됩니다.",
-    items: ["체력 분석", "목표 설정", "자동 루틴 생성", "실시간 조정", "진행도 추적", "성과 분석"]
+    description:
+      "인공지능이 당신의 체력 수준, 목표, 선호도를 분석하여 최적화된 운동 루틴을 자동으로 생성합니다. 매일 변화하는 컨디션에 맞춰 실시간으로 조정됩니다.",
+    items: ["체력 분석", "목표 설정", "자동 루틴 생성", "실시간 조정", "진행도 추적", "성과 분석"],
   },
   {
     title: "빅데이터 기반 분석",
-    description: "수백만 건의 트레이닝 데이터를 기반으로 가장 효과적인 운동 방법을 제안합니다. 당신과 유사한 사용자들의 성공 사례를 참고하여 최적의 결과를 도출합니다.",
-    items: ["데이터 분석", "패턴 인식", "성공 사례 학습", "효과 예측", "개인화 추천", "통계 리포트"]
+    description:
+      "수백만 건의 트레이닝 데이터를 기반으로 가장 효과적인 운동 방법을 제안합니다. 당신과 유사한 사용자들의 성공 사례를 참고하여 최적의 결과를 도출합니다.",
+    items: ["데이터 분석", "패턴 인식", "성공 사례 학습", "효과 예측", "개인화 추천", "통계 리포트"],
   },
   {
     title: "실시간 피드백",
-    description: "AI 코치가 운동 중 자세와 동작을 실시간으로 분석하고 피드백을 제공합니다. 부상 위험을 줄이고 운동 효과를 극대화할 수 있습니다.",
-    items: ["자세 분석", "동작 교정", "음성 피드백", "부상 예방", "운동 효율 향상", "실시간 코칭"]
+    description:
+      "AI 코치가 운동 중 자세와 동작을 실시간으로 분석하고 피드백을 제공합니다. 부상 위험을 줄이고 운동 효과를 극대화할 수 있습니다.",
+    items: ["자세 분석", "동작 교정", "음성 피드백", "부상 예방", "운동 효율 향상", "실시간 코칭"],
   },
   {
     title: "영양 관리",
-    description: "운동 목표에 맞는 식단을 AI가 자동으로 계획합니다. 칼로리, 영양소 균형을 고려한 맞춤형 식단 추천으로 건강한 식습관을 만들어갑니다.",
-    items: ["식단 계획", "칼로리 계산", "영양소 분석", "레시피 추천", "식사 기록", "영양 밸런스"]
-  }
+    description:
+      "운동 목표에 맞는 식단을 AI가 자동으로 계획합니다. 칼로리, 영양소 균형을 고려한 맞춤형 식단 추천으로 건강한 식습관을 만들어갑니다.",
+    items: ["식단 계획", "칼로리 계산", "영양소 분석", "레시피 추천", "식사 기록", "영양 밸런스"],
+  },
 ];
 
 // 요금제 데이터
@@ -58,26 +63,40 @@ const pricingPlans = [
     description: "AI 트레이닝을 무료로 체험해보세요",
     features: ["기본 운동 계획", "AI 자세 분석", "진행도 추적", "커뮤니티 접근"],
     cta: "무료로 시작하기",
-    popular: false
+    popular: false,
   },
   {
     name: "프로",
     price: "₩29,000",
     period: "월",
     description: "진지한 트레이닝을 위한 완벽한 선택",
-    features: ["맞춤형 AI 운동 계획", "실시간 피드백", "영양 관리", "무제한 운동 기록", "전문가 상담", "우선 지원"],
+    features: [
+      "맞춤형 AI 운동 계획",
+      "실시간 피드백",
+      "영양 관리",
+      "무제한 운동 기록",
+      "전문가 상담",
+      "우선 지원",
+    ],
     cta: "프로 시작하기",
-    popular: true
+    popular: true,
   },
   {
     name: "팀",
     price: "₩99,000",
     period: "월",
     description: "팀과 함께 목표를 달성하세요",
-    features: ["프로 플랜 모든 기능", "최대 10명 팀원", "팀 대시보드", "그룹 챌린지", "전담 매니저", "맞춤 교육"],
+    features: [
+      "프로 플랜 모든 기능",
+      "최대 10명 팀원",
+      "팀 대시보드",
+      "그룹 챌린지",
+      "전담 매니저",
+      "맞춤 교육",
+    ],
     cta: "팀 시작하기",
-    popular: false
-  }
+    popular: false,
+  },
 ];
 
 const Home = () => {
@@ -95,41 +114,31 @@ const Home = () => {
   // 로컬스토리지에서 유저 정보 불러오기
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    if (storedUser) setUser(JSON.parse(storedUser));
   }, []);
 
   // 메뉴 외부 클릭 시 닫기
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) {
-        setMenuOpen(false);
-      }
+      if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false);
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // 스크롤 이벤트 - 메시지 변환 및 애니메이션
+  // 스크롤 이벤트
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY;
       const windowHeight = window.innerHeight;
 
-      // 스크롤 진행도 (전체)
       const docHeight = document.documentElement.scrollHeight - windowHeight;
       const scrolled = docHeight > 0 ? (scrollY / docHeight) * 100 : 0;
       setScrollProgress(scrolled);
 
-      // 어떤 메시지를 보여줄지 결정 (히어로 섹션 높이: 300vh)
-      const phraseIndex = Math.min(
-        Math.floor(scrollY / (windowHeight * 0.5)),
-        heroMessages.length - 1
-      );
+      const phraseIndex = Math.min(Math.floor(scrollY / (windowHeight * 0.5)), heroMessages.length - 1);
       setCurrentPhrase(phraseIndex);
 
-      // 페이드 효과 계산
       const scrollProgressLocal = (scrollY % (windowHeight * 0.5)) / (windowHeight * 0.5);
       setOpacity(1 - scrollProgressLocal * 0.6);
       setTextOpacity(Math.max(0.3, 1 - scrollProgressLocal * 0.8));
@@ -139,23 +148,16 @@ const Home = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // 마우스 움직임 추적
+  // 마우스 추적
   useEffect(() => {
-    const handleMouseMove = (e) => {
-      setMousePos({ x: e.clientX, y: e.clientY });
-    };
-
+    const handleMouseMove = (e) => setMousePos({ x: e.clientX, y: e.clientY });
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
   const toggleMenu = () => setMenuOpen((prev) => !prev);
+  const toggleDarkMode = () => setIsDarkMode((prev) => !prev);
 
-  const toggleDarkMode = () => {
-    setIsDarkMode((prev) => !prev);
-  };
-
-  // 로그아웃
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -163,7 +165,6 @@ const Home = () => {
     setMenuOpen(false);
   };
 
-  // 운동 기구 애니메이션 계산
   const dumbbell1Rotate = scrollProgress * 7.2;
   const kettlebell1Scale = 1 + scrollProgress * 0.003;
   const kettlebell2Scale = 1 + scrollProgress * 0.002;
@@ -175,18 +176,18 @@ const Home = () => {
 
   return (
     <div className={`home-container ${isDarkMode ? "dark-mode" : "light-mode"}`}>
+      
       {/* 애니메이션 배경 */}
-      <div 
+      <div
         className="animated-background-container"
         style={{
-          opacity: Math.max(0, 1 - scrollProgress * 0.015)
+          opacity: Math.max(0, 1 - scrollProgress * 0.015),
         }}
       >
-        {/* 배경 그라데이션 */}
         <div className="background-gradient"></div>
 
         {/* 상단 좌측 - 덤벨 */}
-        <svg 
+        <svg
           className="animation-element dumbbell-1"
           style={{
             transform: `rotate(${dumbbell1Rotate}deg) translateX(${parallaxX}px) translateY(${parallaxY}px)`,
@@ -200,19 +201,32 @@ const Home = () => {
         </svg>
 
         {/* 상단 우측 - 케틀벨 */}
-        <svg 
+        <svg
           className="animation-element kettlebell-1"
           style={{
             transform: `scale(${kettlebell1Scale}) translateX(${-parallaxX}px) translateY(${parallaxY}px)`,
           }}
           viewBox="0 0 100 100"
         >
-          <path d="M 50 10 Q 60 15 65 30 Q 70 50 65 70 Q 60 85 50 90 Q 40 85 35 70 Q 30 50 35 30 Q 40 15 50 10" fill="none" stroke="currentColor" strokeWidth="2" />
-          <ellipse cx="50" cy="60" rx="15" ry="20" fill="none" stroke="currentColor" strokeWidth="2" />
+          <path
+            d="M 50 10 Q 60 15 65 30 Q 70 50 65 70 Q 60 85 50 90 Q 40 85 35 70 Q 30 50 35 30 Q 40 15 50 10"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          />
+          <ellipse
+            cx="50"
+            cy="60"
+            rx="15"
+            ry="20"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          />
         </svg>
 
         {/* 중단 좌측 - 요가 매트 */}
-        <svg 
+        <svg
           className="animation-element yoga-mat"
           style={{
             transform: `rotate(${scrollProgress * 1.8}deg) translateX(${parallaxX * 0.5}px)`,
@@ -220,18 +234,13 @@ const Home = () => {
           viewBox="0 0 200 100"
         >
           <rect x="10" y="20" width="180" height="60" rx="10" fill="none" stroke="currentColor" strokeWidth="2" />
-          <line x1="30" y1="20" x2="30" y2="80" stroke="currentColor" strokeWidth="1" opacity="0.5" />
-          <line x1="50" y1="20" x2="50" y2="80" stroke="currentColor" strokeWidth="1" opacity="0.5" />
-          <line x1="70" y1="20" x2="70" y2="80" stroke="currentColor" strokeWidth="1" opacity="0.5" />
-          <line x1="90" y1="20" x2="90" y2="80" stroke="currentColor" strokeWidth="1" opacity="0.5" />
-          <line x1="110" y1="20" x2="110" y2="80" stroke="currentColor" strokeWidth="1" opacity="0.5" />
-          <line x1="130" y1="20" x2="130" y2="80" stroke="currentColor" strokeWidth="1" opacity="0.5" />
-          <line x1="150" y1="20" x2="150" y2="80" stroke="currentColor" strokeWidth="1" opacity="0.5" />
-          <line x1="170" y1="20" x2="170" y2="80" stroke="currentColor" strokeWidth="1" opacity="0.5" />
+          {[30, 50, 70, 90, 110, 130, 150, 170].map((x, i) => (
+            <line key={i} x1={x} y1="20" x2={x} y2="80" stroke="currentColor" strokeWidth="1" opacity="0.5" />
+          ))}
         </svg>
 
         {/* 중단 우측 - 저항 밴드 */}
-        <svg 
+        <svg
           className="animation-element resistance-band"
           style={{
             transform: `scale(${kettlebell2Scale}) translateX(${-parallaxX * 0.5}px) translateY(${parallaxY}px)`,
@@ -247,25 +256,25 @@ const Home = () => {
           <circle cx="80" cy="70" r="4" fill="currentColor" />
         </svg>
 
-        {/* 하단 - 운동 심박수 그래프 */}
-        <svg 
+        {/* 하단 - 심박 그래프 */}
+        <svg
           className="animation-element heart-graph"
           style={{
             transform: `translateX(${parallaxX * 0.3}px) translateY(${-scrollProgress * 0.5}px)`,
           }}
           viewBox="0 0 300 100"
         >
-          <polyline 
-            points="10,50 30,45 50,60 70,40 90,55 110,35 130,50 150,30 170,55 190,40 210,60 230,35 250,50 270,45 290,55" 
-            fill="none" 
-            stroke="currentColor" 
+          <polyline
+            points="10,50 30,45 50,60 70,40 90,55 110,35 130,50 150,30 170,55 190,40 210,60 230,35 250,50 270,45 290,55"
+            fill="none"
+            stroke="currentColor"
             strokeWidth="2"
           />
           <line x1="10" y1="80" x2="290" y2="80" stroke="currentColor" strokeWidth="1" opacity="0.3" />
         </svg>
 
-        {/* 하단 우측 - 운동 목표 진행도 */}
-        <svg 
+        {/* 하단 우측 - 진행 원형 */}
+        <svg
           className="animation-element progress-circle"
           style={{
             transform: `rotate(${scrollProgress * 3.6}deg) translateX(${-parallaxX * 0.5}px)`,
@@ -273,23 +282,23 @@ const Home = () => {
           viewBox="0 0 100 100"
         >
           <circle cx="50" cy="50" r="35" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.3" />
-          <circle 
-            cx="50" 
-            cy="50" 
-            r="35" 
-            fill="none" 
-            stroke="currentColor" 
+          <circle
+            cx="50"
+            cy="50"
+            r="35"
+            fill="none"
+            stroke="currentColor"
             strokeWidth="2"
             strokeDasharray={`${220 * (0.3 + scrollProgress * 0.007)} 220`}
             strokeLinecap="round"
-            style={{ transform: 'rotate(-90deg)', transformOrigin: '50px 50px' }}
+            style={{ transform: "rotate(-90deg)", transformOrigin: "50px 50px" }}
           />
           <text x="50" y="55" textAnchor="middle" fontSize="16" fill="currentColor" opacity="0.6">
             {progressPercent}%
           </text>
         </svg>
 
-        {/* 떠다니는 입자 효과 */}
+        {/* 떠다니는 입자 */}
         {[...Array(5)].map((_, i) => (
           <div
             key={i}
@@ -321,20 +330,24 @@ const Home = () => {
 
         <div className="header-right">
           <button className="theme-toggle" onClick={toggleDarkMode} title="테마 전환">
-            {isDarkMode ? (
-              <Sun size={20} />
-            ) : (
-              <Moon size={20} />
-            )}
+            {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
           </button>
 
-          {/* 로그인 상태에 따라 표시 */}
+          {/* 로그인 상태 */}
           {user ? (
             <div className="user-menu" ref={menuRef}>
+              
+              {/* ★ 여기만 수정됨 — header-avatar 추가 ★ */}
               <img
-                src={user.avatar || defaultAvatar}
+                src={
+                  user?.avatar
+                    ? user.avatar
+                    : isDarkMode
+                    ? defaultDark
+                    : defaultLight
+                }
                 alt="User Avatar"
-                className="avatar"
+                className="avatar header-avatar"
               />
 
               <div className="user-info">
@@ -347,11 +360,9 @@ const Home = () => {
                 </span>
               </div>
 
-              {/* 드롭다운 메뉴 */}
               {menuOpen && (
                 <ul className="user-dropdown">
                   <li onClick={() => navigate("/profile")}>프로필 수정</li>
-                  <li onClick={() => alert("챌린지 페이지 준비중!")}>챌린지</li>
                   <li onClick={logout}>로그아웃</li>
                 </ul>
               )}
@@ -364,44 +375,37 @@ const Home = () => {
         </div>
       </header>
 
-      {/* 히어로 섹션 - Mantis 스타일 */}
+      {/* ===== 히어로 섹션 ===== */}
       <section className="hero-section-mantis">
         <div className="hero-sticky-container">
-          {/* 상단 라벨 */}
-          <div 
-            className="hero-label"
-            style={{ opacity: textOpacity }}
-          >
+          <div className="hero-label" style={{ opacity: textOpacity }}>
             <span>홈 트레이닝 혁신</span>
           </div>
 
-          {/* 메인 제목 */}
-          <h1 
+          <h1
             className="hero-title-mantis"
-            style={{ 
+            style={{
               opacity,
               transform: `translateY(${(1 - opacity) * 20}px)`
             }}
           >
             {currentContent.main}
           </h1>
-          
-          {/* 부제목 */}
-          <p 
+
+          <p
             className="hero-subtitle-mantis"
-            style={{ 
+            style={{
               opacity: textOpacity,
               transform: `translateY(${(1 - textOpacity) * 10}px)`
             }}
           >
             {currentContent.sub}
           </p>
-          
-          {/* CTA 버튼 */}
+
           {currentContent.showCTA && (
-            <div 
+            <div
               className="hero-buttons-mantis"
-              style={{ 
+              style={{
                 opacity: textOpacity,
                 transform: `scale(${0.9 + textOpacity * 0.1})`
               }}
@@ -414,10 +418,9 @@ const Home = () => {
             </div>
           )}
 
-          {/* 스크롤 인디케이터 */}
-          <div 
+          <div
             className="scroll-indicator"
-            style={{ opacity: Math.max(0, 1 - (currentPhrase * 0.3)) }}
+            style={{ opacity: Math.max(0, 1 - currentPhrase * 0.3) }}
           >
             <span>스크롤</span>
             <div className="scroll-icon">
@@ -427,7 +430,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* AI 트레이닝의 힘 섹션 */}
+      {/* ===== AI 트레이닝 소개 ===== */}
       <section className="power-section" id="about">
         <div className="section-container">
           <div className="section-header">
@@ -437,7 +440,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* 주요 기능 섹션 */}
+      {/* ===== 기능 섹션 ===== */}
       <section className="features-section" id="features">
         <div className="section-container">
           <div className="features-grid">
@@ -459,26 +462,25 @@ const Home = () => {
         </div>
       </section>
 
-      {/* 요금제 섹션 */}
+      {/* ===== 요금제 섹션 ===== */}
       <section className="pricing-section" id="pricing">
         <div className="section-container">
           <div className="pricing-header">
             <h2>요금제</h2>
             <p>간단한 요금제</p>
-            <p className="pricing-subtitle">당신에게 맞는 플랜을 선택하고 오늘부터 AI 트레이닝을 시작하세요</p>
+            <p className="pricing-subtitle">
+              당신에게 맞는 플랜을 선택하고 오늘부터 AI 트레이닝을 시작하세요
+            </p>
           </div>
 
           <div className="pricing-grid">
             {pricingPlans.map((plan, index) => (
-              <div 
-                key={index} 
-                className={`pricing-card ${plan.popular ? "popular" : ""}`}
-              >
+              <div key={index} className={`pricing-card ${plan.popular ? "popular" : ""}`}>
                 {plan.popular && <div className="popular-badge">⭐ 인기</div>}
-                
+
                 <h3>{plan.name}</h3>
                 <p className="pricing-description">{plan.description}</p>
-                
+
                 <div className="pricing-amount">
                   <span className="price">{plan.price}</span>
                   <span className="period">/ {plan.period}</span>
@@ -493,16 +495,14 @@ const Home = () => {
                   ))}
                 </ul>
 
-                <button className="pricing-btn">
-                  {plan.cta}
-                </button>
+                <button className="pricing-btn">{plan.cta}</button>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* 푸터 */}
+      {/* ===== 푸터 ===== */}
       <footer className="footer">
         <div className="section-container">
           <p>&copy; 2024 AI TRAINER. All rights reserved.</p>

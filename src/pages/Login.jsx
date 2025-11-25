@@ -17,26 +17,35 @@ export default function Login() {
     console.log("🔥 로그인 버튼 클릭됨");
 
     try {
+      // 1️⃣ 로그인 요청
       const res = await api.post("/web/users/login", {
         email: email,
         password: pw,
       });
 
-      // 토큰 저장
-      localStorage.setItem("token", res.data.access_token);
+      const token = res.data.access_token;
 
-      // 🔥 헤더 UI가 로그인 상태로 바뀌도록 user 정보도 저장
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          name: email.split("@")[0], // 임시 이름 (백엔드가 name 안 보내는 경우)
-          avatar: null,
-        })
-      );
+      // 2️⃣ 토큰 저장
+      localStorage.setItem("token", token);
+
+      // 3️⃣ 로그인한 유저 정보 불러오기
+      const userRes = await api.get("/web/users/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const userData = userRes.data;
+
+      // 4️⃣ user 정보 저장 → 헤더, 홈 UI 즉시 로그인 상태 반영됨
+      localStorage.setItem("user", JSON.stringify({
+        name: userData.name,
+        email: userData.email,
+        avatar: userData.avatar || null,
+      }));
 
       alert("로그인 성공!");
       navigate("/");
     } catch (err) {
+      console.error("❌ 로그인 실패:", err);
       alert(err?.response?.data?.detail || "로그인 실패");
     }
   };
@@ -155,6 +164,7 @@ export default function Login() {
             ))}
           </div>
         </div>
+
       </div>
     </div>
   );

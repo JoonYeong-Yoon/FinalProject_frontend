@@ -1,0 +1,95 @@
+/* 전체 배경 */
+.detail-extra-wrapper {
+  min-height: 100vh;
+  background: #111;
+  padding: 40px 20px;
+  display: flex;
+  justify-content: center;
+}
+
+/* 카드 */
+.detail-extra-card {
+  width: 100%;
+  max-width: 900px;
+  background: #1b1b1b;
+  padding: 40px;
+  border-radius: 16px;
+  color: #fff;
+}
+
+/* 섹션 제목 (신체 정보 / 운동 정보) */
+.detail-section-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-top: 40px;
+  margin-bottom: 28px;
+}
+
+/* 작은 제목 (선호 운동, 활동량 등) */
+.detail-subtitle {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  display: block;
+}
+
+/* label */
+.detail-label {
+  font-size: 16px;
+  margin-bottom: 12px;
+  display: block;
+}
+
+/* 입력 필드 */
+.detail-input,
+.detail-select,
+.detail-textarea {
+  width: 100%;
+  padding: 15px;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 8px;
+  color: #fff;
+  margin-bottom: 24px;
+}
+
+/* Checkbox grid */
+.detail-checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px 24px;
+  margin-bottom: 28px;
+}
+
+.detail-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 16px;
+}
+
+.detail-checkbox input[type="checkbox"] {
+  margin-right: 6px;
+  transform: scale(1.2);
+}
+
+/* 버튼 */
+.detail-button-area {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 40px;
+}
+
+.detail-btn-cancel {
+  padding: 10px 22px;
+  background: #333;
+  border-radius: 12px;
+  color: #fff;
+}
+
+.detail-btn-save {
+  padding: 10px 22px;
+  background: #2563eb;
+  border-radius: 12px;
+  color: #fff;
+}
