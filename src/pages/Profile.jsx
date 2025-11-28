@@ -76,7 +76,6 @@ export default function Profile() {
         setProfile(data);
         setEditData(data);
 
-        // 아바타 미등록이면 null 로 설정
         setAvatarPreview(data.avatar || null);
       } catch (err) {
         console.error("프로필 로드 실패:", err);
@@ -113,43 +112,38 @@ export default function Profile() {
   /* ------------------------------
       저장하기
   ------------------------------- */
-  const handleSave = async () => {
-    if (!token) return alert("로그인 필요");
+const handleSave = async () => {
+  if (!token) return alert("로그인 필요");
 
-    setIsLoading(true);
-    const emailChanged = editData.email !== profile.email;
+  setIsLoading(true);
+  const emailChanged = editData.email !== profile.email;
 
-    try {
-      const updated = {
-        ...editData,
-        username: editData.name,
-        avatar: avatarPreview,
-      };
+  try {
+    const updated = {
+      ...editData,
+      username: editData.name,
+      avatar: avatarPreview,
+    };
 
-      await api.put("/web/users/update", updated, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+    await api.put("/web/users/update", updated, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-      if (emailChanged) {
-        alert("이메일 변경됨 → 다시 로그인 필요");
-
-        localStorage.clear();
-        sessionStorage.clear();
-
-        window.location.href = "/login";
-        return;
-      }
-
-      setProfile(updated);
-      setEditing(false);
-      alert("저장 완료!");
-    } catch (err) {
-      console.error("저장 실패:", err);
-      alert("저장 실패");
-    } finally {
-      setIsLoading(false);
+    // 🔥 이메일 바뀌어도 더 이상 로그아웃 안됨
+    if (emailChanged) {
+      alert("이메일이 변경되었습니다!");
     }
-  };
+
+    setProfile(updated);
+    setEditing(false);
+    alert("저장 완료!");
+  } catch (err) {
+    console.error("저장 실패:", err);
+    alert("저장 실패");
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   /* ------------------------------
       계정 삭제
@@ -204,7 +198,6 @@ export default function Profile() {
                 왼쪽 카드
           ------------------------------ */}
           <aside className="profile-left-card">
-            {/* 프로필 사진 */}
             <div className="avatar">
               <img
                 src={avatarPreview || defaultAvatar}
@@ -230,7 +223,6 @@ export default function Profile() {
               />
             </div>
 
-            {/* 기본 정보 */}
             <div className="profile-info-box">
               <label className="info-title">
                 <User size={14} /> 이름
@@ -295,7 +287,6 @@ export default function Profile() {
               <p className="info-value">{profile.created_at || "-"}</p>
             </div>
 
-            {/* 수정 버튼 */}
             <div className="edit-btn-area">
               {!editing ? (
                 <button className="edit-btn" onClick={() => setEditing(true)}>
@@ -324,6 +315,7 @@ export default function Profile() {
             <h2 className="section-title">상세 정보</h2>
 
             <div className="body-grid">
+              
               {/* 나이 */}
               <div className="body-item">
                 <label>나이</label>
@@ -332,9 +324,13 @@ export default function Profile() {
                     type="number"
                     className="body-input"
                     value={editData.age}
-                    onChange={(e) =>
-                      change("age", Math.max(0, Number(e.target.value)))
-                    }
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (v === "") return change("age", "");
+                      const num = Number(v);
+                      if (num < 1) return change("age", "");
+                      change("age", num);
+                    }}
                   />
                 ) : (
                   <p className="view-box">{profile.age || "-"}</p>
@@ -349,9 +345,13 @@ export default function Profile() {
                     type="number"
                     className="body-input"
                     value={editData.height}
-                    onChange={(e) =>
-                      change("height", Math.max(0, Number(e.target.value)))
-                    }
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (v === "") return change("height", "");
+                      const num = Number(v);
+                      if (num < 1) return change("height", "");
+                      change("height", num);
+                    }}
                   />
                 ) : (
                   <p className="view-box">{profile.height || "-"}</p>
@@ -366,9 +366,13 @@ export default function Profile() {
                     type="number"
                     className="body-input"
                     value={editData.weight}
-                    onChange={(e) =>
-                      change("weight", Math.max(0, Number(e.target.value)))
-                    }
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (v === "") return change("weight", "");
+                      const num = Number(v);
+                      if (num < 1) return change("weight", "");
+                      change("weight", num);
+                    }}
                   />
                 ) : (
                   <p className="view-box">{profile.weight || "-"}</p>
@@ -584,7 +588,6 @@ export default function Profile() {
           </section>
         </div>
 
-        {/* 하단 버튼 */}
         <div className="bottom-btn-box">
           <button className="home-btn" onClick={() => (window.location.href = "/")}>
             <Home size={18} /> 홈

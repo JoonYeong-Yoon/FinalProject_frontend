@@ -10,7 +10,7 @@ import Calorie from "./pages/Calorie";
 import Products from "./pages/Products";
 import Profile from "./pages/Profile";
 import DetailExtra from "./pages/DetailExtra";
-
+import Dashboard from "./pages/Dashboard"; // ← 신규 추가
 
 export default function App() {
   return (
@@ -30,6 +30,9 @@ export default function App() {
 
         {/* 구독 페이지 */}
         <Route path="/subscribe" element={<div>구독 페이지 만들기</div>} />
+
+        {/* 로그인 후 이동할 대시보드 페이지 */}
+        <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
     </BrowserRouter>
   );

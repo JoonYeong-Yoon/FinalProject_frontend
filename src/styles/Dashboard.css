@@ -1,0 +1,235 @@
+/* ===========================================================
+   🔥 전체 배경
+=========================================================== */
+.dashboard-wrapper {
+  width: 100%;
+  height: 100vh;
+  background: #0a0a0f;
+  position: relative;
+  overflow: hidden;
+}
+
+.dashboard-wrapper::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(3px);
+  z-index: 0;
+}
+
+.dashboard-wrapper > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ===========================================================
+   🔥 Glass Navbar
+=========================================================== */
+.glass-navbar {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 85%;
+  height: 64px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 35px;
+  border-radius: 40px;
+
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+
+  box-shadow:
+    inset 0 0 15px rgba(255,255,255,0.05),
+    0 0 25px rgba(120,120,255,0.25);
+
+  z-index: 999;
+}
+
+.nav-left { display: flex; align-items: center; gap: 10px; }
+.logo-img { width: 45px; height: 50px; border-radius: 50%; object-fit: contain; }
+.logo-text { font-size: 24px; font-weight: 700; color: #fff; }
+
+.nav-right { display: flex; align-items: center; gap: 32px; }
+.nav-right a { color: #eee; text-decoration: none; cursor: pointer; }
+.nav-right a:hover { color: #fff; transform: translateY(-2px); }
+
+.profile-icon {
+  width: 42px; height: 42px; border-radius: 50%;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.15);
+}
+.profile-img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ===========================================================
+   🔥 메인 레이아웃
+=========================================================== */
+.dashboard-container {
+  display: flex;
+  width: 100%;
+  height: calc(100vh - 120px);
+  padding-top: 120px;
+  position: relative;
+}
+
+/* ===========================================================
+   🔥 제목 영역 (독립 이동)
+=========================================================== */
+.title-area {
+  position: absolute;
+  top: 120px;         /* 🔥 조정 가능 */
+  left: 120px;       /* 🔥 조정 가능 */
+  z-index: 20;
+  width: 450px;
+}
+
+.dash-title {
+  font-size: 38px;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.dash-sub {
+  opacity: 0.75;
+  font-size: 18px;
+}
+
+/* ===========================================================
+   🔥 왼쪽 스크롤 패널
+=========================================================== */
+.dashboard-left {
+  width: 50%;
+  height: 100%;
+  padding: 160px 40px 20px 80px;
+  color: #fff;
+
+  display: flex;
+  flex-direction: column;
+}
+
+/* 🔥 유리 스크롤 박스 */
+.left-glass-panel {
+  width: 95%;
+  padding: 25px;
+  border-radius: 16px;
+
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(14px);
+
+  box-shadow:
+    inset 0 0 25px rgba(255,255,255,0.04),
+    0 0 40px rgba(120,160,255,0.22);
+
+  flex: 1;
+  overflow-y: auto;
+  max-height: 70vh;
+  padding-right: 12px;
+}
+
+.left-glass-panel::-webkit-scrollbar {
+  width: 8px;
+}
+.left-glass-panel::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.25);
+  border-radius: 10px;
+}
+
+/* ===========================================================
+   🔥 섹션 스타일
+=========================================================== */
+.muscle-section {
+  margin-bottom: 45px;
+  padding: 20px;
+  border-radius: 12px;
+  transition: background 0.25s ease;
+}
+
+.muscle-section h2 {
+  margin-bottom: 14px;
+  font-size: 1.6rem;
+}
+
+.muscle-section p {
+  font-size: 1rem;
+  line-height: 1.6rem;
+  opacity: 0.85;
+  white-space: pre-line;
+}
+
+.active-section {
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: inset 0 0 20px rgba(255,255,255,0.1);
+  backdrop-filter: blur(6px);
+}
+
+/* ===========================================================
+   🔥 오른쪽 3D 모델
+=========================================================== */
+.dashboard-right {
+  width: 50%;
+  height: 100%;
+  position: relative;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  min-height: 700px;
+}
+
+.human-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.human-wrapper canvas {
+  width: 100% !important;
+  height: 100% !important;
+
+  position: relative;
+  z-index: 20;
+
+  pointer-events: auto !important;
+  cursor: grab;
+}
+.human-wrapper canvas:active {
+  cursor: grabbing;
+}
+
+/* ===========================================================
+   🔥 챗봇 버튼
+=========================================================== */
+.chatbot-box {
+  position: fixed;
+  right: 40px;
+  bottom: 40px;
+}
+.chatbot-btn {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.3);
+  backdrop-filter: blur(12px);
+
+  color: #fff;
+  font-size: 24px;
+  cursor: pointer;
+}

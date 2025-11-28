@@ -35,15 +35,22 @@ export default function Login() {
 
       const userData = userRes.data;
 
-      // 4️⃣ user 정보 저장 → 헤더, 홈 UI 즉시 로그인 상태 반영됨
-      localStorage.setItem("user", JSON.stringify({
-        name: userData.name,
-        email: userData.email,
-        avatar: userData.avatar || null,
-      }));
+      // 4️⃣ user 정보 저장
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          name: userData.name,
+          email: userData.email,
+          avatar: userData.avatar || null,
+        })
+      );
 
       alert("로그인 성공!");
-      navigate("/");
+
+      // ⬇⬇⬇ 변경된 유일한 부분 ⬇⬇⬇
+      navigate("/dashboard");
+      // ⬆⬆⬆ 여기만 바뀜 ⬆⬆⬆
+
     } catch (err) {
       console.error("❌ 로그인 실패:", err);
       alert(err?.response?.data?.detail || "로그인 실패");
@@ -79,7 +86,6 @@ export default function Login() {
   return (
     <div className="login-container">
       <div className="login-mainCard">
-
         <div className="login-left">
           <div className="login-header">
             <div className="login-logo">
@@ -164,7 +170,6 @@ export default function Login() {
             ))}
           </div>
         </div>
-
       </div>
     </div>
   );
