@@ -361,11 +361,26 @@ const Home = () => {
               </div>
 
               {menuOpen && (
-                <ul className="user-dropdown">
-                  <li onClick={() => navigate("/profile")}>프로필 수정</li>
-                  <li onClick={logout}>로그아웃</li>
-                </ul>
-              )}
+  <ul className="user-dropdown">
+
+    {/* 프로필 */}
+    <li onClick={() => navigate("/profile")}>프로필 수정</li>
+
+    {/* ★ 관리자 전용 메뉴 */}
+    {user?.email === "admin@test.com" && (
+      <li
+        style={{ color: "#ffeb70", fontWeight: "600" }}
+        onClick={() => navigate("/admin")}
+      >
+        관리자 페이지
+      </li>
+    )}
+
+    {/* 로그아웃 */}
+    <li onClick={logout}>로그아웃</li>
+  </ul>
+)}
+
             </div>
           ) : (
             <button className="btn login-btn" onClick={() => navigate("/login")}>

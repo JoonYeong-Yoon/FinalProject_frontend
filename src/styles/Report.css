@@ -1,0 +1,139 @@
+/* 전체 다크 테마 유지 */
+body {
+  background-color: #0d0d0d !important;
+}
+
+/* 헤더 겹침 방지 */
+.header-spacing {
+  height: 110px;
+}
+
+/* 전체 래퍼 */
+.report-wrapper {
+  min-height: 100vh;
+  padding: 20px 60px 60px;
+  color: white;
+}
+
+/* 제목 */
+.report-title {
+  font-size: 26px;
+  font-weight: 600;
+  margin-bottom: 25px;
+  color: #e8e8e8;
+}
+
+/* ================================
+   상단 KPI 박스
+================================ */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  margin-bottom: 40px;
+}
+
+.kpi-card {
+  background: #151515;
+  padding: 22px 24px;
+  border-radius: 14px;
+  border: 1px solid #262626;
+  transition: 0.2s;
+}
+
+.kpi-card:hover {
+  border-color: #7f4dff;
+  box-shadow: 0 0 12px rgba(127, 77, 255, 0.25);
+}
+
+.kpi-label {
+  font-size: 14px;
+  color: #aaaaaa;
+}
+
+.kpi-value {
+  font-size: 30px;
+  font-weight: 700;
+  margin-top: 4px;
+  color: #cba4ff;
+}
+
+.kpi-sub {
+  font-size: 13px;
+  color: #777;
+}
+
+/* ================================
+   메인 그래프 카드
+================================ */
+.graph-card {
+  background: #121212;
+  padding: 25px 30px 35px;
+  border-radius: 16px;
+  border: 1px solid #262626;
+  margin-bottom: 40px;
+}
+
+.graph-card.large {
+  height: auto;
+}
+
+.graph-title {
+  font-size: 20px;
+  margin-bottom: 12px;
+}
+
+/* ================================
+   분석 카드 3개
+================================ */
+.analysis-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+  margin-bottom: 40px;
+}
+
+.analysis-card {
+  background: #151515;
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid #262626;
+}
+
+.analysis-title {
+  font-size: 18px;
+  margin-bottom: 15px;
+}
+
+/* ================================
+   최근 운동 리스트
+================================ */
+.recent-title {
+  font-size: 22px;
+  margin-bottom: 14px;
+}
+
+.recent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.recent-item {
+  display: flex;
+  justify-content: space-between;
+  background: #151515;
+  border: 1px solid #262626;
+  padding: 16px;
+  border-radius: 12px;
+}
+
+.recent-item h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.recent-item p {
+  margin: 3px 0;
+  color: #bbb;
+}

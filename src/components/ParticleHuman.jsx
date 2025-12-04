@@ -1,277 +1,299 @@
 // src/components/ParticleHuman.jsx
 import React, { useEffect, useRef } from "react";
 import * as THREE from "three";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 export default function ParticleHuman({
-  selectedMuscle,
-  hoverMuscle,
-  width = 400,
-  height = 600,
+  width = 550,
+  height = 850,
+  selectedMuscle = null,
+  hoverMuscle = null,
+  highlightMuscles = [],
 }) {
   const mountRef = useRef(null);
-  const particleGroupsRef = useRef({});
+  const meshesRef = useRef([]);
+  const cameraRef = useRef(null);
 
-  // 색상 매핑
-  const muscleColors = {
-    neck: 0xff6b9d,
-    shoulders: 0xffa500,
-    chest: 0xff0000,
-    back: 0x7b68ee,
-    arms: 0x32cd32,
-    core: 0xffd700,
-    glutes: 0xff1493,
-    thighs: 0x1e90ff,
-    calves: 0x00fa9a,
+  // ===========================
+  // 🔥 근육 인덱스 매핑
+  // ===========================
+  const MUSCLE_INDEXES = {
+    upper_chest: [133, 320],
+    middle_chest: [134, 321],
+    lower_chest: [135, 322],
+
+    front_delts: [296, 109, 301, 114],
+    side_delts: [300, 113],
+    rear_delts: [299, 112, 166, 94],
+
+    traps_upper: [100, 197],
+    traps_middle: [101, 198],
+    traps_lower: [102, 199],
+
+    lat_upper_1: [195, 98],
+    lat_upper_2: [193, 96],
+    lat_middle: [196, 99],
+    lat_lower: [192, 95],
+
+    mid_back: [194, 97],
+    erector_spinae: [138, 73],
+
+    bicep_brachialis: [117, 304],
+    brachialis: [116, 303],
+
+    forearm_brachioradialis: [107, 294],
+    forearm_flexor: [104, 201],
+
+    triceps_long: [111, 298],
+    triceps_lateral: [115, 302],
+    triceps_medial: [110, 297],
+
+    // -----------------------
+    // 🍀 복근 & 외복사근
+    // -----------------------
+    abs_upper_1: [310, 123],
+    abs_upper_2: [309, 122],
+    abs_mid: [308, 121],
+    abs_lower: [307, 120],
+    oblique: [306, 119],
+
+    glute_outer: [77, 142],
+    glute_middle: [78, 144],
+    glute_center: [359, 143],
+
+    thigh_upper: [139, 74],
+    thigh_outer: [154, 88],
+    thigh_middle: [156, 90],
+    thigh_lower: [155, 89],
+    thigh_inner: [158, 92],
+
+    hamstring_outer: [86, 152],
+    hamstring_inner: [87, 153],
+
+    calf_outer: [83, 149],
+    calf_inner: [82, 148],
+    soleus: [146, 80],
   };
 
-  // 기본 Z축 분류
-  const getBodyPartByZ = (z) => {
-    if (z > 170) return "neck";
-    if (z > 150) return "shoulders";
-    if (z > 120) return "chest";
-    if (z > 80) return "core";
-    if (z > 50) return "glutes";
-    if (z > 25) return "thighs";
-    return "calves";
+  // ===========================
+  // 🔥 UI → 내부 근육 key 변환 맵핑
+  // ===========================
+  const MUSCLE_NAME_MAP = {
+    "상부 가슴": "upper_chest",
+    "중부 가슴": "middle_chest",
+    "하부 가슴": "lower_chest",
+
+    "전면 삼각근": "front_delts",
+    "측면 삼각근": "side_delts",
+    "후면 삼각근": "rear_delts",
+
+    "승모근 상부": "traps_upper",
+    "승모근 중부": "traps_middle",
+    "승모근 하부": "traps_lower",
+
+    "광배근 상부": "lat_upper_1",
+    "광배근 중부": "lat_middle",
+    "광배근 하부": "lat_lower",
+
+    "상복근 1": "abs_upper_1",
+    "상복근 2": "abs_upper_2",
+    "중복근 1": "abs_mid",
+    "중복근 2": "abs_mid",
+    "하복근": "abs_lower",
+    "외복사근": "oblique",
   };
 
-  // ⭐ 좌표 기반 부위 분류 함수
-  const detectPartByCoords = (x, y, z) => {
-    // 앞쪽/뒤쪽 분리 기준
-    const isFront = y >= 0;
-    const isBackSide = y < 0;
+  const convertMuscle = (name) => MUSCLE_NAME_MAP[name] || name;
 
-    // --- 목 (Neck) - 가장 높은 부분
-    if (z > 175 && Math.abs(x) <= 15) {
-      return "neck";
-    }
+  // 복근 그룹
+  const ABS_KEYS = [
+    "abs_upper_1",
+    "abs_upper_2",
+    "abs_mid",
+    "abs_lower",
+    "oblique",
+  ];
 
-    // --- 어깨 (Shoulders) - 높은 부분 + 팔 쪽
-    if ((Math.abs(x) > 15 && z >= 120) || (z >= 155 && z <= 175)) {
-      return "shoulders";
-    }
-
-    // --- 가슴 (Front Chest) - 앞쪽, 중간 높이
-    if (
-      isFront &&
-      Math.abs(x) <= 15 &&
-      z >= 145 &&
-      z <= 175
-    ) {
-      return "chest";
-    }
-
-    // --- 등 (Back) - 뒤쪽, 중간 높이
-    if (isBackSide && z >= 110 && z <= 175) {
-      return "back";
-    }
-
-    // --- 코어 (복부) - 앞쪽, 중간-하단
-    if (isFront && z >= 90 && z <= 145) {
-      return "core";
-    }
-
-    // --- 엉덩이 (Glutes) - 뒤쪽, 중간-하단
-    if (isBackSide && z >= 50 && z <= 110) {
-      return "glutes";
-    }
-
-    // --- 허벅지 (Thighs)
-    if (z >= 25 && z <= 90) {
-      return "thighs";
-    }
-
-    // --- 종아리 (Calves)
-    if (z < 25) {
-      return "calves";
-    }
-
-    // fallback
-    return getBodyPartByZ(z);
-  };
-
+  // ===========================
+  // 모델 로딩
+  // ===========================
   useEffect(() => {
-    const container = mountRef.current;
-    if (!container) return;
-
-    const w = container.clientWidth;
-    const h = container.clientHeight;
+    const mount = mountRef.current;
+    if (!mount) return;
 
     const scene = new THREE.Scene();
-    scene.background = null;
 
-    const camera = new THREE.PerspectiveCamera(50, w / h, 0.1, 1000);
-    camera.position.set(0, 0, 2.5);
+    const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 2000);
+    camera.position.set(0, 0.5, 18);
+    cameraRef.current = camera;
 
-    const renderer = new THREE.WebGLRenderer({
-      antialias: true,
-      alpha: true,
-    });
-    renderer.setSize(w, h);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setClearColor(0x000000, 0);
-    container.appendChild(renderer.domElement);
+    renderer.setSize(width, height);
+    mount.appendChild(renderer.domElement);
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
-    controls.minDistance = 1.5;
-    controls.maxDistance = 5;
+    controls.zoomToCursor = true;
+    controls.enablePan = false;
+    controls.target.set(0, 0.3, 0);
 
-    scene.add(new THREE.AmbientLight(0xffffff, 1.5));
-    const d1 = new THREE.DirectionalLight(0xffffff, 1);
-    d1.position.set(5, 5, 5);
-    scene.add(d1);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.65));
+    const dir = new THREE.DirectionalLight(0xffffff, 1.3);
+    dir.position.set(3, 6, 4);
+    scene.add(dir);
 
-    const d2 = new THREE.DirectionalLight(0x00d4ff, 0.5);
-    d2.position.set(-5, 3, -3);
-    scene.add(d2);
+    const loader = new OBJLoader();
+    loader.load("/models/human_anatomy_musculature_obj.obj", (obj) => {
+      obj.scale.set(0.009, 0.009, 0.009);
+      obj.position.set(0, -0.45, 0);
 
-    const loader = new GLTFLoader();
+      const meshes = [];
 
-    loader.load(
-      "/models/human.glb",
-      (gltf) => {
-        const model = gltf.scene;
+      obj.traverse((child) => {
+        if (!child.isMesh) return;
 
-        const particlesByPart = {};
+        child.geometry.computeBoundingBox();
+        const box = child.geometry.boundingBox;
+        const w = box.max.x - box.min.x;
+        const h = box.max.y - box.min.y;
 
-        model.traverse((child) => {
-          if (child.isMesh && child.geometry?.attributes?.position) {
-            const positions = child.geometry.attributes.position.array;
+        if (w > 2.8 && h < 0.5) {
+          child.visible = false;
+          return;
+        }
 
-            for (let i = 0; i < positions.length; i += 90) {
-              const x = positions[i];
-              const y = positions[i + 1];
-              const z = positions[i + 2];
-
-              // ⭐ 좌표 기반 분류
-              const partName = detectPartByCoords(x, y, z);
-
-              if (!particlesByPart[partName]) {
-                particlesByPart[partName] = [];
-              }
-              particlesByPart[partName].push(new THREE.Vector3(x, y, z));
-            }
-          }
+        child.material = new THREE.MeshStandardMaterial({
+          color: 0xcfcfcf,
+          metalness: 0.1,
+          roughness: 0.9,
         });
 
-        console.log("📌 분류된 파티클");
-        console.table(
-          Object.entries(particlesByPart).map(([p, arr]) => ({
-            part: p,
-            count: arr.length,
-          }))
-        );
+        meshes.push(child);
+      });
 
-        // 모델 중심 정렬
-        const box = new THREE.Box3().setFromObject(model);
-        const size = new THREE.Vector3();
-        const center = new THREE.Vector3();
-        box.getSize(size);
-        box.getCenter(center);
-
-        const maxDim = Math.max(size.x, size.y, size.z);
-        const scale = 1.8 / maxDim;
-
-        // 파티클 시스템 생성
-        Object.keys(particlesByPart).forEach((partName) => {
-          const pts = particlesByPart[partName];
-          const geom = new THREE.BufferGeometry();
-          const buf = new Float32Array(pts.length * 3);
-
-          pts.forEach((p, i) => {
-            buf[i * 3] = p.x;
-            buf[i * 3 + 1] = p.y;
-            buf[i * 3 + 2] = p.z;
-          });
-
-          geom.setAttribute("position", new THREE.BufferAttribute(buf, 3));
-
-          const mat = new THREE.PointsMaterial({
-            color: 0xffffff,
-            size: 0.012,
-            opacity: 0.7,
-            transparent: true,
-            depthWrite: false,
-            blending: THREE.AdditiveBlending,
-            sizeAttenuation: true,
-          });
-
-          const mesh = new THREE.Points(geom, mat);
-          mesh.scale.setScalar(scale);
-          mesh.position.set(-center.x * scale, -center.y * scale, -center.z * scale);
-          mesh.rotation.x = -Math.PI / 2;
-          scene.add(mesh);
-
-          particleGroupsRef.current[partName] = {
-            system: mesh,
-            targetColor: new THREE.Color(0xffffff),
-            currentColor: new THREE.Color(0xffffff),
-          };
-        });
-
-        console.log("🎉 파티클 생성 완료");
-      },
-      undefined,
-      (e) => console.log("⚠ GLB load error:", e)
-    );
+      meshesRef.current = meshes;
+      scene.add(obj);
+    });
 
     const animate = () => {
       requestAnimationFrame(animate);
-
-      Object.values(particleGroupsRef.current).forEach((g) => {
-        g.currentColor.lerp(g.targetColor, 0.08);
-        g.system.material.color.copy(g.currentColor);
-      });
-
       controls.update();
       renderer.render(scene, camera);
     };
     animate();
 
-    const handleResize = () => {
-      const newW = container.clientWidth;
-      const newH = container.clientHeight;
-      renderer.setSize(newW, newH);
-      camera.aspect = newW / newH;
-      camera.updateProjectionMatrix();
-    };
-    window.addEventListener("resize", handleResize);
-
     return () => {
-      window.removeEventListener("resize", handleResize);
       renderer.dispose();
-      container.innerHTML = "";
+      if (mount.contains(renderer.domElement)) {
+        mount.removeChild(renderer.domElement);
+      }
     };
-  }, []);
+  }, [width, height]);
 
-  // 선택/호버 색상 반영
+  // ===========================
+  // 🔥 색칠 로직 (복근 제외 적용)
+  // ===========================
   useEffect(() => {
-    const active = hoverMuscle || selectedMuscle;
-    Object.keys(particleGroupsRef.current).forEach((name) => {
-      const g = particleGroupsRef.current[name];
-      if (name === active && muscleColors[active]) {
-        g.targetColor.setHex(muscleColors[active]);
-      } else {
-        g.targetColor.setHex(0xffffff);
+    if (!meshesRef.current.length) return;
+
+    // 선택된 근육 UI → 내부 key 변환
+    const realSelected = convertMuscle(selectedMuscle);
+    const realHover = convertMuscle(hoverMuscle);
+    const realHighlights = highlightMuscles.map(convertMuscle);
+
+    // 복근 운동인지 확인
+    const isAbsSelected = ABS_KEYS.includes(realSelected);
+
+    // 복근 제외 처리
+    const filteredHighlight = isAbsSelected
+      ? realHighlights
+      : realHighlights.filter((m) => !ABS_KEYS.includes(m));
+
+    const filteredHover = isAbsSelected
+      ? realHover
+      : ABS_KEYS.includes(realHover)
+      ? null
+      : realHover;
+
+    const filteredSelected = isAbsSelected
+      ? realSelected
+      : ABS_KEYS.includes(realSelected)
+      ? null
+      : realSelected;
+
+    // 최종 색칠 대상
+    const finalList = [
+      ...filteredHighlight,
+      filteredHover,
+      filteredSelected,
+    ].filter(Boolean);
+
+    const ROLE_COLORS = {
+      primary: 0xff4444,
+      secondary: 0xffa444,
+      tertiary: 0x33cc66,
+    };
+
+    const roleMap = {
+      primary: finalList.slice(0, 1),
+      secondary: finalList.slice(1, 3),
+      tertiary: finalList.slice(3),
+    };
+
+    meshesRef.current.forEach((mesh, idx) => {
+      let applied = false;
+
+      for (const role of ["primary", "secondary", "tertiary"]) {
+        for (const m of roleMap[role]) {
+          if (MUSCLE_INDEXES[m]?.includes(idx)) {
+            mesh.material.color.setHex(ROLE_COLORS[role]);
+            mesh.material.metalness = 0.45;
+            mesh.material.roughness = 0.45;
+            applied = true;
+            break;
+          }
+        }
+        if (applied) break;
+      }
+
+      if (!applied) {
+        mesh.material.color.setHex(0xcfcfcf);
+        mesh.material.metalness = 0.1;
+        mesh.material.roughness = 0.9;
       }
     });
-  }, [selectedMuscle, hoverMuscle]);
+  }, [selectedMuscle, hoverMuscle, highlightMuscles]);
 
-  return (
-    <div
-      ref={mountRef}
-      style={{
-        width: "100%",
-        height: "100%",
-        minHeight: height,
-        borderRadius: "20px",
-        background: "transparent",
-        cursor: "grab",
-      }}
-    />
-  );
+  // ===========================
+  // mesh index 출력 (디버깅용)
+  // ===========================
+  useEffect(() => {
+    if (!mountRef.current || !meshesRef.current.length) return;
+
+    const dom = mountRef.current;
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    const onClick = (e) => {
+      const rect = dom.getBoundingClientRect();
+      mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, cameraRef.current);
+
+      const hits = raycaster.intersectObjects(meshesRef.current);
+      if (hits.length > 0) {
+        const mesh = hits[0].object;
+        const idx = meshesRef.current.indexOf(mesh);
+        console.log("🔥 mesh index:", idx);
+      }
+    };
+
+    dom.addEventListener("click", onClick);
+    return () => dom.removeEventListener("click", onClick);
+  }, []);
+
+  return <div ref={mountRef} style={{ width, height }} />;
 }

@@ -1,4 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Layout from "./components/Layout";
+
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -10,29 +12,39 @@ import Calorie from "./pages/Calorie";
 import Products from "./pages/Products";
 import Profile from "./pages/Profile";
 import DetailExtra from "./pages/DetailExtra";
-import Dashboard from "./pages/Dashboard"; // ← 신규 추가
+import Dashboard from "./pages/Dashboard";
+import Admin from "./pages/Admin";
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/detail-extra" element={<DetailExtra />} />
-        <Route path="/" element={<Home />} />
+
+        {/* ❌ 헤더 없는 페이지 */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/routine" element={<Routine />} />
-        <Route path="/exercise" element={<Exercise />} />
-        <Route path="/report" element={<Report />} />
-        <Route path="/facilities" element={<Facilities />} />
-        <Route path="/calorie" element={<Calorie />} />
-        <Route path="/products" element={<Products />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/admin" element={<Admin />} />
 
-        {/* 구독 페이지 */}
-        <Route path="/subscribe" element={<div>구독 페이지 만들기</div>} />
+        {/* ✔ 공통 헤더 적용 페이지 */}
+        <Route element={<Layout />}>
 
-        {/* 로그인 후 이동할 대시보드 페이지 */}
-        <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+
+          <Route path="/routine" element={<Routine />} />
+          <Route path="/exercise" element={<Exercise />} />
+          <Route path="/report" element={<Report />} />
+          <Route path="/facilities" element={<Facilities />} />
+          <Route path="/calorie" element={<Calorie />} />
+          <Route path="/products" element={<Products />} />
+
+          <Route path="/profile" element={<Profile />} />
+
+          <Route path="/detail-extra" element={<DetailExtra />} />
+
+          <Route path="/subscribe" element={<div>구독 페이지 만들기</div>} />
+        </Route>
+
       </Routes>
     </BrowserRouter>
   );

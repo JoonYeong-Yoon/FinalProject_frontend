@@ -2,10 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   User,
   Mail,
-  Phone,
   Calendar,
   Edit3,
-  UserCircle,
   Home,
   Camera,
   Save,
@@ -21,22 +19,17 @@ export default function Profile() {
   const [editing, setEditing] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-
   const [isDarkMode, setIsDarkMode] = useState(
     localStorage.getItem("theme") === "dark"
   );
 
   useEffect(() => {
-    const handleTheme = () => {
-      setIsDarkMode(document.documentElement.classList.contains("dark-mode"));
-    };
-    handleTheme();
+    setIsDarkMode(document.documentElement.classList.contains("dark-mode"));
   }, []);
 
   const [profile, setProfile] = useState({
     name: "",
     email: "",
-    phone: "",
     age: "",
     height: "",
     weight: "",
@@ -55,9 +48,9 @@ export default function Profile() {
   const [editData, setEditData] = useState(profile);
   const token = localStorage.getItem("token");
 
-  /* ------------------------------
-      프로필 정보 불러오기
-  ------------------------------- */
+  /* ------------------------------------------
+      프로필 불러오기
+  ------------------------------------------- */
   useEffect(() => {
     if (!token) return;
 
@@ -75,7 +68,6 @@ export default function Profile() {
 
         setProfile(data);
         setEditData(data);
-
         setAvatarPreview(data.avatar || null);
       } catch (err) {
         console.error("프로필 로드 실패:", err);
@@ -85,69 +77,64 @@ export default function Profile() {
     load();
   }, [token]);
 
-  /* ------------------------------
+  /* ------------------------------------------
       BMI 계산
-  ------------------------------- */
+  ------------------------------------------- */
   const bmi = () => {
     if (!editData.height || !editData.weight) return "-";
     return (editData.weight / (editData.height / 100) ** 2).toFixed(1);
   };
 
-  /* ------------------------------
-      입력 변경 함수
-  ------------------------------- */
+  /* ------------------------------------------
+      변경 핸들러
+  ------------------------------------------- */
   const change = (field, value) => {
     setEditData({ ...editData, [field]: value });
   };
 
   const changeArray = (field, value) => {
     const arr = editData[field] || [];
-    if (arr.includes(value)) {
-      setEditData({ ...editData, [field]: arr.filter((v) => v !== value) });
-    } else {
-      setEditData({ ...editData, [field]: [...arr, value] });
+    setEditData({
+      ...editData,
+      [field]: arr.includes(value)
+        ? arr.filter((v) => v !== value)
+        : [...arr, value],
+    });
+  };
+
+  /* ------------------------------------------
+      저장하기
+  ------------------------------------------- */
+  const handleSave = async () => {
+    if (!token) return alert("로그인 필요");
+
+    setIsLoading(true);
+
+    try {
+      const updated = {
+        ...editData,
+        username: editData.name,
+        avatar: avatarPreview,
+      };
+
+      await api.put("/web/users/update", updated, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setProfile(updated);
+      setEditing(false);
+      alert("저장 완료!");
+    } catch (err) {
+      console.error("저장 실패:", err);
+      alert("저장 실패");
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  /* ------------------------------
-      저장하기
-  ------------------------------- */
-const handleSave = async () => {
-  if (!token) return alert("로그인 필요");
-
-  setIsLoading(true);
-  const emailChanged = editData.email !== profile.email;
-
-  try {
-    const updated = {
-      ...editData,
-      username: editData.name,
-      avatar: avatarPreview,
-    };
-
-    await api.put("/web/users/update", updated, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    // 🔥 이메일 바뀌어도 더 이상 로그아웃 안됨
-    if (emailChanged) {
-      alert("이메일이 변경되었습니다!");
-    }
-
-    setProfile(updated);
-    setEditing(false);
-    alert("저장 완료!");
-  } catch (err) {
-    console.error("저장 실패:", err);
-    alert("저장 실패");
-  } finally {
-    setIsLoading(false);
-  }
-};
-
-  /* ------------------------------
+  /* ------------------------------------------
       계정 삭제
-  ------------------------------- */
+  ------------------------------------------- */
   const handleDelete = async () => {
     if (!window.confirm("정말 삭제하시겠습니까?")) return;
 
@@ -157,19 +144,17 @@ const handleSave = async () => {
       });
 
       alert("계정이 삭제되었습니다.");
-
       localStorage.clear();
       sessionStorage.clear();
-
       window.location.href = "/login";
     } catch (err) {
       alert("삭제 실패");
     }
   };
 
-  /* ------------------------------
+  /* ------------------------------------------
       아바타 업로드
-  ------------------------------- */
+  ------------------------------------------- */
   const handleAvatar = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -179,24 +164,19 @@ const handleSave = async () => {
     reader.readAsDataURL(file);
   };
 
-  /* ------------------------------
-      기본 아바타 경로
-  ------------------------------- */
   const defaultAvatar = isDarkMode
     ? "/default-avatar-dark.png"
     : "/default-avatar-light.png";
 
+  /* ===================================================================
+        RENDER
+  =================================================================== */
   return (
     <div className="profile-wrapper">
-      <header className="profile-header">
-        <h1 className="profile-header-title">내 프로필</h1>
-      </header>
-
       <div className="profile-container">
         <div className="profile-main">
-          {/* ------------------------------
-                왼쪽 카드
-          ------------------------------ */}
+
+          {/* ------------ LEFT CARD ------------ */}
           <aside className="profile-left-card">
             <div className="avatar">
               <img
@@ -227,11 +207,10 @@ const handleSave = async () => {
               <label className="info-title">
                 <User size={14} /> 이름
               </label>
-
               {editing ? (
                 <input
                   className="info-input"
-                  value={editData.name}
+                  value={editData.name ?? ""}
                   onChange={(e) => change("name", e.target.value)}
                 />
               ) : (
@@ -241,9 +220,9 @@ const handleSave = async () => {
               <label className="info-title">소개</label>
               {editing ? (
                 <textarea
-                  rows={3}
                   className="info-input"
-                  value={editData.intro}
+                  rows={3}
+                  value={editData.intro ?? ""}
                   onChange={(e) => change("intro", e.target.value)}
                 />
               ) : (
@@ -253,32 +232,14 @@ const handleSave = async () => {
               <label className="info-title">
                 <Mail size={14} /> 이메일
               </label>
-
               {editing ? (
                 <input
                   className="info-input"
-                  value={editData.email}
+                  value={editData.email ?? ""}
                   onChange={(e) => change("email", e.target.value)}
                 />
               ) : (
                 <p className="info-value">{profile.email || "-"}</p>
-              )}
-
-              <label className="info-title">
-                <Phone size={14} /> 전화번호
-              </label>
-
-              {editing ? (
-                <input
-                  className="info-input"
-                  type="tel"
-                  value={editData.phone}
-                  onChange={(e) =>
-                    change("phone", e.target.value.replace(/[^0-9]/g, ""))
-                  }
-                />
-              ) : (
-                <p className="info-value">{profile.phone || "-"}</p>
               )}
 
               <label className="info-title">
@@ -287,6 +248,7 @@ const handleSave = async () => {
               <p className="info-value">{profile.created_at || "-"}</p>
             </div>
 
+            {/* EDIT BUTTONS */}
             <div className="edit-btn-area">
               {!editing ? (
                 <button className="edit-btn" onClick={() => setEditing(true)}>
@@ -294,10 +256,7 @@ const handleSave = async () => {
                 </button>
               ) : (
                 <>
-                  <button
-                    className="cancel-btn"
-                    onClick={() => setEditing(false)}
-                  >
+                  <button className="cancel-btn" onClick={() => setEditing(false)}>
                     <X size={16} /> 취소
                   </button>
                   <button className="save-btn" onClick={handleSave}>
@@ -308,27 +267,25 @@ const handleSave = async () => {
             </div>
           </aside>
 
-          {/* ------------------------------
-                오른쪽 상세 정보
-          ------------------------------ */}
-          <section className="profile-right-card stretch-card">
+          {/* ------------ DETAILS SECTION ------------ */}
+          <section className="profile-right-card">
             <h2 className="section-title">상세 정보</h2>
 
             <div className="body-grid">
-              
-              {/* 나이 */}
+
+              {/* ------------ ROW 1 ------------ */}
               <div className="body-item">
                 <label>나이</label>
                 {editing ? (
                   <input
                     type="number"
                     className="body-input"
-                    value={editData.age}
+                    value={editData.age ?? ""}
                     onChange={(e) => {
                       const v = e.target.value;
                       if (v === "") return change("age", "");
                       const num = Number(v);
-                      if (num < 1) return change("age", "");
+                      if (!Number.isFinite(num) || num <= 0) return;
                       change("age", num);
                     }}
                   />
@@ -337,19 +294,18 @@ const handleSave = async () => {
                 )}
               </div>
 
-              {/* 키 */}
               <div className="body-item">
                 <label>키(cm)</label>
                 {editing ? (
                   <input
                     type="number"
                     className="body-input"
-                    value={editData.height}
+                    value={editData.height ?? ""}
                     onChange={(e) => {
                       const v = e.target.value;
                       if (v === "") return change("height", "");
                       const num = Number(v);
-                      if (num < 1) return change("height", "");
+                      if (!Number.isFinite(num) || num <= 0) return;
                       change("height", num);
                     }}
                   />
@@ -358,19 +314,18 @@ const handleSave = async () => {
                 )}
               </div>
 
-              {/* 체중 */}
               <div className="body-item">
                 <label>체중(kg)</label>
                 {editing ? (
                   <input
                     type="number"
                     className="body-input"
-                    value={editData.weight}
+                    value={editData.weight ?? ""}
                     onChange={(e) => {
                       const v = e.target.value;
                       if (v === "") return change("weight", "");
                       const num = Number(v);
-                      if (num < 1) return change("weight", "");
+                      if (!Number.isFinite(num) || num <= 0) return;
                       change("weight", num);
                     }}
                   />
@@ -380,21 +335,23 @@ const handleSave = async () => {
               </div>
 
               {/* BMI */}
-              <div className="bmi-box">
+              <div className="body-item">
                 <label>BMI</label>
-                <div className="bmi-row">
-                  <span className="bmi-value">{bmi()}</span>
-                  <span className="bmi-unit">kg/m²</span>
+                <div className="bmi-box">
+                  <div className="bmi-row">
+                    <span className="bmi-value">{bmi()}</span>
+                    <span className="bmi-unit">kg/m²</span>
+                  </div>
                 </div>
               </div>
 
-              {/* 성별 */}
+              {/* ------------ ROW 2 ------------ */}
               <div className="body-item">
                 <label>성별</label>
                 {editing ? (
                   <select
                     className="body-select"
-                    value={editData.gender}
+                    value={editData.gender ?? ""}
                     onChange={(e) => change("gender", e.target.value)}
                   >
                     <option value="">선택</option>
@@ -412,13 +369,12 @@ const handleSave = async () => {
                 )}
               </div>
 
-              {/* 운동 목표 */}
               <div className="body-item">
                 <label>운동 목표</label>
                 {editing ? (
                   <select
                     className="body-select"
-                    value={editData.goal}
+                    value={editData.goal ?? ""}
                     onChange={(e) => change("goal", e.target.value)}
                   >
                     <option value="">선택</option>
@@ -432,13 +388,12 @@ const handleSave = async () => {
                 )}
               </div>
 
-              {/* 하루 운동 시간 */}
               <div className="body-item">
                 <label>하루 운동 시간</label>
                 {editing ? (
                   <select
                     className="body-select"
-                    value={editData.dailyTime}
+                    value={editData.dailyTime ?? ""}
                     onChange={(e) => change("dailyTime", e.target.value)}
                   >
                     <option value="">선택</option>
@@ -454,13 +409,12 @@ const handleSave = async () => {
                 )}
               </div>
 
-              {/* 주당 운동 */}
               <div className="body-item">
                 <label>주당 운동</label>
                 {editing ? (
                   <select
                     className="body-select"
-                    value={editData.weekly}
+                    value={editData.weekly ?? ""}
                     onChange={(e) => change("weekly", e.target.value)}
                   >
                     <option value="">선택</option>
@@ -474,45 +428,38 @@ const handleSave = async () => {
                 )}
               </div>
 
-              {/* 선호 운동 */}
-              <div className="body-item full-row">
+              {/* ------------ ROW 3 ------------ */}
+              <div className="body-item">
                 <label>선호 운동</label>
-
                 {editing ? (
-                  <div className="checkbox-grid">
-                    {["웨이트", "유산소", "홈트", "요가", "필라테스"].map(
-                      (item) => (
-                        <label key={item} className="check-label">
-                          <input
-                            type="checkbox"
-                            checked={editData.prefer.includes(item)}
-                            onChange={() => changeArray("prefer", item)}
-                          />
-                          {item}
-                        </label>
-                      )
-                    )}
+                  <div className="checkbox-grid-compact">
+                    {["웨이트", "유산소", "홈트", "요가", "필라테스"].map((item) => (
+                      <label key={item} className="check-label">
+                        <input
+                          type="checkbox"
+                          checked={editData.prefer?.includes(item)}
+                          onChange={() => changeArray("prefer", item)}
+                        />
+                        {item}
+                      </label>
+                    ))}
                   </div>
                 ) : (
                   <p className="view-box">
-                    {Array.isArray(profile.prefer)
-                      ? profile.prefer.join(", ")
-                      : "-"}
+                    {profile.prefer?.length ? profile.prefer.join(", ") : "-"}
                   </p>
                 )}
               </div>
 
-              {/* 부상 통증 */}
-              <div className="body-item full-row">
+              <div className="body-item">
                 <label>부상 / 통증</label>
-
                 {editing ? (
-                  <div className="checkbox-grid">
+                  <div className="checkbox-grid-compact">
                     {["허리", "무릎", "어깨", "목"].map((item) => (
                       <label key={item} className="check-label">
                         <input
                           type="checkbox"
-                          checked={editData.pain.includes(item)}
+                          checked={editData.pain?.includes(item)}
                           onChange={() => changeArray("pain", item)}
                         />
                         {item}
@@ -521,20 +468,17 @@ const handleSave = async () => {
                   </div>
                 ) : (
                   <p className="view-box">
-                    {Array.isArray(profile.pain)
-                      ? profile.pain.join(", ")
-                      : "-"}
+                    {profile.pain?.length ? profile.pain.join(", ") : "-"}
                   </p>
                 )}
               </div>
 
-              {/* 활동량 */}
               <div className="body-item">
                 <label>활동량</label>
                 {editing ? (
                   <select
                     className="body-select"
-                    value={editData.activity}
+                    value={editData.activity ?? ""}
                     onChange={(e) => change("activity", e.target.value)}
                   >
                     <option value="">선택</option>
@@ -555,13 +499,12 @@ const handleSave = async () => {
                 )}
               </div>
 
-              {/* 목표 기간 */}
               <div className="body-item">
                 <label>목표 기간</label>
                 {editing ? (
                   <select
                     className="body-select"
-                    value={editData.targetPeriod}
+                    value={editData.targetPeriod ?? ""}
                     onChange={(e) => change("targetPeriod", e.target.value)}
                   >
                     <option value="">선택</option>
@@ -584,12 +527,17 @@ const handleSave = async () => {
                   </p>
                 )}
               </div>
+
             </div>
           </section>
         </div>
 
+        {/* 하단 버튼 */}
         <div className="bottom-btn-box">
-          <button className="home-btn" onClick={() => (window.location.href = "/")}>
+          <button
+            className="home-btn"
+            onClick={() => (window.location.href = "/dashboard")}
+          >
             <Home size={18} /> 홈
           </button>
 
@@ -597,6 +545,7 @@ const handleSave = async () => {
             <Trash2 size={18} /> 계정 삭제
           </button>
         </div>
+
       </div>
     </div>
   );

@@ -1,0 +1,151 @@
+/* ============================================
+   전체 배경
+============================================ */
+.admin-container {
+  min-height: 100vh;
+  padding: 50px 80px;
+  background: #0a0a0f;
+  color: #ffffff;
+  font-family: "Pretendard", sans-serif;
+}
+
+/* ============================================
+   제목
+============================================ */
+.admin-title {
+  font-size: 42px;
+  margin-bottom: 40px;
+  font-weight: 700;
+  text-align: center;
+  color: #ffffff;
+}
+
+/* ============================================
+   섹션 카드 (글래스 스타일)
+============================================ */
+.admin-card {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px);
+  border-radius: 22px;
+  padding: 35px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+}
+
+/* 섹션 제목 */
+.admin-section-title {
+  font-size: 24px;
+  margin-bottom: 25px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+/* ============================================
+   상단 툴바 (검색 + 필터 + 정렬)
+============================================ */
+.admin-tools {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.admin-search,
+.admin-filter,
+.admin-sort {
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 14px;
+  outline: none;
+}
+
+.admin-search::placeholder {
+  color: rgba(255,255,255,0.5);
+}
+
+/* ============================================
+   테이블 디자인
+============================================ */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  color: #fff;
+  font-size: 14px;
+}
+
+.admin-table th {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 14px;
+  text-align: left;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.admin-table td {
+  padding: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  color: #eeeeee;
+}
+
+.admin-table tr:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* ============================================
+   구독 버튼 (태그)
+============================================ */
+.tag {
+  padding: 8px 12px;
+  border-radius: 50px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+
+.tag-subscribed {
+  background: #4b8bff;
+  color: white;
+}
+
+.tag-unsubscribed {
+  background: #555;
+  color: white;
+}
+
+/* ============================================
+   삭제 버튼
+============================================ */
+.delete-btn {
+  padding: 8px 12px;
+  background: #ff4e4e;
+  color: white;
+  font-weight: 600;
+  border-radius: 12px;
+  font-size: 13px;
+  border: none;
+  cursor: pointer;
+}
+
+.delete-btn:hover {
+  background: #ff3333;
+}
+
+/* ============================================
+   기타 상태 UI
+============================================ */
+.admin-no-users {
+  text-align: center;
+  padding: 30px 0;
+  color: rgba(255,255,255,0.7);
+  font-size: 15px;
+}
+
+.admin-loading,
+.admin-error {
+  text-align: center;
+  font-size: 20px;
+  padding-top: 80px;
+}

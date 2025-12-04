@@ -1,187 +1,338 @@
 // src/pages/Dashboard.jsx
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import "../styles/Dashboard.css";
 import { useNavigate } from "react-router-dom";
 
 import ParticleHuman from "../components/ParticleHuman";
-import { muscleMap } from "../muscleMap";
+import { EXERCISE_DB } from "../data/EXERCISE_DB";
+import { MUSCLE_INDEXES } from "../data/MUSCLE_INDEXES";
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [selectedMuscle, setSelectedMuscle] = useState(null);
-  const [hoverMuscle, setHoverMuscle] = useState(null);
 
-  const sectionRefs = useRef({});
+  const [selectedMain, setSelectedMain] = useState(null);
+  const [selectedSub, setSelectedSub] = useState(null);
+  const [highlightMuscles, setHighlightMuscles] = useState([]);
 
-  const user = JSON.parse(localStorage.getItem("user"));
-  const avatar = user?.avatar ? user.avatar : "/default-avatar-light.png";
+  const [hoverMain, setHoverMain] = useState(null);
 
-  // 🔥 스크롤 자동 선택
+  // ============================
+  // ⭐ 복근 KEY 정의
+  // ============================
+  const ABS_KEYS = [
+    "abs_upper_1",
+    "abs_upper_2",
+    "abs_mid_1",
+    "abs_mid_2",
+    "abs_lower",
+  ];
+
+  // ============================
+  // 챗봇 상태
+  // ============================
+  const [chatMessages, setChatMessages] = useState([
+    { role: "bot", text: "안녕하세요! AI 트레이너입니다. 무엇을 도와드릴까요?" }
+  ]);
+  const [inputMessage, setInputMessage] = useState("");
+  const chatMessagesRef = useRef(null);
+
+  const SECTION_REFS = useRef({});
+
+  // ============================
+  // 근육 그룹 정의
+  // ============================
+  const MAIN_GROUPS = {
+    chest: ["upper_chest", "middle_chest", "lower_chest"],
+    shoulders: ["front_delts", "side_delts", "rear_delts"],
+    back: [
+      "traps_upper", "traps_middle", "traps_lower",
+      "lat_upper_1", "lat_upper_2", "lat_middle", "lat_lower",
+      "mid_back", "erector_spinae"
+    ],
+    arms: [
+      "bicep_brachialis", "brachialis", "forearm_brachioradialis",
+      "forearm_flexor", "triceps_long", "triceps_lateral", "triceps_medial"
+    ],
+    core: [
+      "abs_upper_1", "abs_upper_2",
+      "abs_mid_1", "abs_mid_2",
+      "abs_lower"
+    ],
+    glutes: ["glute_outer", "glute_middle", "glute_center"],
+    thighs: [
+      "thigh_upper", "thigh_outer",
+      "thigh_middle", "thigh_lower",
+      "thigh_inner"
+    ],
+    hamstrings: ["hamstring_outer", "hamstring_inner"],
+    calves: ["calf_outer", "calf_inner", "soleus"]
+  };
+
+  const LABELS = {
+    upper_chest: "상부 가슴",
+    middle_chest: "중부 가슴",
+    lower_chest: "하부 가슴",
+
+    front_delts: "전면 삼각근",
+    side_delts: "측면 삼각근",
+    rear_delts: "후면 삼각근",
+
+    traps_upper: "승모근 상부",
+    traps_middle: "승모근 중부",
+    traps_lower: "승모근 하부",
+
+    lat_upper_1: "광배 상부 1",
+    lat_upper_2: "광배 상부 2",
+    lat_middle: "광배 중부",
+    lat_lower: "광배 하부",
+
+    mid_back: "능형근",
+    erector_spinae: "척추기립근",
+
+    bicep_brachialis: "상완요골근",
+    brachialis: "상완근",
+    forearm_brachioradialis: "전완요골근",
+    forearm_flexor: "전완 굴곡근",
+
+    triceps_long: "삼두 장두",
+    triceps_lateral: "삼두 외측두",
+    triceps_medial: "삼두 내측두",
+
+    abs_upper_1: "상복근 1",
+    abs_upper_2: "상복근 2",
+    abs_mid_1: "중복근 1",
+    abs_mid_2: "중복근 2",
+    abs_lower: "하복근",
+
+    glute_outer: "엉덩이 바깥",
+    glute_middle: "엉덩이 중앙",
+    glute_center: "엉덩이 안쪽",
+
+    thigh_upper: "앞벅지 상부",
+    thigh_outer: "외측광근",
+    thigh_middle: "대퇴직근",
+    thigh_lower: "앞벅지 하부",
+    thigh_inner: "내측광근",
+
+    hamstring_outer: "햄스트링 외측",
+    hamstring_inner: "햄스트링 내측",
+
+    calf_outer: "종아리 외측",
+    calf_inner: "종아리 내측",
+    soleus: "가자미근",
+  };
+
+  const MAIN_LIST = [
+    { key: "chest", title: "🦾 가슴" },
+    { key: "shoulders", title: "💪 어깨" },
+    { key: "back", title: "🏋️ 등" },
+    { key: "arms", title: "🫱 팔" },
+    { key: "core", title: "🧩 복근" },
+    { key: "glutes", title: "🍑 엉덩이" },
+    { key: "thighs", title: "🦵 허벅지" },
+    { key: "hamstrings", title: "🦿 뒷벅지" },
+    { key: "calves", title: "🦶 종아리" }
+  ];
+
+  // ============================
+  // 스크롤 감지
+  // ============================
   const handleScroll = () => {
     const container = document.getElementById("scroll-panel");
+    if (!container) return;
+
     const center = container.scrollTop + container.clientHeight / 2;
 
-    Object.keys(sectionRefs.current).forEach((key) => {
-      const section = sectionRefs.current[key];
-      if (!section) return;
+    Object.keys(SECTION_REFS.current).forEach((key) => {
+      const sec = SECTION_REFS.current[key];
+      if (!sec) return;
 
-      const { offsetTop, offsetHeight } = section;
-      if (center >= offsetTop && center <= offsetTop + offsetHeight) {
-        setSelectedMuscle(key);
+      const top = sec.offsetTop;
+      const bottom = top + sec.offsetHeight;
+
+      if (center >= top && center <= bottom) {
+        setSelectedMain(key);
       }
     });
   };
 
-  const addRef = (key, el) => {
-    sectionRefs.current[key] = el;
+  // ============================
+  // 챗봇 전송
+  // ============================
+  const handleSendMessage = () => {
+    if (!inputMessage.trim()) return;
+
+    setChatMessages(prev => [...prev, { role: "user", text: inputMessage }]);
+
+    setTimeout(() => {
+      setChatMessages(prev => [
+        ...prev,
+        { role: "bot", text: "메시지를 받았습니다! 어떤 운동에 대해 궁금하신가요?" }
+      ]);
+    }, 600);
+
+    setInputMessage("");
   };
 
-  const content = [
-    {
-      key: "neck",
-      title: "🧠 목(Neck)",
-      desc: `목은 신체 중심을 안정시키고, 어깨·등 운동 자세를 유지하는 데 중요한 부위입니다.
-장시간 컴퓨터 사용, 틀어진 자세 등으로 인해 쉽게 굳어지는 곳이기 때문에 운동 전후 스트레칭과 가벼운 강화 운동이 필요합니다.
-- 흉쇄유돌근, 사각근
-- 거북목 개선, 어깨·등 운동 자세 향상`,
-    },
-    {
-      key: "shoulders",
-      title: "💪 어깨(Shoulders)",
-      desc: `어깨는 상체 전체 움직임의 시작점이며 전면·측면·후면 삼각근으로 구성됩니다.
-- 실루엣 변화
-- 안정된 운동 자세
-- 숄더프레스, 레터럴레이즈, 리어델트`,
-    },
-    {
-      key: "chest",
-      title: "🦾 가슴(Chest)",
-      desc: `가슴은 상부·중부·하부로 나뉘며 밀기 계열 운동을 담당합니다.
-- 벤치프레스
-- 인클라인 프레스
-- 케이블 크로스오버`,
-    },
-    {
-      key: "back",
-      title: "🏋️ 등(Back)",
-      desc: `등은 광배근, 승모근, 능형근 등 다양한 근육으로 구성.
-- 체형 교정
-- 등 넓어짐
-- 랫풀다운, 바벨로우, 풀업`,
-    },
-    {
-      key: "arms",
-      title: "🫱 팔(Arms)",
-      desc: `이두·삼두·전완이 균형 있어야 팔 라인이 예뻐짐.
-- 컬
-- 푸시다운
-- 딥스`,
-    },
-    {
-      key: "core",
-      title: "🧩 복근/코어(Core)",
-      desc: `코어는 전신 운동의 기반.
-- 복직근, 복사근, 복횡근
-- 플랭크, 레그레이즈`,
-    },
-    {
-      key: "glutes",
-      title: "🍑 엉덩이(Glutes)",
-      desc: `하체 파워의 핵심.
-- 힙쓰러스트
-- 글루트브릿지
-- 런지`,
-    },
-    {
-      key: "thighs",
-      title: "🦵 허벅지(Thighs)",
-      desc: `대퇴사두·햄스트링·내전근까지 포함하는 큰 근육군.
-- 스쿼트
-- 레그프레스`,
-    },
-    {
-      key: "calves",
-      title: "🦶 종아리(Calves)",
-      desc: `비복근·가자미근으로 구성.
-- 카프레이즈`,
-    },
-  ];
+  useEffect(() => {
+    if (chatMessagesRef.current) {
+      chatMessagesRef.current.scrollTop = chatMessagesRef.current.scrollHeight;
+    }
+  }, [chatMessages]);
 
+
+  // ==========================================================
+  // ⭐ 운동 클릭 시 highlightMuscles 처리 — 복근 제외 기능 최종 적용
+  // ==========================================================
+  const handleExerciseClick = (ex) => {
+    const muscles = [
+      ...ex.primary,
+      ...ex.secondary,
+      ...(ex.tertiary || []),
+    ];
+
+    const isAbsExercise = muscles.some(m => ABS_KEYS.includes(m));
+
+    if (isAbsExercise) {
+      // 복근 운동 → 복근 포함 전체 표시
+      setHighlightMuscles(muscles);
+      return;
+    }
+
+    // 복근이 섞여 있더라도 무조건 제거 (외복사근 제외)
+    const filtered = muscles.filter(m => !ABS_KEYS.includes(m));
+
+    setHighlightMuscles(filtered);
+  };
+
+
+  // ============================
+  // RENDER
+  // ============================
   return (
     <div className="dashboard-wrapper">
 
-      {/* 🔥 Glass Navbar */}
-      <div className="glass-navbar">
-        <div className="nav-left">
-          <img src="/logo.png" className="logo-img" alt="logo" />
-          <span className="logo-text">AI TRAINER</span>
-        </div>
-
-        <div className="nav-right">
-          <a onClick={() => navigate("/routine")}>나의 루틴</a>
-          <a onClick={() => navigate("/exercise")}>운동하기</a>
-          <a onClick={() => navigate("/report")}>운동 리포트</a>
-          <a onClick={() => navigate("/calorie")}>영양/칼로리</a>
-
-          <div className="profile-icon" onClick={() => navigate("/profile")}>
-            <img className="profile-img" src={avatar} alt="profile" />
-          </div>
-        </div>
+      <div className="title-area">
+        <h1>Welcome, Trainer!</h1>
+        <p>운동 부위를 선택해보세요</p>
       </div>
 
-      {/* ======================================================
-          🔥 메인 레이아웃
-      ====================================================== */}
       <div className="dashboard-container">
 
-        {/* 왼쪽 패널 */}
-        <div className="dashboard-left">
-
-          {/* 🔥 (고정된 제목 영역) */}
-          <div className="title-area">
-            <h1 className="dash-title">Welcome, Trainer!</h1>
-            <p className="dash-sub">오늘의 운동 부위를 확인해보세요.</p>
-          </div>
-
-          {/* 🔥 스크롤 목록 */}
-          <div
-            id="scroll-panel"
-            className="left-glass-panel"
-            onScroll={handleScroll}
-          >
-            {content.map((sec) => (
+        {/* LEFT 상단 패널 */}
+        <div className="left-top-panel">
+          <div id="scroll-panel" className="left-glass-panel" onScroll={handleScroll}>
+            {MAIN_LIST.map((m) => (
               <div
-                key={sec.key}
-                ref={(el) => addRef(sec.key, el)}
-                className={`muscle-section ${selectedMuscle === sec.key ? "active-section" : ""}`}
-                onMouseEnter={() => setHoverMuscle(sec.key)}
-                onMouseLeave={() => setHoverMuscle(null)}
+                key={m.key}
+                ref={(el) => (SECTION_REFS.current[m.key] = el)}
+                className={`muscle-section ${selectedMain === m.key ? "active-section" : ""}`}
+                onMouseEnter={() => setHoverMain(m.key)}
+                onMouseLeave={() => setHoverMain(null)}
               >
-                <h2>{sec.title}</h2>
-                <p style={{ whiteSpace: "pre-line" }}>{sec.desc}</p>
+                <h2>{m.title}</h2>
+
+                <div className="sub-chest-box">
+                  {MAIN_GROUPS[m.key].map((sub) => (
+                    <div
+                      key={sub}
+                      className={`sub-item ${selectedSub === sub ? "sub-selected" : ""}`}
+                      onClick={() => {
+                        setSelectedMain(m.key);
+                        setSelectedSub(sub);
+                        setHighlightMuscles([]);
+                      }}
+                    >
+                      {LABELS[sub]}
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* 오른쪽 3D 모델 */}
+        {/* LEFT 하단 패널 */}
+        <div className="left-bottom-panel">
+          <div className="exercise-list-box-fixed">
+            <div className="exercise-header-fixed">
+              <h2 className="exercise-title">
+                {selectedSub ? `📌 ${LABELS[selectedSub]}` : "🚀 운동 선택"}
+              </h2>
+            </div>
+
+            {selectedSub && EXERCISE_DB[selectedSub] ? (
+              <ul className="exercise-list">
+                {EXERCISE_DB[selectedSub].map((ex, i) => (
+                  <li
+                    key={i}
+                    className="exercise-item"
+                    onClick={() => handleExerciseClick(ex)}
+                  >
+                    <strong className="ex-name">{ex.name}</strong>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="exercise-empty">
+                <p>왼쪽에서 부위를 선택하세요</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* RIGHT 3D 모델 */}
         <div className="dashboard-right">
           <div className="human-wrapper">
             <ParticleHuman
-              selectedMuscle={selectedMuscle}
-              hoverMuscle={hoverMuscle}
-              width={380}
-              height={650}
+              width={700}
+              height={950}
+              selectedMuscle={selectedMain}
+              hoverMuscle={hoverMain}
+              highlightMuscles={highlightMuscles}
             />
           </div>
         </div>
 
       </div>
 
-      {/* 챗봇 */}
-      <div className="chatbot-box">
-        <div className="chatbot-btn">🤖</div>
+      {/* CHATBOT */}
+      <div className="chatbot-container">
+        <div className="chat-window">
+
+          <div className="chat-header">
+            <div className="chat-header-left">
+              <div className="chatbot-icon-small">🤖</div>
+              <span className="chat-header-title">AI Trainer</span>
+            </div>
+          </div>
+
+          <div className="chat-messages" ref={chatMessagesRef}>
+            {chatMessages.map((msg, idx) => (
+              <div
+                key={idx}
+                className={`chat-message ${msg.role === "user" ? "user-message" : "bot-message"}`}
+              >
+                {msg.text}
+              </div>
+            ))}
+          </div>
+
+          <div className="chat-input">
+            <input
+              type="text"
+              value={inputMessage}
+              onChange={(e) => setInputMessage(e.target.value)}
+              onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+              placeholder="메시지를 입력하세요..."
+              className="chat-input-field"
+            />
+            <button onClick={handleSendMessage} className="chat-send-btn">➤</button>
+          </div>
+
+        </div>
       </div>
+
     </div>
   );
 }
