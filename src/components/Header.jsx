@@ -18,6 +18,7 @@ export default function Header() {
     "/exercise",
     "/report",
     "/calorie",
+    "/community", // 🆕 커뮤니티 추가
   ];
 
   const isWorkoutPage = workoutPages.includes(location.pathname);
@@ -47,6 +48,7 @@ export default function Header() {
         <a onClick={() => nav("/exercise")}>자세교정</a>
         <a onClick={() => nav("/report")}>운동 리포트</a>
         <a onClick={() => nav("/calorie")}>영양/칼로리</a>
+        <a onClick={() => nav("/community")}>커뮤니티</a> {/* 🆕 커뮤니티 버튼 추가 */}
 
         <div className="profile-icon" onClick={() => nav("/profile")}>
           <img src={profile.avatar} className="profile-img" alt="Profile" />

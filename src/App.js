@@ -14,6 +14,8 @@ import Profile from "./pages/Profile";
 import DetailExtra from "./pages/DetailExtra";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
+import Community from "./pages/Community"; // 🆕 추가
+import CommunityProfile from "./pages/CommunityProfile"; // 🆕 추가
 
 export default function App() {
   return (
@@ -37,6 +39,8 @@ export default function App() {
           <Route path="/facilities" element={<Facilities />} />
           <Route path="/calorie" element={<Calorie />} />
           <Route path="/products" element={<Products />} />
+          <Route path="/community" element={<Community />} /> {/* 🆕 추가 */}
+          <Route path="/community/profile/:username" element={<CommunityProfile />} /> {/* 🆕 추가 */}
 
           <Route path="/profile" element={<Profile />} />
 
