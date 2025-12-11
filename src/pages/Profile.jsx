@@ -116,7 +116,7 @@ export default function Profile() {
         username: editData.name,
         avatar: avatarPreview,
       };
-
+      console.log(updated);
       await api.put("/web/users/update", updated, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -175,7 +175,6 @@ export default function Profile() {
     <div className="profile-wrapper">
       <div className="profile-container">
         <div className="profile-main">
-
           {/* ------------ LEFT CARD ------------ */}
           <aside className="profile-left-card">
             <div className="avatar">
@@ -256,7 +255,10 @@ export default function Profile() {
                 </button>
               ) : (
                 <>
-                  <button className="cancel-btn" onClick={() => setEditing(false)}>
+                  <button
+                    className="cancel-btn"
+                    onClick={() => setEditing(false)}
+                  >
                     <X size={16} /> 취소
                   </button>
                   <button className="save-btn" onClick={handleSave}>
@@ -272,7 +274,6 @@ export default function Profile() {
             <h2 className="section-title">상세 정보</h2>
 
             <div className="body-grid">
-
               {/* ------------ ROW 1 ------------ */}
               <div className="body-item">
                 <label>나이</label>
@@ -433,16 +434,18 @@ export default function Profile() {
                 <label>선호 운동</label>
                 {editing ? (
                   <div className="checkbox-grid-compact">
-                    {["웨이트", "유산소", "홈트", "요가", "필라테스"].map((item) => (
-                      <label key={item} className="check-label">
-                        <input
-                          type="checkbox"
-                          checked={editData.prefer?.includes(item)}
-                          onChange={() => changeArray("prefer", item)}
-                        />
-                        {item}
-                      </label>
-                    ))}
+                    {["웨이트", "유산소", "홈트", "요가", "필라테스"].map(
+                      (item) => (
+                        <label key={item} className="check-label">
+                          <input
+                            type="checkbox"
+                            checked={editData.prefer?.includes(item)}
+                            onChange={() => changeArray("prefer", item)}
+                          />
+                          {item}
+                        </label>
+                      )
+                    )}
                   </div>
                 ) : (
                   <p className="view-box">
@@ -527,7 +530,6 @@ export default function Profile() {
                   </p>
                 )}
               </div>
-
             </div>
           </section>
         </div>
@@ -545,7 +547,6 @@ export default function Profile() {
             <Trash2 size={18} /> 계정 삭제
           </button>
         </div>
-
       </div>
     </div>
   );

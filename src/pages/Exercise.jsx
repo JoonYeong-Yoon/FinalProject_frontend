@@ -1,16 +1,94 @@
 // src/pages/Exercise.jsx
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Exercise.css";
 
 export default function Exercise() {
   const navigate = useNavigate();
   const [ttsEnabled, setTtsEnabled] = useState(true);
-
   const [uploadedMedia, setUploadedMedia] = useState(null);
+  const [selectedRoutine, setSelectedRoutine] = useState(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [aiAnalysis, setAiAnalysis] = useState(null);
+  const [exerciseTimer, setExerciseTimer] = useState(0);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [currentSet, setCurrentSet] = useState(1);
+  const [repCount, setRepCount] = useState(0);
+  
   const fileInputRef = useRef(null);
-
   const API_BASE = "http://192.168.0.12:8000";
+
+  // 운동 루틴 목록
+  const routines = [
+    {
+      id: 1,
+      name: "풀바디 루틴 A",
+      exercises: [
+        { name: "푸쉬업", sets: 3, reps: 15 },
+        { name: "스쿼트", sets: 4, reps: 20 },
+        { name: "플랭크", sets: 3, duration: "60초" }
+      ],
+      difficulty: "중급",
+      duration: 45
+    },
+    {
+      id: 2,
+      name: "하체 집중",
+      exercises: [
+        { name: "런지", sets: 4, reps: 12 },
+        { name: "불가리안 스쿼트", sets: 3, reps: 10 },
+        { name: "힙 쓰러스트", sets: 4, reps: 15 }
+      ],
+      difficulty: "고급",
+      duration: 50
+    },
+    {
+      id: 3,
+      name: "상체 + 코어",
+      exercises: [
+        { name: "덤벨 프레스", sets: 4, reps: 12 },
+        { name: "바벨로우", sets: 3, reps: 10 },
+        { name: "AB 롤아웃", sets: 3, reps: 12 }
+      ],
+      difficulty: "중급",
+      duration: 40
+    }
+  ];
+
+  // 자세 체크포인트
+  const postureCheckpoints = [
+    { id: 1, title: "무릎 정렬", status: "good", description: "무릎이 발끝과 일직선" },
+    { id: 2, title: "척추 중립", status: "warning", description: "허리가 약간 구부러짐" },
+    { id: 3, title: "어깨 위치", status: "good", description: "어깨가 바르게 정렬됨" },
+    { id: 4, title: "골반 각도", status: "good", description: "골반이 안정적" }
+  ];
+
+  // AI 피드백 메시지
+  const feedbackMessages = [
+    "✅ 훌륭합니다! 자세가 완벽해요",
+    "⚠️ 무릎을 조금 더 안쪽으로 모아주세요",
+    "⚠️ 등을 곧게 펴주세요",
+    "✅ 호흡이 안정적이네요!",
+    "⚠️ 발 간격을 어깨 너비로 조정해주세요"
+  ];
+
+  // 타이머 작동
+  useEffect(() => {
+    let interval;
+    if (isTimerRunning) {
+      interval = setInterval(() => {
+        setExerciseTimer(prev => prev + 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isTimerRunning]);
+
+  // 시간 포맷팅
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  };
 
   // 파일 업로드 처리
   const handleMediaSelect = async (e) => {
@@ -21,6 +99,8 @@ export default function Exercise() {
       url: URL.createObjectURL(file),
       type: file.type,
     });
+
+    setIsAnalyzing(true);
 
     const formData = new FormData();
     formData.append("file", file);
@@ -33,11 +113,15 @@ export default function Exercise() {
 
       if (!res.ok) {
         alert("업로드 실패!");
+        setIsAnalyzing(false);
         return;
       }
 
       const data = await res.json();
       console.log("AI 분석 결과:", data);
+
+      // AI 분석 결과 저장
+      setAiAnalysis(data);
 
       if (data.ai_result?.knee_warning) {
         alert("⚠ 무릎 위험: 자세 교정이 필요합니다!");
@@ -45,57 +129,168 @@ export default function Exercise() {
     } catch (error) {
       console.error(error);
       alert("서버 연결 실패");
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  // 운동 시작
+  const startExercise = () => {
+    if (!selectedRoutine) {
+      alert("루틴을 먼저 선택해주세요!");
+      return;
+    }
+    setIsTimerRunning(true);
+  };
+
+  // 운동 일시정지
+  const pauseExercise = () => {
+    setIsTimerRunning(false);
+  };
+
+  // 운동 완료
+  const finishExercise = () => {
+    if (window.confirm("운동을 종료하고 기록을 저장하시겠습니까?")) {
+      // 운동 기록 저장 로직
+      const record = {
+        routine: selectedRoutine?.name,
+        duration: exerciseTimer,
+        sets: currentSet,
+        reps: repCount,
+        date: new Date().toISOString()
+      };
+      console.log("운동 기록:", record);
+      
+      // 초기화
+      setExerciseTimer(0);
+      setIsTimerRunning(false);
+      setCurrentSet(1);
+      setRepCount(0);
+      setSelectedRoutine(null);
+      setUploadedMedia(null);
+      
+      alert("운동 기록이 저장되었습니다! 🎉");
     }
   };
 
   return (
     <div className="exercise-wrapper">
-
-      {/* 헤더와 겹침 방지 */}
+      {/* 헤더 겹침 방지 */}
       <div className="top-gap" />
 
-      <h1 className="exercise-title">🏋‍♂️ 루틴 실행 및 실시간 자세 피드백</h1>
+      {/* 상단 헤더 */}
+      <div className="exercise-header">
+        <div>
+          <h1 className="exercise-title">🏋️‍♂️ AI 자세 교정 시스템</h1>
+          <p className="exercise-subtitle">실시간으로 운동 자세를 분석하고 피드백을 받아보세요</p>
+        </div>
+        <div className="timer-display">
+          <div className="timer-label">운동 시간</div>
+          <div className="timer-value">{formatTime(exerciseTimer)}</div>
+        </div>
+      </div>
 
       {/* 메인 레이아웃 */}
       <div className="exercise-grid">
 
-        {/* 왼쪽 패널 */}
+        {/* 왼쪽 패널 - 루틴 및 피드백 */}
         <div className="panel-left">
-          <h2 className="panel-header">📢 AI 트레이너 피드백</h2>
-
-          <div className="routine-summary">선택된 루틴 없음</div>
-
-          <div className="tts-row">
-            <span>🔊 음성 피드백(TTS)</span>
-            <button
-              className={`toggle ${ttsEnabled ? "on" : "off"}`}
-              onClick={() => setTtsEnabled(!ttsEnabled)}
-            >
-              {ttsEnabled ? "ON" : "OFF"}
-            </button>
+          <h2 className="panel-header">📋 운동 루틴 선택</h2>
+          
+          <div className="routine-list">
+            {routines.map(routine => (
+              <div
+                key={routine.id}
+                className={`routine-card ${selectedRoutine?.id === routine.id ? 'selected' : ''}`}
+                onClick={() => setSelectedRoutine(routine)}
+              >
+                <div className="routine-header">
+                  <h3 className="routine-name">{routine.name}</h3>
+                  <span className={`difficulty-badge ${routine.difficulty}`}>
+                    {routine.difficulty}
+                  </span>
+                </div>
+                <div className="routine-info">
+                  <span>⏱️ {routine.duration}분</span>
+                  <span>💪 {routine.exercises.length}개 운동</span>
+                </div>
+              </div>
+            ))}
           </div>
 
-          <textarea
-            className="feedback-box"
-            placeholder="루틴을 선택하고 운동을 시작해주세요."
-          />
+          {selectedRoutine && (
+            <div className="selected-routine-detail">
+              <h3 className="detail-title">운동 상세</h3>
+              {selectedRoutine.exercises.map((exercise, idx) => (
+                <div key={idx} className="exercise-item">
+                  <span className="exercise-number">{idx + 1}</span>
+                  <div className="exercise-info">
+                    <span className="exercise-name">{exercise.name}</span>
+                    <span className="exercise-detail">
+                      {exercise.sets}세트 × {exercise.reps || exercise.duration}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
 
-          <button className="finish-btn">운동 기록 저장 및 종료</button>
+          <div className="control-section">
+            <h3 className="section-title">🔊 음성 피드백</h3>
+            <div className="tts-row">
+              <span>실시간 음성 안내</span>
+              <button
+                className={`toggle ${ttsEnabled ? "on" : "off"}`}
+                onClick={() => setTtsEnabled(!ttsEnabled)}
+              >
+                {ttsEnabled ? "ON" : "OFF"}
+              </button>
+            </div>
+          </div>
+
+          <div className="action-buttons">
+            {!isTimerRunning ? (
+              <button className="start-btn" onClick={startExercise}>
+                ▶️ 운동 시작
+              </button>
+            ) : (
+              <button className="pause-btn" onClick={pauseExercise}>
+                ⏸️ 일시정지
+              </button>
+            )}
+            <button className="finish-btn" onClick={finishExercise}>
+              ✓ 운동 완료 및 저장
+            </button>
+          </div>
         </div>
 
-        {/* 중앙 업로드 패널 */}
+        {/* 중앙 패널 - 영상 업로드 및 분석 */}
         <div className="panel-center">
+          <h2 className="panel-header">📹 운동 영상 분석</h2>
 
           {!uploadedMedia ? (
             <div
               className="upload-dropzone"
               onClick={() => fileInputRef.current.click()}
             >
-              <div className="upload-label">📤 이미지 / 영상 업로드하기</div>
-              <p className="upload-hint">여기에 끌어다 놓거나 클릭하여 업로드</p>
+              <div className="upload-icon">📤</div>
+              <div className="upload-label">이미지 / 영상 업로드하기</div>
+              <p className="upload-hint">
+                클릭하거나 파일을 드래그하여 업로드
+              </p>
+              <div className="upload-formats">
+                <span>지원 형식: JPG, PNG, MP4, MOV</span>
+              </div>
             </div>
           ) : (
             <div className="preview-box">
+              {isAnalyzing && (
+                <div className="analyzing-overlay">
+                  <div className="spinner"></div>
+                  <p>AI가 자세를 분석 중입니다...</p>
+                </div>
+              )}
+
               {uploadedMedia.type.includes("image") && (
                 <img src={uploadedMedia.url} className="preview-media" alt="preview" />
               )}
@@ -104,12 +299,20 @@ export default function Exercise() {
                 <video src={uploadedMedia.url} className="preview-media" controls />
               )}
 
-              <button
-                className="change-btn"
-                onClick={() => fileInputRef.current.click()}
-              >
-                🔄 다른 파일 선택하기
-              </button>
+              <div className="preview-controls">
+                <button
+                  className="change-btn"
+                  onClick={() => fileInputRef.current.click()}
+                >
+                  🔄 다른 파일 선택
+                </button>
+                <button
+                  className="analyze-btn"
+                  onClick={() => setIsAnalyzing(true)}
+                >
+                  🤖 AI 재분석
+                </button>
+              </div>
             </div>
           )}
 
@@ -121,17 +324,98 @@ export default function Exercise() {
             onChange={handleMediaSelect}
           />
 
+          {/* 세트/횟수 카운터 */}
+          <div className="counter-section">
+            <div className="counter-card">
+              <div className="counter-label">현재 세트</div>
+              <div className="counter-value">{currentSet}</div>
+              <div className="counter-controls">
+                <button onClick={() => setCurrentSet(Math.max(1, currentSet - 1))}>-</button>
+                <button onClick={() => setCurrentSet(currentSet + 1)}>+</button>
+              </div>
+            </div>
+            <div className="counter-card">
+              <div className="counter-label">횟수</div>
+              <div className="counter-value">{repCount}</div>
+              <div className="counter-controls">
+                <button onClick={() => setRepCount(Math.max(0, repCount - 1))}>-</button>
+                <button onClick={() => setRepCount(repCount + 1)}>+</button>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* 오른쪽 실시간 스트림 패널 */}
+        {/* 오른쪽 패널 - AI 피드백 */}
         <div className="panel-right">
-          <div className="warning-box">⚠ 무릎 위치 위험 (AI 피드백 연동)</div>
-          <h2 className="panel-header">🎥 실시간 운동 분석 스트림</h2>
-          <p className="stream-desc">
-            관절 인식 + 실시간 자세 교정 Overlay 그래픽 표시 예정
-          </p>
-        </div>
+          <h2 className="panel-header">🤖 AI 실시간 피드백</h2>
 
+          {/* 자세 체크포인트 */}
+          <div className="checkpoint-section">
+            <h3 className="section-title">자세 체크포인트</h3>
+            <div className="checkpoint-list">
+              {postureCheckpoints.map(checkpoint => (
+                <div key={checkpoint.id} className="checkpoint-item">
+                  <div className="checkpoint-header">
+                    <span className={`status-dot ${checkpoint.status}`}></span>
+                    <span className="checkpoint-title">{checkpoint.title}</span>
+                  </div>
+                  <p className="checkpoint-desc">{checkpoint.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 실시간 피드백 메시지 */}
+          <div className="feedback-section">
+            <h3 className="section-title">💬 실시간 코칭</h3>
+            <div className="feedback-messages">
+              {feedbackMessages.slice(0, 3).map((msg, idx) => (
+                <div key={idx} className={`feedback-message ${msg.includes('⚠️') ? 'warning' : 'success'}`}>
+                  <span>{msg}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 운동 통계 */}
+          <div className="stats-section">
+            <h3 className="section-title">📊 운동 통계</h3>
+            <div className="stats-grid">
+              <div className="stat-item">
+                <div className="stat-icon">🔥</div>
+                <div className="stat-info">
+                  <span className="stat-label">소모 칼로리</span>
+                  <span className="stat-value">245 kcal</span>
+                </div>
+              </div>
+              <div className="stat-item">
+                <div className="stat-icon">💪</div>
+                <div className="stat-info">
+                  <span className="stat-label">완료 세트</span>
+                  <span className="stat-value">{currentSet - 1}개</span>
+                </div>
+              </div>
+              <div className="stat-item">
+                <div className="stat-icon">⭐</div>
+                <div className="stat-info">
+                  <span className="stat-label">정확도</span>
+                  <span className="stat-value">87%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 위험 경고 */}
+          {aiAnalysis?.ai_result?.knee_warning && (
+            <div className="warning-box">
+              <div className="warning-icon">⚠️</div>
+              <div className="warning-content">
+                <h4>무릎 위치 주의</h4>
+                <p>무릎이 발끝을 넘어가고 있습니다. 부상 위험이 있으니 자세를 교정해주세요.</p>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

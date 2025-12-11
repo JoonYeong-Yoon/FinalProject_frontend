@@ -8,10 +8,19 @@ export default function Routine() {
   const [tab, setTab] = useState(1);
   const [selectedRoutine, setSelectedRoutine] = useState(null);
   const [showWorkoutModal, setShowWorkoutModal] = useState(false);
+  const [showCustomCreator, setShowCustomCreator] = useState(false);
+  const [userRoutines, setUserRoutines] = useState([]);
   const [aiOptions, setAiOptions] = useState({
     pastData: false,
     bioRhythm: false,
     inbody: false,
+  });
+
+  // 사용자 정의 루틴 생성 상태
+  const [customRoutine, setCustomRoutine] = useState({
+    name: "",
+    level: "초급",
+    exercises: [{ name: "", sets: 3, reps: 10 }],
   });
 
   // 운동 세션 상태
@@ -31,7 +40,7 @@ export default function Routine() {
   const user = JSON.parse(localStorage.getItem("user"));
   const avatar = user?.avatar ? user.avatar : "/default-avatar-light.png";
 
-  const routines = [
+  const initialRoutines = [
     {
       id: 1,
       title: "초급자 전신 코어 루틴",
@@ -80,6 +89,15 @@ export default function Routine() {
       level: "중급",
       calories: 280,
     },
+  ];
+
+  const [routines, setRoutines] = useState(initialRoutines);
+
+  // 운동 선택지 목록
+  const EXERCISE_OPTIONS = [
+    "스쿼트", "플랭크", "푸시업", "버피", "점핑잭", "마운틴 클라이머",
+    "덤벨 로우", "암 레이즈", "런지", "스텝업", "와이드 스쿼트", "데드리프트",
+    "오버헤드 프레스", "벤치 프레스", "레그 프레스"
   ];
 
   // 카운트다운 및 타이머 로직
@@ -185,6 +203,63 @@ export default function Routine() {
     alert("AI가 맞춤 루틴을 생성 중입니다...");
   };
 
+  // 사용자 정의 루틴 함수들
+  const handleCustomExerciseChange = (index, field, value) => {
+    const newExercises = [...customRoutine.exercises];
+    newExercises[index][field] = field === "name" ? value : parseInt(value) || 0;
+    setCustomRoutine({ ...customRoutine, exercises: newExercises });
+  };
+
+  const handleAddExercise = () => {
+    setCustomRoutine({
+      ...customRoutine,
+      exercises: [...customRoutine.exercises, { name: "", sets: 3, reps: 10 }],
+    });
+  };
+
+  const handleRemoveExercise = (index) => {
+    const newExercises = customRoutine.exercises.filter((_, i) => i !== index);
+    setCustomRoutine({ ...customRoutine, exercises: newExercises });
+  };
+
+  const handleSaveCustomRoutine = () => {
+    if (!customRoutine.name.trim()) {
+      alert("루틴 이름을 입력해주세요.");
+      return;
+    }
+    const validExercises = customRoutine.exercises.filter(ex => ex.name.trim());
+    if (validExercises.length === 0) {
+      alert("최소한 하나의 운동을 추가해주세요.");
+      return;
+    }
+
+    // 대략적인 칼로리 및 총 시간 계산
+    const totalDuration = Math.round(validExercises.length * 5 + (validExercises.length - 1) * 1);
+    const totalCalories = Math.round(validExercises.reduce((sum, ex) => sum + (ex.sets * ex.reps * 0.5), 0) + (totalDuration * 5));
+
+    const newRoutine = {
+      id: Date.now(),
+      title: customRoutine.name,
+      exercises: validExercises,
+      duration: totalDuration,
+      level: customRoutine.level,
+      calories: totalCalories,
+      isCustom: true,
+    };
+
+    setRoutines([...routines, newRoutine]);
+    setUserRoutines([...userRoutines, newRoutine]);
+    setSelectedRoutine(newRoutine);
+    setShowCustomCreator(false);
+    setCustomRoutine({ name: "", level: "초급", exercises: [{ name: "", sets: 3, reps: 10 }] });
+    alert("루틴이 저장되었습니다!");
+  };
+
+  const handleResetCustomRoutine = () => {
+    setCustomRoutine({ name: "", level: "초급", exercises: [{ name: "", sets: 3, reps: 10 }] });
+    setShowCustomCreator(false);
+  };
+
   const currentExercise = selectedRoutine?.exercises[currentExerciseIndex];
   const progress = selectedRoutine
     ? (completedExercises.length / selectedRoutine.exercises.length) * 100
@@ -283,72 +358,262 @@ export default function Routine() {
         {/* -------------------- 직접 입력 -------------------- */}
         {tab === 1 && (
           <div className="content-box fade">
-            <div className="section-header">
-              <h3 className="subtitle">미리 설정된 루틴</h3>
-              <p className="subtext">오늘 진행할 루틴을 선택해 주세요</p>
-            </div>
-
-            <div className="routine-list">
-              {routines.map((routine) => (
-                <div
-                  key={routine.id}
-                  className={`routine-card ${selectedRoutine?.id === routine.id ? "selected" : ""}`}
-                  onClick={() => handleRoutineSelect(routine)}
+            {!showCustomCreator ? (
+              <>
+                <button
+                  className="create-routine-btn"
+                  onClick={() => setShowCustomCreator(true)}
                 >
-                  <div className="routine-card-header">
-                    <h4 className="routine-card-title">{routine.title}</h4>
-                    <span className={`level-badge ${routine.level === "초급" ? "beginner" : "intermediate"}`}>
-                      {routine.level}
-                    </span>
-                  </div>
-                  <div className="routine-card-exercises">
-                    {routine.exercises.map((ex, idx) => (
-                      <span key={idx} className="exercise-tag">{ex.name}</span>
-                    ))}
-                  </div>
-                  <div className="routine-card-meta">
-                    <span className="meta-item">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <polyline points="12 6 12 12 16 14"></polyline>
-                      </svg>
-                      {routine.duration}분
-                    </span>
-                    <span className="meta-item">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path>
-                      </svg>
-                      {routine.calories}kcal
-                    </span>
-                    <span className="meta-item">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M6.5 6.5h11v11h-11z"></path>
-                        <path d="M3 12h3M18 12h3M12 3v3M12 18v3"></path>
-                      </svg>
-                      {routine.exercises.length}개 운동
-                    </span>
-                  </div>
-                  <div className="routine-card-progress">
-                    <div className="progress-bar">
-                      <div className="progress-fill" style={{ width: "0%" }}></div>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                  </svg>
+                  나만의 루틴 만들기
+                </button>
+
+                <div className="section-header">
+                  <h3 className="subtitle">미리 설정된 루틴</h3>
+                  <p className="subtext">오늘 진행할 루틴을 선택해 주세요</p>
+                </div>
+
+                <div className="routine-list">
+                  {routines.filter(r => !r.isCustom).map((routine) => (
+                    <div
+                      key={routine.id}
+                      className={`routine-card ${selectedRoutine?.id === routine.id ? "selected" : ""}`}
+                      onClick={() => handleRoutineSelect(routine)}
+                    >
+                      <div className="routine-card-header">
+                        <h4 className="routine-card-title">{routine.title}</h4>
+                        <span className={`level-badge ${routine.level === "초급" ? "beginner" : routine.level === "중급" ? "intermediate" : "advanced"}`}>
+                          {routine.level}
+                        </span>
+                      </div>
+                      <div className="routine-card-exercises">
+                        {routine.exercises.map((ex, idx) => (
+                          <span key={idx} className="exercise-tag">{ex.name}</span>
+                        ))}
+                      </div>
+                      <div className="routine-card-meta">
+                        <span className="meta-item">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                          </svg>
+                          {routine.duration}분
+                        </span>
+                        <span className="meta-item">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path>
+                          </svg>
+                          {routine.calories}kcal
+                        </span>
+                        <span className="meta-item">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M6.5 6.5h11v11h-11z"></path>
+                            <path d="M3 12h3M18 12h3M12 3v3M12 18v3"></path>
+                          </svg>
+                          {routine.exercises.length}개 운동
+                        </span>
+                      </div>
+                      <div className="routine-card-progress">
+                        <div className="progress-bar">
+                          <div className="progress-fill" style={{ width: "0%" }}></div>
+                        </div>
+                      </div>
+                      <button
+                        className="start-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedRoutine(routine);
+                          setShowWorkoutModal(true);
+                        }}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                          <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                        운동 시작
+                      </button>
                     </div>
-                  </div>
-                  <button
-                    className="start-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedRoutine(routine);
-                      setShowWorkoutModal(true);
-                    }}
+                  ))}
+                </div>
+
+                {userRoutines.length > 0 && (
+                  <>
+                    <div className="section-header">
+                      <h3 className="subtitle">나만의 루틴</h3>
+                    </div>
+                    <div className="routine-list">
+                      {userRoutines.map((routine) => (
+                        <div
+                          key={routine.id}
+                          className={`routine-card ${selectedRoutine?.id === routine.id ? "selected" : ""}`}
+                          onClick={() => handleRoutineSelect(routine)}
+                        >
+                          <div className="routine-card-header">
+                            <h4 className="routine-card-title">{routine.title}</h4>
+                            <span className={`level-badge ${routine.level === "초급" ? "beginner" : routine.level === "중급" ? "intermediate" : "advanced"}`}>
+                              {routine.level}
+                            </span>
+                          </div>
+                          <div className="routine-card-exercises">
+                            {routine.exercises.map((ex, idx) => (
+                              <span key={idx} className="exercise-tag">{ex.name}</span>
+                            ))}
+                          </div>
+                          <div className="routine-card-meta">
+                            <span className="meta-item">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                              </svg>
+                              {routine.duration}분
+                            </span>
+                            <span className="meta-item">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path>
+                              </svg>
+                              {routine.calories}kcal
+                            </span>
+                            <span className="meta-item">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M6.5 6.5h11v11h-11z"></path>
+                                <path d="M3 12h3M18 12h3M12 3v3M12 18v3"></path>
+                              </svg>
+                              {routine.exercises.length}개 운동
+                            </span>
+                          </div>
+                          <div className="routine-card-progress">
+                            <div className="progress-bar">
+                              <div className="progress-fill" style={{ width: "0%" }}></div>
+                            </div>
+                          </div>
+                          <button
+                            className="start-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedRoutine(routine);
+                              setShowWorkoutModal(true);
+                            }}
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                            </svg>
+                            운동 시작
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </>
+            ) : (
+              // ========== 사용자 정의 루틴 생성 UI ==========
+              <div className="custom-routine-creator">
+                <div className="creator-header">
+                  <h3 className="subtitle">새 루틴 만들기</h3>
+                  <button 
+                    className="close-creator-btn"
+                    onClick={handleResetCustomRoutine}
                   >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                      <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
                     </svg>
-                    운동 시작
                   </button>
                 </div>
-              ))}
-            </div>
+
+                <div className="form-group">
+                  <label>루틴 이름</label>
+                  <input
+                    type="text"
+                    value={customRoutine.name}
+                    onChange={(e) => setCustomRoutine({ ...customRoutine, name: e.target.value })}
+                    placeholder="예: 나만의 전신 근력 루틴"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>난이도 설정</label>
+                  <select 
+                    value={customRoutine.level} 
+                    onChange={(e) => setCustomRoutine({ ...customRoutine, level: e.target.value })}
+                  >
+                    <option value="초급">초급</option>
+                    <option value="중급">중급</option>
+                    <option value="고급">고급</option>
+                  </select>
+                </div>
+
+                <h4 className="exercise-list-title">운동 목록</h4>
+                <div className="exercises-container">
+                  {customRoutine.exercises.map((exercise, index) => (
+                    <div key={index} className="exercise-item">
+                      <select
+                        value={exercise.name}
+                        onChange={(e) => handleCustomExerciseChange(index, "name", e.target.value)}
+                        className="exercise-select"
+                      >
+                        <option value="">운동 선택</option>
+                        {EXERCISE_OPTIONS.map(opt => (
+                          <option key={opt} value={opt}>{opt}</option>
+                        ))}
+                      </select>
+                      <div className="exercise-inputs">
+                        <div className="input-group">
+                          <input
+                            type="number"
+                            value={exercise.sets}
+                            onChange={(e) => handleCustomExerciseChange(index, "sets", e.target.value)}
+                            placeholder="세트"
+                            min="1"
+                          />
+                          <span className="unit">세트</span>
+                        </div>
+                        <div className="input-group">
+                          <input
+                            type="number"
+                            value={exercise.reps}
+                            onChange={(e) => handleCustomExerciseChange(index, "reps", e.target.value)}
+                            placeholder="횟수"
+                            min="1"
+                          />
+                          <span className="unit">회</span>
+                        </div>
+                      </div>
+                      {customRoutine.exercises.length > 1 && (
+                        <button 
+                          className="remove-btn" 
+                          onClick={() => handleRemoveExercise(index)}
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                <button className="add-exercise-btn" onClick={handleAddExercise}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                  </svg>
+                  운동 추가
+                </button>
+
+                <div className="action-buttons">
+                  <button className="save-btn" onClick={handleSaveCustomRoutine}>
+                    루틴 저장
+                  </button>
+                  <button className="cancel-btn" onClick={handleResetCustomRoutine}>
+                    취소
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -588,108 +853,54 @@ export default function Routine() {
               ) : (
                 /* 운동 진행 중 */
                 <div className="exercise-screen">
-              {/* 상단 타이머 */}
-              <div className="exercise-timer-bar">
-                <div className="timer-item">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <polyline points="12 6 12 12 16 14"></polyline>
-                  </svg>
-                  <span className="timer-value">{formatTime(elapsedTime)}</span>
-                  <span className="timer-label">운동 시간</span>
-                </div>
-                <div className="timer-divider"></div>
-                <div className="timer-item">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path>
-                  </svg>
-                  <span className="timer-value">{Math.round(elapsedTime * 0.15)}</span>
-                  <span className="timer-label">칼로리</span>
-                </div>
-              </div>
+                  <div className="exercise-timer-bar">
+                    <div className="timer-item">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                      </svg>
+                      <span>{formatTime(elapsedTime)}</span>
+                    </div>
+                  </div>
 
-              {/* 진행률 */}
-              <div className="exercise-progress">
-                <div className="progress-header">
-                  <span>전체 진행률</span>
-                  <span>{Math.round(progress)}%</span>
-                </div>
-                <div className="progress-bar large">
-                  <div className="progress-fill" style={{ width: `${progress}%` }}></div>
-                </div>
-              </div>
-
-              {/* 현재 운동 */}
-              <div className="current-exercise">
-                <span className="exercise-index">
-                  {currentExerciseIndex + 1}/{selectedRoutine.exercises.length}
-                </span>
-                <h3 className="exercise-name">{currentExercise?.name}</h3>
-                <p className="exercise-reps">
-                  {currentExercise?.sets} x {currentExercise?.reps}
-                </p>
-              </div>
-
-              {/* 컨트롤 버튼 */}
-              <div className="exercise-controls">
-                <button
-                  className="control-btn pause"
-                  onClick={() => setIsPaused(!isPaused)}
-                >
-                  {isPaused ? (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                      <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                    </svg>
-                  ) : (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                      <rect x="6" y="4" width="4" height="16"></rect>
-                      <rect x="14" y="4" width="4" height="16"></rect>
-                    </svg>
-                  )}
-                </button>
-                <button className="control-btn complete" onClick={handleCompleteExercise}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                  </svg>
-                  {currentExerciseIndex === selectedRoutine.exercises.length - 1
-                    ? "운동 완료"
-                    : "세트 완료"}
-                </button>
-              </div>
-
-              {/* 운동 목록 */}
-              <div className="exercise-list-panel">
-                <h4>운동 목록</h4>
-                <ul>
-                  {selectedRoutine.exercises.map((ex, idx) => (
-                    <li
-                      key={idx}
-                      className={`
-                        ${idx === currentExerciseIndex ? "current" : ""}
-                        ${completedExercises.includes(ex.name) ? "completed" : ""}
-                      `}
-                    >
-                      <div className="exercise-check">
-                        {completedExercises.includes(ex.name) ? (
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path>
-                          </svg>
-                        ) : (
-                          <span className="check-empty"></span>
-                        )}
+                  <div className="exercise-content">
+                    <div className="exercise-progress">
+                      <div className="progress-text">
+                        <span className="progress-current">{currentExerciseIndex + 1}</span>
+                        <span className="progress-total">/ {selectedRoutine.exercises.length}</span>
                       </div>
-                      <span className="ex-name">{ex.name}</span>
-                      <span className="ex-detail">{ex.sets} x {ex.reps}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                      <div className="progress-bar">
+                        <div className="progress-fill" style={{ width: `${progress}%` }}></div>
+                      </div>
+                    </div>
+
+                    <div className="exercise-info">
+                      <h3 className="exercise-name">{currentExercise?.name}</h3>
+                      <div className="exercise-details">
+                        <div className="detail-item">
+                          <span className="detail-label">세트</span>
+                          <span className="detail-value">{currentExercise?.sets}</span>
+                        </div>
+                        <div className="detail-item">
+                          <span className="detail-label">횟수</span>
+                          <span className="detail-value">{currentExercise?.reps}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <button className="complete-exercise-btn" onClick={handleCompleteExercise}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                      </svg>
+                      운동 완료
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
-  )}
-</div>
-);
+  );
 }
