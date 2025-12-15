@@ -4,6 +4,30 @@
 .profile-wrapper {
   min-height: 100vh;
   background: linear-gradient(135deg, #0a0a0f 0%, #12121a 50%, #16161f 100%);
+  overflow-x: hidden;
+}
+
+/* body 가로 스크롤 방지 */
+body {
+  overflow-x: hidden;
+}
+
+/* 스크롤바 스타일 */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 /* ----------------------------
@@ -306,6 +330,41 @@
   min-height: 38px;
   display: flex;
   align-items: center;
+}
+
+/* ----------------------------
+   생년월일 date input 스타일
+---------------------------- */
+.date-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.body-input.date-input {
+  color-scheme: dark;
+  cursor: pointer;
+}
+
+.body-input.date-input::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  filter: invert(0.8);
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  margin: 0;
+}
+
+.body-input.date-input.readonly::-webkit-calendar-picker-indicator {
+  display: none;
+}
+
+.body-input.date-input:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.body-input.date-input::-moz-calendar-picker-indicator {
+  filter: invert(0.8);
 }
 
 /* 체크박스 */

@@ -30,17 +30,14 @@ export default function Profile() {
   const [profile, setProfile] = useState({
     name: "",
     email: "",
-    age: "",
-    height: "",
-    weight: "",
-    gender: "",
-    goal: "",
-    dailyTime: "",
-    weekly: "",
-    prefer: [],
-    pain: [],
-    activity: "",
-    targetPeriod: "",
+    birth_date: "",
+    height_cm: "",
+    weight_kg: "",
+    body_fat: "",
+    skeletal_muscle: "",
+    bmr: "",
+    water: "",
+    visceral_fat_level: "",
     intro: "",
     avatar: "",
   });
@@ -60,11 +57,7 @@ export default function Profile() {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        const data = {
-          ...res.data,
-          prefer: Array.isArray(res.data.prefer) ? res.data.prefer : [],
-          pain: Array.isArray(res.data.pain) ? res.data.pain : [],
-        };
+        const data = res.data;
 
         setProfile(data);
         setEditData(data);
@@ -81,8 +74,8 @@ export default function Profile() {
       BMI 계산
   ------------------------------------------- */
   const bmi = () => {
-    if (!editData.height || !editData.weight) return "-";
-    return (editData.weight / (editData.height / 100) ** 2).toFixed(1);
+    if (!editData.height_cm || !editData.weight_kg) return "-";
+    return (editData.weight_kg / (editData.height_cm / 100) ** 2).toFixed(1);
   };
 
   /* ------------------------------------------
@@ -90,16 +83,6 @@ export default function Profile() {
   ------------------------------------------- */
   const change = (field, value) => {
     setEditData({ ...editData, [field]: value });
-  };
-
-  const changeArray = (field, value) => {
-    const arr = editData[field] || [];
-    setEditData({
-      ...editData,
-      [field]: arr.includes(value)
-        ? arr.filter((v) => v !== value)
-        : [...arr, value],
-    });
   };
 
   /* ------------------------------------------
@@ -276,62 +259,61 @@ export default function Profile() {
             <div className="body-grid">
               {/* ------------ ROW 1 ------------ */}
               <div className="body-item">
-                <label>나이</label>
+                <label>생년월일</label>
+                <input
+                  type="date"
+                  className={editing ? "body-input" : "body-input readonly"}
+                  value={editData.birth_date ?? ""}
+                  onChange={(e) => change("birth_date", e.target.value)}
+                  disabled={!editing}
+                />
+              </div>
+
+              <div className="body-item">
+                <label>키</label>
                 {editing ? (
                   <input
                     type="number"
+                    step="0.1"
                     className="body-input"
-                    value={editData.age ?? ""}
+                    placeholder="cm"
+                    value={editData.height_cm ?? ""}
                     onChange={(e) => {
                       const v = e.target.value;
-                      if (v === "") return change("age", "");
+                      if (v === "") return change("height_cm", "");
                       const num = Number(v);
                       if (!Number.isFinite(num) || num <= 0) return;
-                      change("age", num);
+                      change("height_cm", num);
                     }}
                   />
                 ) : (
-                  <p className="view-box">{profile.age || "-"}</p>
+                  <p className="view-box">
+                    {profile.height_cm ? `${profile.height_cm}cm` : "-"}
+                  </p>
                 )}
               </div>
 
               <div className="body-item">
-                <label>키(cm)</label>
+                <label>체중</label>
                 {editing ? (
                   <input
                     type="number"
+                    step="0.1"
                     className="body-input"
-                    value={editData.height ?? ""}
+                    placeholder="kg"
+                    value={editData.weight_kg ?? ""}
                     onChange={(e) => {
                       const v = e.target.value;
-                      if (v === "") return change("height", "");
+                      if (v === "") return change("weight_kg", "");
                       const num = Number(v);
                       if (!Number.isFinite(num) || num <= 0) return;
-                      change("height", num);
+                      change("weight_kg", num);
                     }}
                   />
                 ) : (
-                  <p className="view-box">{profile.height || "-"}</p>
-                )}
-              </div>
-
-              <div className="body-item">
-                <label>체중(kg)</label>
-                {editing ? (
-                  <input
-                    type="number"
-                    className="body-input"
-                    value={editData.weight ?? ""}
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      if (v === "") return change("weight", "");
-                      const num = Number(v);
-                      if (!Number.isFinite(num) || num <= 0) return;
-                      change("weight", num);
-                    }}
-                  />
-                ) : (
-                  <p className="view-box">{profile.weight || "-"}</p>
+                  <p className="view-box">
+                    {profile.weight_kg ? `${profile.weight_kg}kg` : "-"}
+                  </p>
                 )}
               </div>
 
@@ -348,186 +330,118 @@ export default function Profile() {
 
               {/* ------------ ROW 2 ------------ */}
               <div className="body-item">
-                <label>성별</label>
+                <label>체지방률</label>
                 {editing ? (
-                  <select
-                    className="body-select"
-                    value={editData.gender ?? ""}
-                    onChange={(e) => change("gender", e.target.value)}
-                  >
-                    <option value="">선택</option>
-                    <option value="male">남성</option>
-                    <option value="female">여성</option>
-                  </select>
+                  <input
+                    type="number"
+                    step="0.1"
+                    className="body-input"
+                    placeholder="%"
+                    value={editData.body_fat ?? ""}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (v === "") return change("body_fat", "");
+                      const num = Number(v);
+                      if (!Number.isFinite(num) || num < 0) return;
+                      change("body_fat", num);
+                    }}
+                  />
                 ) : (
                   <p className="view-box">
-                    {profile.gender === "male"
-                      ? "남성"
-                      : profile.gender === "female"
-                      ? "여성"
-                      : "-"}
+                    {profile.body_fat ? `${profile.body_fat}%` : "-"}
                   </p>
                 )}
               </div>
 
               <div className="body-item">
-                <label>운동 목표</label>
+                <label>골격근량</label>
                 {editing ? (
-                  <select
-                    className="body-select"
-                    value={editData.goal ?? ""}
-                    onChange={(e) => change("goal", e.target.value)}
-                  >
-                    <option value="">선택</option>
-                    <option value="bulk">벌크업</option>
-                    <option value="lean">린매스업</option>
-                    <option value="diet">다이어트</option>
-                    <option value="health">체력 증가</option>
-                  </select>
-                ) : (
-                  <p className="view-box">{profile.goal || "-"}</p>
-                )}
-              </div>
-
-              <div className="body-item">
-                <label>하루 운동 시간</label>
-                {editing ? (
-                  <select
-                    className="body-select"
-                    value={editData.dailyTime ?? ""}
-                    onChange={(e) => change("dailyTime", e.target.value)}
-                  >
-                    <option value="">선택</option>
-                    <option value="30">30분</option>
-                    <option value="60">60분</option>
-                    <option value="90">90분</option>
-                    <option value="120">120분 이상</option>
-                  </select>
+                  <input
+                    type="number"
+                    step="0.1"
+                    className="body-input"
+                    placeholder="kg"
+                    value={editData.skeletal_muscle ?? ""}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (v === "") return change("skeletal_muscle", "");
+                      const num = Number(v);
+                      if (!Number.isFinite(num) || num < 0) return;
+                      change("skeletal_muscle", num);
+                    }}
+                  />
                 ) : (
                   <p className="view-box">
-                    {profile.dailyTime ? `${profile.dailyTime}분` : "-"}
+                    {profile.skeletal_muscle ? `${profile.skeletal_muscle}kg` : "-"}
                   </p>
                 )}
               </div>
 
               <div className="body-item">
-                <label>주당 운동</label>
+                <label>기초대사량</label>
                 {editing ? (
-                  <select
-                    className="body-select"
-                    value={editData.weekly ?? ""}
-                    onChange={(e) => change("weekly", e.target.value)}
-                  >
-                    <option value="">선택</option>
-                    <option value="1-2">1~2회</option>
-                    <option value="3-4">3~4회</option>
-                    <option value="5-6">5~6회</option>
-                    <option value="7">매일</option>
-                  </select>
+                  <input
+                    type="number"
+                    className="body-input"
+                    placeholder="kcal"
+                    value={editData.bmr ?? ""}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (v === "") return change("bmr", "");
+                      const num = Number(v);
+                      if (!Number.isFinite(num) || num < 0) return;
+                      change("bmr", num);
+                    }}
+                  />
                 ) : (
-                  <p className="view-box">{profile.weekly || "-"}</p>
+                  <p className="view-box">
+                    {profile.bmr ? `${profile.bmr}kcal` : "-"}
+                  </p>
+                )}
+              </div>
+
+              <div className="body-item">
+                <label>체수분</label>
+                {editing ? (
+                  <input
+                    type="number"
+                    step="0.1"
+                    className="body-input"
+                    placeholder="%"
+                    value={editData.water ?? ""}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (v === "") return change("water", "");
+                      const num = Number(v);
+                      if (!Number.isFinite(num) || num < 0) return;
+                      change("water", num);
+                    }}
+                  />
+                ) : (
+                  <p className="view-box">
+                    {profile.water ? `${profile.water}%` : "-"}
+                  </p>
                 )}
               </div>
 
               {/* ------------ ROW 3 ------------ */}
               <div className="body-item">
-                <label>선호 운동</label>
+                <label>내장지방 레벨</label>
                 {editing ? (
-                  <div className="checkbox-grid-compact">
-                    {["웨이트", "유산소", "홈트", "요가", "필라테스"].map(
-                      (item) => (
-                        <label key={item} className="check-label">
-                          <input
-                            type="checkbox"
-                            checked={editData.prefer?.includes(item)}
-                            onChange={() => changeArray("prefer", item)}
-                          />
-                          {item}
-                        </label>
-                      )
-                    )}
-                  </div>
+                  <input
+                    type="number"
+                    className="body-input"
+                    value={editData.visceral_fat_level ?? ""}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (v === "") return change("visceral_fat_level", "");
+                      const num = Number(v);
+                      if (!Number.isFinite(num) || num < 0) return;
+                      change("visceral_fat_level", num);
+                    }}
+                  />
                 ) : (
-                  <p className="view-box">
-                    {profile.prefer?.length ? profile.prefer.join(", ") : "-"}
-                  </p>
-                )}
-              </div>
-
-              <div className="body-item">
-                <label>부상 / 통증</label>
-                {editing ? (
-                  <div className="checkbox-grid-compact">
-                    {["허리", "무릎", "어깨", "목"].map((item) => (
-                      <label key={item} className="check-label">
-                        <input
-                          type="checkbox"
-                          checked={editData.pain?.includes(item)}
-                          onChange={() => changeArray("pain", item)}
-                        />
-                        {item}
-                      </label>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="view-box">
-                    {profile.pain?.length ? profile.pain.join(", ") : "-"}
-                  </p>
-                )}
-              </div>
-
-              <div className="body-item">
-                <label>활동량</label>
-                {editing ? (
-                  <select
-                    className="body-select"
-                    value={editData.activity ?? ""}
-                    onChange={(e) => change("activity", e.target.value)}
-                  >
-                    <option value="">선택</option>
-                    <option value="low">거의 앉아있음</option>
-                    <option value="normal">보통</option>
-                    <option value="active">활동적</option>
-                  </select>
-                ) : (
-                  <p className="view-box">
-                    {profile.activity === "low"
-                      ? "거의 앉아있음"
-                      : profile.activity === "normal"
-                      ? "보통"
-                      : profile.activity === "active"
-                      ? "활동적"
-                      : "-"}
-                  </p>
-                )}
-              </div>
-
-              <div className="body-item">
-                <label>목표 기간</label>
-                {editing ? (
-                  <select
-                    className="body-select"
-                    value={editData.targetPeriod ?? ""}
-                    onChange={(e) => change("targetPeriod", e.target.value)}
-                  >
-                    <option value="">선택</option>
-                    <option value="1m">1개월</option>
-                    <option value="3m">3개월</option>
-                    <option value="6m">6개월</option>
-                    <option value="none">없음</option>
-                  </select>
-                ) : (
-                  <p className="view-box">
-                    {profile.targetPeriod === "1m"
-                      ? "1개월"
-                      : profile.targetPeriod === "3m"
-                      ? "3개월"
-                      : profile.targetPeriod === "6m"
-                      ? "6개월"
-                      : profile.targetPeriod === "none"
-                      ? "없음"
-                      : "-"}
-                  </p>
+                  <p className="view-box">{profile.visceral_fat_level || "-"}</p>
                 )}
               </div>
             </div>

@@ -46,10 +46,7 @@ export default function Login() {
       );
 
       alert("로그인 성공!");
-
-      // ⬇⬇⬇ 변경된 유일한 부분 ⬇⬇⬇
       navigate("/dashboard");
-      // ⬆⬆⬆ 여기만 바뀜 ⬆⬆⬆
 
     } catch (err) {
       console.error("❌ 로그인 실패:", err);
@@ -137,25 +134,46 @@ export default function Login() {
         <div className="login-right">
           <div className="login-slider-wrapper">
             <div className="login-slider" ref={sliderRef}>
+              {/* 첫 번째 슬라이드 - 대시보드 */}
               <div className="slider-card">
-                <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=900&q=80" className="slider-img" />
-                <p className="slider-date">15 Oct 2025</p>
-                <h2 className="slider-title">환상적인 산악 풍경</h2>
-                <p className="slider-desc">웅장한 산맥과 구름 사이로 펼쳐지는 장관.</p>
+                <img 
+                  src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=900&q=80" 
+                  className="slider-img" 
+                  alt="AI Trainer Dashboard"
+                />
+                <p className="slider-date">Dec 2025</p>
+                <h2 className="slider-title">AI 트레이너와 함께하는 운동</h2>
+                <p className="slider-desc">
+                  인공지능이 당신의 운동 목표를 분석하고 맞춤형 루틴을 제공합니다.
+                </p>
               </div>
 
+              {/* 두 번째 슬라이드 - 운동 리포트 */}
               <div className="slider-card">
-                <img src="https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=900&q=80" className="slider-img" />
-                <p className="slider-date">22 Jun 2024</p>
-                <h2 className="slider-title">신비로운 숲의 기운</h2>
-                <p className="slider-desc">고요한 숲길을 걸어보세요.</p>
+                <img 
+                  src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=900&q=80" 
+                  className="slider-img" 
+                  alt="Workout Report"
+                />
+                <p className="slider-date">Dec 2025</p>
+                <h2 className="slider-title">상세한 운동 리포트</h2>
+                <p className="slider-desc">
+                  운동 횟수, 소모 칼로리, 연속 운동일수를 한눈에 확인하세요.
+                </p>
               </div>
 
+              {/* 세 번째 슬라이드 - 커뮤니티 */}
               <div className="slider-card">
-                <img src="https://images.unsplash.com/photo-1505142468610-359e7d316be0?auto=format&fit=crop&w=900&q=80" className="slider-img" />
-                <p className="slider-date">30 Jun 2024</p>
-                <h2 className="slider-title">꿈의 호수</h2>
-                <p className="slider-desc">맑고 푸른 호수가 주는 평온함.</p>
+                <img 
+                  src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=900&q=80" 
+                  className="slider-img" 
+                  alt="Community"
+                />
+                <p className="slider-date">Dec 2025</p>
+                <h2 className="slider-title">함께 성장하는 커뮤니티</h2>
+                <p className="slider-desc">
+                  다른 사용자들과 운동 팁을 공유하고 동기부여를 받으세요.
+                </p>
               </div>
             </div>
           </div>
