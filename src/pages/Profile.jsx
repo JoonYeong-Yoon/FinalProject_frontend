@@ -45,6 +45,11 @@ export default function Profile() {
   const [editData, setEditData] = useState(profile);
   const token = localStorage.getItem("token");
 
+  // 디버깅용 - profile이 변경될 때마다 로그
+  useEffect(() => {
+    console.log("🔄 Profile state 변경:", profile);
+  }, [profile]);
+
   /* ------------------------------------------
       프로필 불러오기
   ------------------------------------------- */
@@ -59,9 +64,18 @@ export default function Profile() {
 
         const data = res.data;
 
-        setProfile(data);
-        setEditData(data);
-        setAvatarPreview(data.avatar || null);
+        console.log("📥 프로필 데이터 로드:", data); // 디버깅용
+
+        // 백엔드에서 height, weight로 올 경우를 대비해 변환
+        const mappedData = {
+          ...data,
+          height_cm: data.height_cm || data.height || "",
+          weight_kg: data.weight_kg || data.weight || "",
+        };
+
+        setProfile(mappedData);
+        setEditData(mappedData);
+        setAvatarPreview(mappedData.avatar || null);
       } catch (err) {
         console.error("프로필 로드 실패:", err);
       }
@@ -86,30 +100,88 @@ export default function Profile() {
   };
 
   /* ------------------------------------------
-      저장하기
+      저장하기 - height_cm, weight_kg로 전송
   ------------------------------------------- */
   const handleSave = async () => {
-    if (!token) return alert("로그인 필요");
+    if (!token) {
+      alert("로그인이 필요합니다. 다시 로그인해주세요.");
+      window.location.href = "/login";
+      return;
+    }
+
+    console.log("=== 토큰 확인 ===");
+    console.log("Token:", token);
 
     setIsLoading(true);
 
     try {
+      // 백엔드가 height_cm, weight_kg로 받는 경우
       const updated = {
-        ...editData,
-        username: editData.name,
-        avatar: avatarPreview,
+        name: editData.name || null,
+        email: editData.email || null,
+        birth_date: editData.birth_date || null,
+        // 백엔드 필드명에 맞춰 height_cm, weight_kg로 전송
+        height_cm: editData.height_cm ? parseFloat(editData.height_cm) : null,
+        weight_kg: editData.weight_kg ? parseFloat(editData.weight_kg) : null,
+        body_fat: editData.body_fat ? parseFloat(editData.body_fat) : null,
+        skeletal_muscle: editData.skeletal_muscle ? parseFloat(editData.skeletal_muscle) : null,
+        bmr: editData.bmr ? parseInt(editData.bmr) : null,
+        water: editData.water ? parseFloat(editData.water) : null,
+        visceral_fat_level: editData.visceral_fat_level ? parseInt(editData.visceral_fat_level) : null,
+        intro: editData.intro || null,
+        avatar: avatarPreview || null,
       };
-      console.log(updated);
-      await api.put("/web/users/update", updated, {
+
+      console.log("=== 전송 데이터 (height_cm, weight_kg) ===");
+      console.log(JSON.stringify(updated, null, 2));
+
+      const response = await api.put("/web/users/update", updated, {
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+      });
+
+      console.log("=== 서버 응답 ===");
+      console.log(response.data);
+
+      // 저장 후 최신 데이터 다시 로드
+      const reloadRes = await api.get("/web/users/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      setProfile(updated);
+      console.log("=== DB에서 다시 로드된 데이터 ===");
+      console.log(reloadRes.data);
+
+      // 백엔드에서 height, weight로 올 경우를 대비해 변환
+      const reloadedData = {
+        ...reloadRes.data,
+        height_cm: reloadRes.data.height_cm || reloadRes.data.height || "",
+        weight_kg: reloadRes.data.weight_kg || reloadRes.data.weight || "",
+      };
+
+      setProfile(reloadedData);
+      setEditData(reloadedData);
+      setAvatarPreview(reloadedData.avatar || null);
       setEditing(false);
+
       alert("저장 완료!");
     } catch (err) {
-      console.error("저장 실패:", err);
-      alert("저장 실패");
+      console.error("=== 저장 실패 ===");
+      console.error("Error:", err);
+      console.error("Response status:", err.response?.status);
+      console.error("Response data:", err.response?.data);
+      
+      // 401 에러 처리 (토큰 만료 또는 인증 실패)
+      if (err.response?.status === 401) {
+        alert("인증이 만료되었습니다. 다시 로그인해주세요.");
+        localStorage.clear();
+        sessionStorage.clear();
+        window.location.href = "/login";
+        return;
+      }
+      
+      alert(`저장 실패: ${err.response?.data?.message || err.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -244,8 +316,8 @@ export default function Profile() {
                   >
                     <X size={16} /> 취소
                   </button>
-                  <button className="save-btn" onClick={handleSave}>
-                    <Save size={16} /> 저장
+                  <button className="save-btn" onClick={handleSave} disabled={isLoading}>
+                    <Save size={16} /> {isLoading ? "저장 중..." : "저장"}
                   </button>
                 </>
               )}

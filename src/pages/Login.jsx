@@ -35,6 +35,8 @@ export default function Login() {
 
       const userData = userRes.data;
 
+      console.log("📊 유저 데이터:", userData); // 디버깅용
+
       // 4️⃣ user 정보 저장
       localStorage.setItem(
         "user",
@@ -44,6 +46,12 @@ export default function Login() {
           avatar: userData.avatar || null,
         })
       );
+
+      // 5️⃣ ⭐ role 저장 (DB에서 가져온 값)
+      const userRole = userData.role || "user"; // role이 없으면 기본값 "user"
+      localStorage.setItem("role", userRole);
+      
+      console.log("🔑 저장된 role:", userRole); // 디버깅용
 
       alert("로그인 성공!");
       navigate("/dashboard");

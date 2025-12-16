@@ -1,5 +1,5 @@
 // src/pages/Exercise.jsx
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Exercise.css";
 
@@ -10,13 +10,9 @@ export default function Exercise() {
   const [selectedRoutine, setSelectedRoutine] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState(null);
-  const [exerciseTimer, setExerciseTimer] = useState(0);
-  const [isTimerRunning, setIsTimerRunning] = useState(false);
-  const [currentSet, setCurrentSet] = useState(1);
-  const [repCount, setRepCount] = useState(0);
   
   const fileInputRef = useRef(null);
-  const API_BASE = "http://192.168.0.12:8000";
+  const API_BASE = "http://192.168.0.27:8000";
 
   // 운동 루틴 목록
   const routines = [
@@ -67,28 +63,8 @@ export default function Exercise() {
   const feedbackMessages = [
     "✅ 훌륭합니다! 자세가 완벽해요",
     "⚠️ 무릎을 조금 더 안쪽으로 모아주세요",
-    "⚠️ 등을 곧게 펴주세요",
-    "✅ 호흡이 안정적이네요!",
-    "⚠️ 발 간격을 어깨 너비로 조정해주세요"
+    "⚠️ 등을 곧게 펴주세요"
   ];
-
-  // 타이머 작동
-  useEffect(() => {
-    let interval;
-    if (isTimerRunning) {
-      interval = setInterval(() => {
-        setExerciseTimer(prev => prev + 1);
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [isTimerRunning]);
-
-  // 시간 포맷팅
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-  };
 
   // 파일 업로드 처리
   const handleMediaSelect = async (e) => {
@@ -106,21 +82,23 @@ export default function Exercise() {
     formData.append("file", file);
 
     try {
-      const res = await fetch(`${API_BASE}/video/upload`, {
+      const res = await fetch(`${API_BASE}/web/video/upload`, {
         method: "POST",
         body: formData,
       });
 
-      if (!res.ok) {
-        alert("업로드 실패!");
-        setIsAnalyzing(false);
-        return;
-      }
+if (!res.ok) {
+  const errText = await res.text();
+  console.error("업로드 실패:", errText);
+  alert("업로드 실패! 콘솔 확인");
+  setIsAnalyzing(false);
+  return;
+}
+
 
       const data = await res.json();
       console.log("AI 분석 결과:", data);
 
-      // AI 분석 결과 저장
       setAiAnalysis(data);
 
       if (data.ai_result?.knee_warning) {
@@ -140,32 +118,18 @@ export default function Exercise() {
       alert("루틴을 먼저 선택해주세요!");
       return;
     }
-    setIsTimerRunning(true);
-  };
-
-  // 운동 일시정지
-  const pauseExercise = () => {
-    setIsTimerRunning(false);
+    alert("운동을 시작합니다! 🏋️‍♂️");
   };
 
   // 운동 완료
   const finishExercise = () => {
     if (window.confirm("운동을 종료하고 기록을 저장하시겠습니까?")) {
-      // 운동 기록 저장 로직
       const record = {
         routine: selectedRoutine?.name,
-        duration: exerciseTimer,
-        sets: currentSet,
-        reps: repCount,
         date: new Date().toISOString()
       };
       console.log("운동 기록:", record);
       
-      // 초기화
-      setExerciseTimer(0);
-      setIsTimerRunning(false);
-      setCurrentSet(1);
-      setRepCount(0);
       setSelectedRoutine(null);
       setUploadedMedia(null);
       
@@ -175,19 +139,10 @@ export default function Exercise() {
 
   return (
     <div className="exercise-wrapper">
-      {/* 헤더 겹침 방지 */}
-      <div className="top-gap" />
-
       {/* 상단 헤더 */}
       <div className="exercise-header">
-        <div>
-          <h1 className="exercise-title">🏋️‍♂️ AI 자세 교정 시스템</h1>
-          <p className="exercise-subtitle">실시간으로 운동 자세를 분석하고 피드백을 받아보세요</p>
-        </div>
-        <div className="timer-display">
-          <div className="timer-label">운동 시간</div>
-          <div className="timer-value">{formatTime(exerciseTimer)}</div>
-        </div>
+        <h1 className="exercise-title">🏋️‍♂️ AI 자세 교정 시스템</h1>
+        <p className="exercise-subtitle">실시간으로 운동 자세를 분석하고 피드백을 받아보세요</p>
       </div>
 
       {/* 메인 레이아웃 */}
@@ -249,15 +204,9 @@ export default function Exercise() {
           </div>
 
           <div className="action-buttons">
-            {!isTimerRunning ? (
-              <button className="start-btn" onClick={startExercise}>
-                ▶️ 운동 시작
-              </button>
-            ) : (
-              <button className="pause-btn" onClick={pauseExercise}>
-                ⏸️ 일시정지
-              </button>
-            )}
+            <button className="start-btn" onClick={startExercise}>
+              ▶️ 운동 시작
+            </button>
             <button className="finish-btn" onClick={finishExercise}>
               ✓ 운동 완료 및 저장
             </button>
@@ -323,26 +272,6 @@ export default function Exercise() {
             style={{ display: "none" }}
             onChange={handleMediaSelect}
           />
-
-          {/* 세트/횟수 카운터 */}
-          <div className="counter-section">
-            <div className="counter-card">
-              <div className="counter-label">현재 세트</div>
-              <div className="counter-value">{currentSet}</div>
-              <div className="counter-controls">
-                <button onClick={() => setCurrentSet(Math.max(1, currentSet - 1))}>-</button>
-                <button onClick={() => setCurrentSet(currentSet + 1)}>+</button>
-              </div>
-            </div>
-            <div className="counter-card">
-              <div className="counter-label">횟수</div>
-              <div className="counter-value">{repCount}</div>
-              <div className="counter-controls">
-                <button onClick={() => setRepCount(Math.max(0, repCount - 1))}>-</button>
-                <button onClick={() => setRepCount(repCount + 1)}>+</button>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* 오른쪽 패널 - AI 피드백 */}
@@ -369,39 +298,11 @@ export default function Exercise() {
           <div className="feedback-section">
             <h3 className="section-title">💬 실시간 코칭</h3>
             <div className="feedback-messages">
-              {feedbackMessages.slice(0, 3).map((msg, idx) => (
+              {feedbackMessages.map((msg, idx) => (
                 <div key={idx} className={`feedback-message ${msg.includes('⚠️') ? 'warning' : 'success'}`}>
                   <span>{msg}</span>
                 </div>
               ))}
-            </div>
-          </div>
-
-          {/* 운동 통계 */}
-          <div className="stats-section">
-            <h3 className="section-title">📊 운동 통계</h3>
-            <div className="stats-grid">
-              <div className="stat-item">
-                <div className="stat-icon">🔥</div>
-                <div className="stat-info">
-                  <span className="stat-label">소모 칼로리</span>
-                  <span className="stat-value">245 kcal</span>
-                </div>
-              </div>
-              <div className="stat-item">
-                <div className="stat-icon">💪</div>
-                <div className="stat-info">
-                  <span className="stat-label">완료 세트</span>
-                  <span className="stat-value">{currentSet - 1}개</span>
-                </div>
-              </div>
-              <div className="stat-item">
-                <div className="stat-icon">⭐</div>
-                <div className="stat-info">
-                  <span className="stat-label">정확도</span>
-                  <span className="stat-value">87%</span>
-                </div>
-              </div>
             </div>
           </div>
 
@@ -420,3 +321,5 @@ export default function Exercise() {
     </div>
   );
 }
+
+console.log(localStorage.getItem("access_token"));

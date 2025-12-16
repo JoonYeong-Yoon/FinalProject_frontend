@@ -9,17 +9,10 @@ body {
   margin: 0 auto;
 }
 
-.top-gap {
-  height: 0;
-}
-
 /* ================================
    상단 헤더
 ================================ */
 .exercise-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin-bottom: 35px;
 }
 
@@ -37,27 +30,6 @@ body {
   font-size: 16px;
   color: #aaa;
   margin: 0;
-}
-
-.timer-display {
-  background: linear-gradient(135deg, #1a1a2e 0%, #2a1a3e 100%);
-  border: 1px solid #a78bfa;
-  border-radius: 16px;
-  padding: 16px 32px;
-  text-align: center;
-}
-
-.timer-label {
-  font-size: 13px;
-  color: #aaa;
-  margin-bottom: 4px;
-}
-
-.timer-value {
-  font-size: 36px;
-  font-weight: 700;
-  color: #b57aff;
-  font-family: 'Courier New', monospace;
 }
 
 /* ================================
@@ -278,7 +250,6 @@ body {
 }
 
 .start-btn,
-.pause-btn,
 .finish-btn {
   width: 100%;
   padding: 14px;
@@ -298,16 +269,6 @@ body {
 .start-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(81, 207, 102, 0.4);
-}
-
-.pause-btn {
-  background: linear-gradient(135deg, #ffa94d 0%, #ff8c00 100%);
-  color: white;
-}
-
-.pause-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(255, 169, 77, 0.4);
 }
 
 .finish-btn {
@@ -462,63 +423,6 @@ body {
   box-shadow: 0 6px 16px rgba(181, 122, 255, 0.4);
 }
 
-/* 카운터 섹션 */
-.counter-section {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-}
-
-.counter-card {
-  background: #1d1d1d;
-  border: 1px solid #262626;
-  border-radius: 12px;
-  padding: 20px;
-  text-align: center;
-}
-
-.counter-label {
-  font-size: 13px;
-  color: #888;
-  margin-bottom: 8px;
-}
-
-.counter-value {
-  font-size: 48px;
-  font-weight: 700;
-  color: #b57aff;
-  margin-bottom: 12px;
-  font-family: 'Courier New', monospace;
-}
-
-.counter-controls {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-}
-
-.counter-controls button {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: none;
-  background: linear-gradient(135deg, #b57aff 0%, #ff8fa3 100%);
-  color: white;
-  font-size: 20px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.counter-controls button:hover {
-  transform: scale(1.1);
-  box-shadow: 0 4px 12px rgba(181, 122, 255, 0.4);
-}
-
-.counter-controls button:active {
-  transform: scale(0.95);
-}
-
 /* ================================
    오른쪽 패널 - AI 피드백
 ================================ */
@@ -630,56 +534,6 @@ body {
   border: 1px solid rgba(255, 169, 77, 0.3);
 }
 
-/* 운동 통계 */
-.stats-section {
-  margin-bottom: 24px;
-}
-
-.stats-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.stat-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: #1d1d1d;
-  border: 1px solid #262626;
-  padding: 14px;
-  border-radius: 10px;
-  transition: all 0.3s;
-}
-
-.stat-item:hover {
-  border-color: #b57aff;
-  transform: translateX(-4px);
-}
-
-.stat-icon {
-  font-size: 28px;
-  flex-shrink: 0;
-}
-
-.stat-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.stat-label {
-  font-size: 12px;
-  color: #888;
-}
-
-.stat-value {
-  font-size: 18px;
-  font-weight: 700;
-  color: #e8e8e8;
-}
-
 /* 위험 경고 박스 */
 .warning-box {
   background: rgba(255, 107, 107, 0.15);
@@ -731,10 +585,6 @@ body {
   .exercise-grid {
     grid-template-columns: 300px 1fr 300px;
   }
-
-  .timer-value {
-    font-size: 28px;
-  }
 }
 
 @media (max-width: 1200px) {
@@ -751,10 +601,6 @@ body {
     align-items: flex-start;
     gap: 16px;
   }
-
-  .timer-display {
-    width: 100%;
-  }
 }
 
 @media (max-width: 768px) {
@@ -764,9 +610,5 @@ body {
 
   .exercise-title {
     font-size: 24px;
-  }
-
-  .counter-section {
-    grid-template-columns: 1fr;
   }
 }
