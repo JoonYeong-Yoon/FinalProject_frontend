@@ -1,16 +1,17 @@
 /* 전체 네비 */
 .glass-navbar {
   position: fixed;
-  top: 20px;
+  top: clamp(12px, 2vw, 20px);
   left: 50%;
   transform: translateX(-50%);
-  width: 85%;
-  height: 64px;
+  width: clamp(90%, 85% + 2vw, 85%);
+  max-width: 1400px;
+  height: clamp(52px, 8vw, 64px);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 35px;
-  border-radius: 40px;
+  padding: 0 clamp(16px, 3vw, 35px);
+  border-radius: clamp(28px, 5vw, 40px);
   background: rgba(255, 255, 255, 0.12);
   border: 1px solid rgba(255, 255, 255, 0.25);
   backdrop-filter: blur(16px);
@@ -18,17 +19,19 @@
     inset 0 0 15px rgba(255,255,255,0.05),
     0 0 25px rgba(120,120,255,0.25);
   z-index: 999;
+  transition: all 0.3s ease;
 }
 
 /* --- 로고 영역 --- */
 .nav-left {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: clamp(6px, 1.2vw, 10px);
   cursor: pointer;
-  padding: 8px 12px;
+  padding: clamp(6px, 1vw, 8px) clamp(8px, 1.5vw, 12px);
   border-radius: 12px;
   transition: all 0.3s ease;
+  flex-shrink: 0;
 }
 
 .nav-left:hover {
@@ -36,38 +39,109 @@
 }
 
 .logo-img {
-  width: 45px;
-  height: 50px;
+  width: clamp(32px, 5vw, 45px);
+  height: clamp(36px, 6vw, 50px);
   border-radius: 50%;
   object-fit: contain;
   transition: all 0.3s ease;
 }
 
 .logo-text {
-  font-size: 24px;
+  font-size: clamp(16px, 2.5vw, 24px);
   font-weight: 700;
   color: #fff;
   transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
 /* ---------- 오른쪽 ---------- */
 .nav-right {
   display: flex;
   align-items: center;
-  gap: 32px;
+  gap: clamp(12px, 2.5vw, 32px);
+  flex-wrap: nowrap;
+}
+
+/* 햄버거 메뉴 버튼 (기본 숨김) */
+.hamburger-menu {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.1);
+  margin-right: 12px;
+  width: 40px;
+  height: 40px;
+  position: relative;
+}
+
+.hamburger-menu:hover {
+  background: rgba(139, 92, 246, 0.2);
+  transform: scale(1.05);
+}
+
+.hamburger-line {
+  width: 22px;
+  height: 2.5px;
+  background: #fff;
+  border-radius: 2px;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  position: absolute;
+}
+
+.hamburger-line:nth-child(1) {
+  top: 12px;
+}
+
+.hamburger-line:nth-child(2) {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.hamburger-line:nth-child(3) {
+  bottom: 12px;
+}
+
+.hamburger-menu.open .hamburger-line:nth-child(1) {
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.hamburger-menu.open .hamburger-line:nth-child(2) {
+  opacity: 0;
+  transform: translateY(-50%) scale(0);
+}
+
+.hamburger-menu.open .hamburger-line:nth-child(3) {
+  bottom: 50%;
+  transform: translateY(50%) rotate(-45deg);
 }
 
 /* 메뉴 링크들 */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: clamp(12px, 2.5vw, 32px);
+  flex-wrap: nowrap;
+}
+
 .nav-right a {
   color: #eee;
   cursor: pointer;
   text-decoration: none;
-  font-size: 15px;
+  font-size: clamp(13px, 1.5vw, 15px);
   font-weight: 500;
-  padding: 8px 16px;
+  padding: clamp(6px, 1vw, 8px) clamp(10px, 1.8vw, 16px);
   border-radius: 10px;
   transition: all 0.3s ease;
   position: relative;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .nav-right a:hover {
@@ -101,15 +175,73 @@
 }
 
 /* ================================
+   모바일 드롭다운 메뉴
+================================ */
+.mobile-menu {
+  display: none;
+  position: fixed;
+  top: clamp(72px, 12vw, 94px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: clamp(90%, 85% + 2vw, 85%);
+  max-width: 1400px;
+  background: rgba(30, 30, 40, 0.98);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 20px;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  animation: mobileMenuSlide 0.3s ease;
+  z-index: 998;
+}
+
+.mobile-menu.open {
+  display: block;
+}
+
+@keyframes mobileMenuSlide {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.mobile-menu a {
+  display: block;
+  padding: 16px 24px;
+  color: #eee;
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.2s ease;
+}
+
+.mobile-menu a:last-child {
+  border-bottom: none;
+}
+
+.mobile-menu a:hover {
+  background: rgba(139, 92, 246, 0.2);
+  color: rgba(139, 92, 246, 0.95);
+  padding-left: 32px;
+}
+
+/* ================================
    프로필 드롭다운
 ================================ */
 .profile-dropdown-wrapper {
   position: relative;
+  flex-shrink: 0;
 }
 
 .profile-icon {
-  width: 42px;
-  height: 42px;
+  width: clamp(36px, 5vw, 42px);
+  height: clamp(36px, 5vw, 42px);
   border-radius: 50%;
   overflow: hidden;
   border: 1px solid rgba(255,255,255,0.3);
@@ -133,9 +265,9 @@
 /* 드롭다운 메뉴 */
 .profile-dropdown {
   position: absolute;
-  top: 55px;
+  top: calc(clamp(36px, 5vw, 42px) + 13px);
   right: 0;
-  min-width: 180px;
+  min-width: clamp(160px, 20vw, 180px);
   background: rgba(30, 30, 40, 0.95);
   border: 1px solid rgba(139, 92, 246, 0.3);
   border-radius: 12px;
@@ -158,9 +290,9 @@
 }
 
 .dropdown-item {
-  padding: 14px 20px;
+  padding: clamp(10px, 1.5vw, 14px) clamp(16px, 2vw, 20px);
   color: #eee;
-  font-size: 14px;
+  font-size: clamp(12px, 1.4vw, 14px);
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -174,7 +306,7 @@
 .dropdown-item:hover {
   background: rgba(139, 92, 246, 0.2);
   color: rgba(139, 92, 246, 0.95);
-  padding-left: 24px;
+  padding-left: clamp(20px, 2.5vw, 24px);
 }
 
 .dropdown-item.logout {
@@ -186,46 +318,66 @@
   color: #ff6b6b;
 }
 
-/* 반응형 */
-@media (max-width: 768px) {
-  .glass-navbar {
-    width: 95%;
-    padding: 0 20px;
-    gap: 16px;
-  }
-
-  .nav-right {
-    gap: 16px;
-  }
-
+/* 반응형 - 1200px 이하부터 메뉴 줄이기 시작 */
+@media (max-width: 1200px) {
   .nav-right a {
     font-size: 13px;
     padding: 6px 12px;
   }
-
-  .profile-dropdown {
-    min-width: 160px;
-  }
-
-  .dropdown-item {
-    padding: 12px 16px;
-    font-size: 13px;
+  
+  .nav-links {
+    gap: 16px;
   }
 }
 
+/* 반응형 - 1024px 이하 */
+@media (max-width: 1024px) {
+  .nav-right a {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+  
+  .nav-links {
+    gap: 12px;
+  }
+}
+
+/* 반응형 - 900px 이하부터 햄버거 메뉴로 전환 */
+@media (max-width: 900px) {
+  .hamburger-menu {
+    display: flex;
+  }
+  
+  .nav-links {
+    display: none;
+  }
+  
+  .logo-text {
+    font-size: clamp(16px, 2.3vw, 20px);
+  }
+}
+
+/* 반응형 - 640px 이하 */
 @media (max-width: 640px) {
   .glass-navbar {
     width: 96%;
-    height: 56px;
-    padding: 0 16px;
+    height: 52px;
+    padding: 0 14px;
+    top: 10px;
+  }
+
+  .nav-left {
+    gap: 6px;
+    padding: 5px 8px;
+  }
+
+  .logo-img {
+    width: 32px;
+    height: 36px;
   }
 
   .logo-text {
-    font-size: 18px;
-  }
-
-  .nav-right a {
-    display: none;
+    font-size: 16px;
   }
   
   .profile-icon {
@@ -241,5 +393,84 @@
   .dropdown-item {
     padding: 10px 14px;
     font-size: 12px;
+  }
+  
+  .mobile-menu {
+    top: 72px;
+    width: 96%;
+  }
+  
+  .mobile-menu a {
+    padding: 14px 20px;
+    font-size: 14px;
+  }
+}
+
+/* 매우 작은 화면 */
+@media (max-width: 480px) {
+  .glass-navbar {
+    width: 98%;
+    height: 48px;
+    padding: 0 12px;
+    border-radius: 24px;
+  }
+
+  .nav-left {
+    gap: 5px;
+    padding: 4px 6px;
+  }
+
+  .logo-img {
+    width: 28px;
+    height: 32px;
+  }
+
+  .logo-text {
+    font-size: 14px;
+  }
+
+  .profile-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .profile-dropdown {
+    min-width: 130px;
+    top: 42px;
+  }
+
+  .dropdown-item {
+    padding: 9px 12px;
+    font-size: 11px;
+  }
+  
+  .mobile-menu {
+    top: 62px;
+    width: 98%;
+  }
+  
+  .mobile-menu a {
+    padding: 12px 18px;
+    font-size: 13px;
+  }
+  
+  .hamburger-menu {
+    width: 36px;
+    height: 36px;
+    padding: 8px;
+    margin-right: 8px;
+  }
+  
+  .hamburger-line {
+    width: 20px;
+    height: 2px;
+  }
+  
+  .hamburger-line:nth-child(1) {
+    top: 10px;
+  }
+  
+  .hamburger-line:nth-child(3) {
+    bottom: 10px;
   }
 }
