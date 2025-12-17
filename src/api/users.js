@@ -44,3 +44,17 @@ export const deleteUser = async () => {
     throw err;
   }
 };
+
+// 현재 로그인한 유저 정보 가져오기
+export const LoginAPI = async (email, password) => {
+  try {
+    const res = await api.post("/web/users/login", {
+      email: email,
+      password: password,
+    });
+    return res.data;
+  } catch (err) {
+    console.error("로그인 실패", err);
+    throw err;
+  }
+};

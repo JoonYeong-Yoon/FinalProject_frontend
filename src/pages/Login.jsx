@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Login.css";
 import api from "../api/api";
+import { getMyInfo, LoginAPI } from "../api/users";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ export default function Login() {
   useEffect(() => {
     const token = localStorage.getItem("token");
     const user = localStorage.getItem("user");
-    
+
     if (token && user) {
       navigate("/dashboard", { replace: true });
     }
@@ -28,23 +29,15 @@ export default function Login() {
 
     try {
       // 1️⃣ 로그인 요청
-      const res = await api.post("/web/users/login", {
-        email: email,
-        password: pw,
-      });
+      const data = await LoginAPI(email, pw);
 
-      const token = res.data.access_token;
+      const token = data.access_token;
 
       // 2️⃣ 토큰 저장
       localStorage.setItem("token", token);
 
       // 3️⃣ 로그인한 유저 정보 불러오기
-      const userRes = await api.get("/web/users/me", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      const userData = userRes.data;
-
+      const userData = await getMyInfo();
       console.log("📊 유저 데이터:", userData); // 디버깅용
 
       // 4️⃣ user 정보 저장
@@ -60,12 +53,11 @@ export default function Login() {
       // 5️⃣ ⭐ role 저장 (DB에서 가져온 값)
       const userRole = userData.role || "user"; // role이 없으면 기본값 "user"
       localStorage.setItem("role", userRole);
-      
+
       console.log("🔑 저장된 role:", userRole); // 디버깅용
 
       alert("로그인 성공!");
       navigate("/dashboard");
-
     } catch (err) {
       console.error("❌ 로그인 실패:", err);
       alert(err?.response?.data?.detail || "로그인 실패");
@@ -135,14 +127,17 @@ export default function Login() {
               />
             </div>
 
-            <button type="submit" className="login-submit">로그인</button>
+            <button type="submit" className="login-submit">
+              로그인
+            </button>
           </form>
 
           <div className="login-footer">
             <p>
               아직 계정이 없나요?
               <span onClick={() => navigate("/signup")} className="footer-link">
-                {" "}회원가입
+                {" "}
+                회원가입
               </span>
             </p>
           </div>
@@ -154,23 +149,24 @@ export default function Login() {
             <div className="login-slider" ref={sliderRef}>
               {/* 첫 번째 슬라이드 - 대시보드 */}
               <div className="slider-card">
-                <img 
-                  src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=900&q=80" 
-                  className="slider-img" 
+                <img
+                  src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=900&q=80"
+                  className="slider-img"
                   alt="AI Trainer Dashboard"
                 />
                 <p className="slider-date">Dec 2025</p>
                 <h2 className="slider-title">AI 트레이너와 함께하는 운동</h2>
                 <p className="slider-desc">
-                  인공지능이 당신의 운동 목표를 분석하고 맞춤형 루틴을 제공합니다.
+                  인공지능이 당신의 운동 목표를 분석하고 맞춤형 루틴을
+                  제공합니다.
                 </p>
               </div>
 
               {/* 두 번째 슬라이드 - 운동 리포트 */}
               <div className="slider-card">
-                <img 
-                  src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=900&q=80" 
-                  className="slider-img" 
+                <img
+                  src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=900&q=80"
+                  className="slider-img"
                   alt="Workout Report"
                 />
                 <p className="slider-date">Dec 2025</p>
@@ -182,9 +178,9 @@ export default function Login() {
 
               {/* 세 번째 슬라이드 - 커뮤니티 */}
               <div className="slider-card">
-                <img 
-                  src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=900&q=80" 
-                  className="slider-img" 
+                <img
+                  src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=900&q=80"
+                  className="slider-img"
                   alt="Community"
                 />
                 <p className="slider-date">Dec 2025</p>
