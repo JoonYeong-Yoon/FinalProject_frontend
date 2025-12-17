@@ -1,7 +1,12 @@
 // src/pages/Admin.jsx
 import React, { useEffect, useState } from "react";
 import "../styles/Admin.css";
-import api from "../api/api";
+import {
+  deleteUserById,
+  getUsers,
+  updateRole,
+  updateSubscription,
+} from "../api/admin";
 
 export default function Admin() {
   // ==========
@@ -21,7 +26,15 @@ export default function Admin() {
 
   // 관리자 체크
   const user = JSON.parse(localStorage.getItem("user"));
+  const role = JSON.parse(localStorage.getItem("role"));
+
   const ADMIN_EMAIL = "admin@test.com";
+  const getNextPlan = (current) => {
+    if (!current) return "Basic";
+    if (current === "Basic") return "Pro";
+    if (current === "Pro") return "Premium";
+    return null; // Premium → 미구독
+  };
 
   // ==========
   // 🔥 관리자 로그 텍스트 맵
@@ -38,15 +51,14 @@ export default function Admin() {
   // ==========
   const fetchUsers = async () => {
     try {
-      const res = await api.get("/admin/users");
-
-      const cleaned = res.data.map((u) => ({
+      let data = await getUsers();
+      data = data.map((u) => ({
         ...u,
-        is_subscribed: !!u.is_subscribed,
+        username: u.name,
       }));
 
-      setUsers(cleaned);
-      setFiltered(cleaned);
+      setUsers(data);
+      setFiltered(data);
     } catch (err) {
       setError("회원 데이터를 가져오지 못했습니다.");
       console.error(err);
@@ -77,19 +89,16 @@ export default function Admin() {
   // ==========
   // 🔥 구독 변경
   // ==========
-  const toggleSubscription = async (id, current) => {
+  console.log(users);
+  const toggleSubscription = async (id, plan_name) => {
     try {
-      await api.post(`/admin/users/${id}/subscription`, {
-        is_subscribed: !current,
-      });
+      await updateSubscription(id, plan_name, "");
 
       const target = users.find((u) => u.id === id);
       writeLog("subscription_toggle", target);
 
       setUsers((prev) =>
-        prev.map((u) =>
-          u.id === id ? { ...u, is_subscribed: !current } : u
-        )
+        prev.map((u) => (u.id === id ? { ...u, plan_name: plan_name } : u))
       );
     } catch (err) {
       console.error(err);
@@ -101,11 +110,11 @@ export default function Admin() {
   // 🔥 관리자 승급
   // ==========
   const promoteUser = async (id) => {
-    if (!window.confirm("해당 유저를 관리자(admin)로 승급시키겠습니까?")) return;
+    if (!window.confirm("해당 유저를 관리자(admin)로 승급시키겠습니까?"))
+      return;
 
     try {
-      await api.patch(`/admin/users/${id}/role`, { role: "admin" });
-
+      await updateRole(id, "admin");
       const target = users.find((u) => u.id === id);
       writeLog("promote_admin", target);
 
@@ -126,13 +135,13 @@ export default function Admin() {
       return;
 
     try {
-      await api.patch(`/admin/users/${id}/role`, { role: "user" });
+      await updateRole(id, "user");
 
       const target = users.find((u) => u.id === id);
       writeLog("demote_admin", target);
 
       setUsers((prev) =>
-        prev.map((u) => (u.id === id ? { ...u, role: "user" } : u))
+        prev.map((u) => (u.id === id ? { ...u, role: !u.role } : u))
       );
     } catch (err) {
       console.error(err);
@@ -147,8 +156,7 @@ export default function Admin() {
     if (!window.confirm("정말 삭제하시겠습니까?")) return;
 
     try {
-      await api.delete(`/admin/users/${id}`);
-
+      await deleteUserById(id);
       const target = users.find((u) => u.id === id);
       writeLog("delete_user", target);
 
@@ -189,7 +197,8 @@ export default function Admin() {
   // ==========
   // 🔐 접근 제한
   // ==========
-  if (!user || user.email !== ADMIN_EMAIL) {
+
+  if (!(role || user.email === ADMIN_EMAIL)) {
     return (
       <div className="admin-error">
         <h2>⚠ 접근 권한 없음</h2>
@@ -200,7 +209,6 @@ export default function Admin() {
 
   if (loading) return <div className="admin-loading">로딩중...</div>;
   if (error) return <div className="admin-error">{error}</div>;
-
   // ==========
   // UI 렌더링
   // ==========
@@ -249,31 +257,40 @@ export default function Admin() {
                   <td>{u.email}</td>
 
                   <td>
-                    {u.role === "admin" ? (
-                      <span className="tag tag-admin">관리자</span>
+                    {u.role ? (
+                      <span
+                        className="tag tag-admin"
+                        style={{ cursor: "default" }}
+                      >
+                        관리자
+                      </span>
                     ) : (
-                      <span className="tag tag-user">유저</span>
+                      <span
+                        className="tag tag-user"
+                        style={{ cursor: "default" }}
+                      >
+                        유저
+                      </span>
                     )}
                   </td>
-
                   <td>
                     <button
                       className={
-                        u.is_subscribed
+                        u.plan_name
                           ? "tag tag-subscribed"
                           : "tag tag-unsubscribed"
                       }
                       onClick={() =>
-                        toggleSubscription(u.id, u.is_subscribed)
+                        toggleSubscription(u.id, getNextPlan(u.plan_name))
                       }
                     >
-                      {u.is_subscribed ? "구독중" : "미구독"}
+                      {u.plan_name ? `구독중 (${u.plan_name})` : "미구독"}
                     </button>
                   </td>
 
                   <td>
                     {/* 승급 또는 강등 */}
-                    {u.role === "admin" ? (
+                    {u.role ? (
                       <button
                         className="promote-btn"
                         onClick={() => demoteUser(u.id)}

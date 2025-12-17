@@ -67,6 +67,7 @@ export default function Profile() {
       }
     };
     load();
+    console.log(profile);
   }, []);
 
   /* ------------------------------------------
