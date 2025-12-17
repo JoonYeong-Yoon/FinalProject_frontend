@@ -271,7 +271,7 @@ body {
 }
 
 .section-title::before {
-  content: '';
+  content: "";
   width: 4px;
   height: 24px;
   background: linear-gradient(135deg, #8b5cf6, #a855f7);
@@ -400,7 +400,11 @@ body {
 
 /* BMI */
 .bmi-box {
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(168, 85, 247, 0.15));
+  background: linear-gradient(
+    135deg,
+    rgba(139, 92, 246, 0.15),
+    rgba(168, 85, 247, 0.15)
+  );
   border-radius: 12px;
   padding: 0.8rem;
   border: 1px solid rgba(139, 92, 246, 0.3);
@@ -534,4 +538,3 @@ body {
     height: 120px;
   }
 }
-

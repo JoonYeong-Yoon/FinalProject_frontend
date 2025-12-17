@@ -11,7 +11,7 @@ import {
   Trash2,
 } from "lucide-react";
 import "../styles/Profile.css";
-import api from "../api/api";
+import { deleteUser, getMyInfo, updateMyInfo } from "../api/users";
 
 export default function Profile() {
   const fileRef = useRef(null);
@@ -41,9 +41,7 @@ export default function Profile() {
     intro: "",
     avatar: "",
   });
-
   const [editData, setEditData] = useState(profile);
-  const token = localStorage.getItem("token");
 
   // 디버깅용 - profile이 변경될 때마다 로그
   useEffect(() => {
@@ -54,16 +52,9 @@ export default function Profile() {
       프로필 불러오기
   ------------------------------------------- */
   useEffect(() => {
-    if (!token) return;
-
     const load = async () => {
       try {
-        const res = await api.get("/web/users/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        const data = res.data;
-
+        const data = await getMyInfo();
         console.log("📥 프로필 데이터 로드:", data); // 디버깅용
 
         // 백엔드에서 height, weight로 올 경우를 대비해 변환
@@ -77,12 +68,13 @@ export default function Profile() {
         setEditData(mappedData);
         setAvatarPreview(mappedData.avatar || null);
       } catch (err) {
+        alert("유저 정보 가져오기에 실패하였습니다.");
+        window.location.href = "/login";
         console.error("프로필 로드 실패:", err);
       }
     };
-
     load();
-  }, [token]);
+  }, []);
 
   /* ------------------------------------------
       BMI 계산
@@ -103,15 +95,11 @@ export default function Profile() {
       저장하기 - height_cm, weight_kg로 전송
   ------------------------------------------- */
   const handleSave = async () => {
-    if (!token) {
-      alert("로그인이 필요합니다. 다시 로그인해주세요.");
-      window.location.href = "/login";
-      return;
-    }
-
-    console.log("=== 토큰 확인 ===");
-    console.log("Token:", token);
-
+    // if (!token) {
+    //   alert("로그인이 필요합니다. 다시 로그인해주세요.");
+    //   window.location.href = "/login";
+    //   return;
+    // }
     setIsLoading(true);
 
     try {
@@ -124,42 +112,40 @@ export default function Profile() {
         height_cm: editData.height_cm ? parseFloat(editData.height_cm) : null,
         weight_kg: editData.weight_kg ? parseFloat(editData.weight_kg) : null,
         body_fat: editData.body_fat ? parseFloat(editData.body_fat) : null,
-        skeletal_muscle: editData.skeletal_muscle ? parseFloat(editData.skeletal_muscle) : null,
+        skeletal_muscle: editData.skeletal_muscle
+          ? parseFloat(editData.skeletal_muscle)
+          : null,
         bmr: editData.bmr ? parseInt(editData.bmr) : null,
         water: editData.water ? parseFloat(editData.water) : null,
-        visceral_fat_level: editData.visceral_fat_level ? parseInt(editData.visceral_fat_level) : null,
+        visceral_fat_level: editData.visceral_fat_level
+          ? parseInt(editData.visceral_fat_level)
+          : null,
         intro: editData.intro || null,
         avatar: avatarPreview || null,
       };
 
       console.log("=== 전송 데이터 (height_cm, weight_kg) ===");
       console.log(JSON.stringify(updated, null, 2));
-
-      const response = await api.put("/web/users/update", updated, {
-        headers: { 
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-      });
-
-      console.log("=== 서버 응답 ===");
-      console.log(response.data);
+      await updateMyInfo(updated);
 
       // 저장 후 최신 데이터 다시 로드
-      const reloadRes = await api.get("/web/users/me", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
+      const res = await getMyInfo();
       console.log("=== DB에서 다시 로드된 데이터 ===");
-      console.log(reloadRes.data);
 
+      console.log("profile", profile);
+      console.log("res", res);
+      // console.log("reloadRes", reloadRes);
+      // const profileData = {
+      //   id: reloadRes.id,
+      //   name: reloadRes.name,
+      //   email: reloadRes.email,
+      // };
       // 백엔드에서 height, weight로 올 경우를 대비해 변환
       const reloadedData = {
-        ...reloadRes.data,
-        height_cm: reloadRes.data.height_cm || reloadRes.data.height || "",
-        weight_kg: reloadRes.data.weight_kg || reloadRes.data.weight || "",
+        ...res,
+        height_cm: res.height_cm || res.height || "",
+        weight_kg: res.weight_kg || res.weight || "",
       };
-
       setProfile(reloadedData);
       setEditData(reloadedData);
       setAvatarPreview(reloadedData.avatar || null);
@@ -171,7 +157,7 @@ export default function Profile() {
       console.error("Error:", err);
       console.error("Response status:", err.response?.status);
       console.error("Response data:", err.response?.data);
-      
+
       // 401 에러 처리 (토큰 만료 또는 인증 실패)
       if (err.response?.status === 401) {
         alert("인증이 만료되었습니다. 다시 로그인해주세요.");
@@ -180,7 +166,7 @@ export default function Profile() {
         window.location.href = "/login";
         return;
       }
-      
+
       alert(`저장 실패: ${err.response?.data?.message || err.message}`);
     } finally {
       setIsLoading(false);
@@ -194,10 +180,7 @@ export default function Profile() {
     if (!window.confirm("정말 삭제하시겠습니까?")) return;
 
     try {
-      await api.delete("/web/users/delete", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
+      await deleteUser();
       alert("계정이 삭제되었습니다.");
       localStorage.clear();
       sessionStorage.clear();
@@ -271,7 +254,7 @@ export default function Profile() {
                 <p className="info-value">{profile.name || "-"}</p>
               )}
 
-              <label className="info-title">소개</label>
+              {/* <label className="info-title">소개</label>
               {editing ? (
                 <textarea
                   className="info-input"
@@ -281,7 +264,7 @@ export default function Profile() {
                 />
               ) : (
                 <p className="info-value">{profile.intro || "-"}</p>
-              )}
+              )} */}
 
               <label className="info-title">
                 <Mail size={14} /> 이메일
@@ -316,7 +299,11 @@ export default function Profile() {
                   >
                     <X size={16} /> 취소
                   </button>
-                  <button className="save-btn" onClick={handleSave} disabled={isLoading}>
+                  <button
+                    className="save-btn"
+                    onClick={handleSave}
+                    disabled={isLoading}
+                  >
                     <Save size={16} /> {isLoading ? "저장 중..." : "저장"}
                   </button>
                 </>
@@ -444,7 +431,9 @@ export default function Profile() {
                   />
                 ) : (
                   <p className="view-box">
-                    {profile.skeletal_muscle ? `${profile.skeletal_muscle}kg` : "-"}
+                    {profile.skeletal_muscle
+                      ? `${profile.skeletal_muscle}kg`
+                      : "-"}
                   </p>
                 )}
               </div>
@@ -513,7 +502,9 @@ export default function Profile() {
                     }}
                   />
                 ) : (
-                  <p className="view-box">{profile.visceral_fat_level || "-"}</p>
+                  <p className="view-box">
+                    {profile.visceral_fat_level || "-"}
+                  </p>
                 )}
               </div>
             </div>
