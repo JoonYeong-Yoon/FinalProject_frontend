@@ -40,13 +40,9 @@ export default function Profile() {
     visceral_fat_level: "",
     intro: "",
     avatar: "",
+    created_at: "",
   });
   const [editData, setEditData] = useState(profile);
-
-  // 디버깅용 - profile이 변경될 때마다 로그
-  useEffect(() => {
-    console.log("🔄 Profile state 변경:", profile);
-  }, [profile]);
 
   /* ------------------------------------------
       프로필 불러오기
@@ -57,16 +53,13 @@ export default function Profile() {
         const data = await getMyInfo();
         console.log("📥 프로필 데이터 로드:", data); // 디버깅용
 
-        // 백엔드에서 height, weight로 올 경우를 대비해 변환
-        const mappedData = {
-          ...data,
-          height_cm: data.height_cm || data.height || "",
-          weight_kg: data.weight_kg || data.weight || "",
-        };
+        console.log("===== ✅ 매핑된 데이터 =====");
+        console.log(JSON.stringify(data, null, 2));
+        console.log("============================");
 
-        setProfile(mappedData);
-        setEditData(mappedData);
-        setAvatarPreview(mappedData.avatar || null);
+        setProfile(data);
+        setEditData(data);
+        // setAvatarPreview(mappedData.avatar || null);
       } catch (err) {
         alert("유저 정보 가져오기에 실패하였습니다.");
         window.location.href = "/login";
@@ -80,19 +73,24 @@ export default function Profile() {
       BMI 계산
   ------------------------------------------- */
   const bmi = () => {
-    if (!editData.height_cm || !editData.weight_kg) return "-";
-    return (editData.weight_kg / (editData.height_cm / 100) ** 2).toFixed(1);
+    const height = parseFloat(editData.height_cm);
+    const weight = parseFloat(editData.weight_kg);
+
+    if (!height || !weight || height <= 0 || weight <= 0) return "-";
+
+    return (weight / (height / 100) ** 2).toFixed(1);
   };
 
   /* ------------------------------------------
       변경 핸들러
   ------------------------------------------- */
   const change = (field, value) => {
+    console.log(`🔄 필드 변경: ${field} = ${value}`);
     setEditData({ ...editData, [field]: value });
   };
 
   /* ------------------------------------------
-      저장하기 - height_cm, weight_kg로 전송
+      저장하기
   ------------------------------------------- */
   const handleSave = async () => {
     // if (!token) {
@@ -103,12 +101,10 @@ export default function Profile() {
     setIsLoading(true);
 
     try {
-      // 백엔드가 height_cm, weight_kg로 받는 경우
       const updated = {
         name: editData.name || null,
         email: editData.email || null,
         birth_date: editData.birth_date || null,
-        // 백엔드 필드명에 맞춰 height_cm, weight_kg로 전송
         height_cm: editData.height_cm ? parseFloat(editData.height_cm) : null,
         weight_kg: editData.weight_kg ? parseFloat(editData.weight_kg) : null,
         body_fat: editData.body_fat ? parseFloat(editData.body_fat) : null,
@@ -124,16 +120,15 @@ export default function Profile() {
         avatar: avatarPreview || null,
       };
 
-      console.log("=== 전송 데이터 (height_cm, weight_kg) ===");
+      console.log("===== 📤 서버로 전송할 데이터 =====");
       console.log(JSON.stringify(updated, null, 2));
-      await updateMyInfo(updated);
-
+      let data = await updateMyInfo(updated);
+      data = data?.data;
+      console.log("data", data);
       // 저장 후 최신 데이터 다시 로드
       const res = await getMyInfo();
       console.log("=== DB에서 다시 로드된 데이터 ===");
 
-      console.log("profile", profile);
-      console.log("res", res);
       // console.log("reloadRes", reloadRes);
       // const profileData = {
       //   id: reloadRes.id,
@@ -143,26 +138,22 @@ export default function Profile() {
       // 백엔드에서 height, weight로 올 경우를 대비해 변환
       const reloadedData = {
         ...res,
-        height_cm: res.height_cm || res.height || "",
-        weight_kg: res.weight_kg || res.weight || "",
+        height_cm: data.height_cm || data.height || "",
+        weight_kg: data.weight_kg || data.weight || "",
       };
       setProfile(reloadedData);
       setEditData(reloadedData);
       setAvatarPreview(reloadedData.avatar || null);
-      setEditing(false);
 
+      setEditing(false);
       alert("저장 완료!");
     } catch (err) {
-      console.error("=== 저장 실패 ===");
-      console.error("Error:", err);
+      console.error("❌ 저장 실패:", err);
       console.error("Response status:", err.response?.status);
       console.error("Response data:", err.response?.data);
-
-      // 401 에러 처리 (토큰 만료 또는 인증 실패)
       if (err.response?.status === 401) {
         alert("인증이 만료되었습니다. 다시 로그인해주세요.");
         localStorage.clear();
-        sessionStorage.clear();
         window.location.href = "/login";
         return;
       }
@@ -186,6 +177,7 @@ export default function Profile() {
       sessionStorage.clear();
       window.location.href = "/login";
     } catch (err) {
+      console.error("❌ 삭제 실패:", err);
       alert("삭제 실패");
     }
   };
@@ -198,7 +190,10 @@ export default function Profile() {
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onloadend = () => setAvatarPreview(reader.result);
+    reader.onloadend = () => {
+      console.log("🖼️ 아바타 업로드:", reader.result.substring(0, 50) + "...");
+      setAvatarPreview(reader.result);
+    };
     reader.readAsDataURL(file);
   };
 
@@ -217,7 +212,7 @@ export default function Profile() {
           <aside className="profile-left-card">
             <div className="avatar">
               <img
-                src={avatarPreview || defaultAvatar}
+                src={avatarPreview || profile.avatar || defaultAvatar}
                 className="avatar-img"
                 alt="avatar"
               />
@@ -247,11 +242,14 @@ export default function Profile() {
               {editing ? (
                 <input
                   className="info-input"
-                  value={editData.name ?? ""}
+                  value={editData.name || ""}
                   onChange={(e) => change("name", e.target.value)}
+                  placeholder="이름을 입력하세요"
                 />
               ) : (
-                <p className="info-value">{profile.name || "-"}</p>
+                <p className="info-value">
+                  {profile.name ? profile.name : "-"}
+                </p>
               )}
 
               {/* <label className="info-title">소개</label>
@@ -259,8 +257,9 @@ export default function Profile() {
                 <textarea
                   className="info-input"
                   rows={3}
-                  value={editData.intro ?? ""}
+                  value={editData.intro || ""}
                   onChange={(e) => change("intro", e.target.value)}
+                  placeholder="소개를 입력하세요"
                 />
               ) : (
                 <p className="info-value">{profile.intro || "-"}</p>
@@ -272,21 +271,28 @@ export default function Profile() {
               {editing ? (
                 <input
                   className="info-input"
-                  value={editData.email ?? ""}
+                  value={editData.email || ""}
                   onChange={(e) => change("email", e.target.value)}
+                  placeholder="이메일을 입력하세요"
                 />
               ) : (
-                <p className="info-value">{profile.email || "-"}</p>
+                <p className="info-value">
+                  {profile.email ? profile.email : "-"}
+                </p>
               )}
 
               <label className="info-title">
                 <Calendar size={14} /> 생성일
               </label>
-              <p className="info-value">{profile.created_at || "-"}</p>
+              <p className="info-value">
+                {profile.created_at
+                  ? new Date(profile.created_at).toLocaleDateString("ko-KR")
+                  : "-"}
+              </p>
             </div>
 
             {/* EDIT BUTTONS */}
-            <div className="edit-btn-area">
+            <div className="edit-btn-area baseinfo">
               {!editing ? (
                 <button className="edit-btn" onClick={() => setEditing(true)}>
                   <Edit3 size={16} /> 수정
@@ -295,7 +301,11 @@ export default function Profile() {
                 <>
                   <button
                     className="cancel-btn"
-                    onClick={() => setEditing(false)}
+                    onClick={() => {
+                      setEditData(profile);
+                      setAvatarPreview(profile.avatar);
+                      setEditing(false);
+                    }}
                   >
                     <X size={16} /> 취소
                   </button>
@@ -322,7 +332,7 @@ export default function Profile() {
                 <input
                   type="date"
                   className={editing ? "body-input" : "body-input readonly"}
-                  value={editData.birth_date ?? ""}
+                  value={editData.birth_date || ""}
                   onChange={(e) => change("birth_date", e.target.value)}
                   disabled={!editing}
                 />
@@ -336,18 +346,12 @@ export default function Profile() {
                     step="0.1"
                     className="body-input"
                     placeholder="cm"
-                    value={editData.height_cm ?? ""}
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      if (v === "") return change("height_cm", "");
-                      const num = Number(v);
-                      if (!Number.isFinite(num) || num <= 0) return;
-                      change("height_cm", num);
-                    }}
+                    value={editData.height_cm || ""}
+                    onChange={(e) => change("height_cm", e.target.value)}
                   />
                 ) : (
                   <p className="view-box">
-                    {profile.height_cm ? `${profile.height_cm}cm` : "-"}
+                    {profile.height_cm ? `${profile.height_cm} cm` : "-"}
                   </p>
                 )}
               </div>
@@ -360,18 +364,12 @@ export default function Profile() {
                     step="0.1"
                     className="body-input"
                     placeholder="kg"
-                    value={editData.weight_kg ?? ""}
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      if (v === "") return change("weight_kg", "");
-                      const num = Number(v);
-                      if (!Number.isFinite(num) || num <= 0) return;
-                      change("weight_kg", num);
-                    }}
+                    value={editData.weight_kg || ""}
+                    onChange={(e) => change("weight_kg", e.target.value)}
                   />
                 ) : (
                   <p className="view-box">
-                    {profile.weight_kg ? `${profile.weight_kg}kg` : "-"}
+                    {profile.weight_kg ? `${profile.weight_kg} kg` : "-"}
                   </p>
                 )}
               </div>
@@ -396,18 +394,12 @@ export default function Profile() {
                     step="0.1"
                     className="body-input"
                     placeholder="%"
-                    value={editData.body_fat ?? ""}
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      if (v === "") return change("body_fat", "");
-                      const num = Number(v);
-                      if (!Number.isFinite(num) || num < 0) return;
-                      change("body_fat", num);
-                    }}
+                    value={editData.body_fat || ""}
+                    onChange={(e) => change("body_fat", e.target.value)}
                   />
                 ) : (
                   <p className="view-box">
-                    {profile.body_fat ? `${profile.body_fat}%` : "-"}
+                    {profile.body_fat ? `${profile.body_fat} %` : "-"}
                   </p>
                 )}
               </div>
@@ -420,19 +412,13 @@ export default function Profile() {
                     step="0.1"
                     className="body-input"
                     placeholder="kg"
-                    value={editData.skeletal_muscle ?? ""}
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      if (v === "") return change("skeletal_muscle", "");
-                      const num = Number(v);
-                      if (!Number.isFinite(num) || num < 0) return;
-                      change("skeletal_muscle", num);
-                    }}
+                    value={editData.skeletal_muscle || ""}
+                    onChange={(e) => change("skeletal_muscle", e.target.value)}
                   />
                 ) : (
                   <p className="view-box">
                     {profile.skeletal_muscle
-                      ? `${profile.skeletal_muscle}kg`
+                      ? `${profile.skeletal_muscle} kg`
                       : "-"}
                   </p>
                 )}
@@ -445,18 +431,12 @@ export default function Profile() {
                     type="number"
                     className="body-input"
                     placeholder="kcal"
-                    value={editData.bmr ?? ""}
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      if (v === "") return change("bmr", "");
-                      const num = Number(v);
-                      if (!Number.isFinite(num) || num < 0) return;
-                      change("bmr", num);
-                    }}
+                    value={editData.bmr || ""}
+                    onChange={(e) => change("bmr", e.target.value)}
                   />
                 ) : (
                   <p className="view-box">
-                    {profile.bmr ? `${profile.bmr}kcal` : "-"}
+                    {profile.bmr ? `${profile.bmr} kcal` : "-"}
                   </p>
                 )}
               </div>
@@ -469,18 +449,12 @@ export default function Profile() {
                     step="0.1"
                     className="body-input"
                     placeholder="%"
-                    value={editData.water ?? ""}
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      if (v === "") return change("water", "");
-                      const num = Number(v);
-                      if (!Number.isFinite(num) || num < 0) return;
-                      change("water", num);
-                    }}
+                    value={editData.water || ""}
+                    onChange={(e) => change("water", e.target.value)}
                   />
                 ) : (
                   <p className="view-box">
-                    {profile.water ? `${profile.water}%` : "-"}
+                    {profile.water ? `${profile.water} %` : "-"}
                   </p>
                 )}
               </div>
@@ -492,21 +466,48 @@ export default function Profile() {
                   <input
                     type="number"
                     className="body-input"
-                    value={editData.visceral_fat_level ?? ""}
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      if (v === "") return change("visceral_fat_level", "");
-                      const num = Number(v);
-                      if (!Number.isFinite(num) || num < 0) return;
-                      change("visceral_fat_level", num);
-                    }}
+                    placeholder="레벨"
+                    value={editData.visceral_fat_level || ""}
+                    onChange={(e) =>
+                      change("visceral_fat_level", e.target.value)
+                    }
                   />
                 ) : (
                   <p className="view-box">
-                    {profile.visceral_fat_level || "-"}
+                    {profile.visceral_fat_level
+                      ? profile.visceral_fat_level
+                      : "-"}
                   </p>
                 )}
               </div>
+            </div>
+            {/* EDIT BUTTONS */}
+            <div className="edit-btn-area addinfo">
+              {!editing ? (
+                <button className="edit-btn" onClick={() => setEditing(true)}>
+                  <Edit3 size={16} /> 수정
+                </button>
+              ) : (
+                <>
+                  <button
+                    className="cancel-btn"
+                    onClick={() => {
+                      setEditData(profile);
+                      setAvatarPreview(profile.avatar);
+                      setEditing(false);
+                    }}
+                  >
+                    <X size={16} /> 취소
+                  </button>
+                  <button
+                    className="save-btn"
+                    onClick={handleSave}
+                    disabled={isLoading}
+                  >
+                    <Save size={16} /> {isLoading ? "저장 중..." : "저장"}
+                  </button>
+                </>
+              )}
             </div>
           </section>
         </div>

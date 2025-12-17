@@ -503,6 +503,15 @@ body {
   .body-grid {
     grid-template-columns: repeat(3, 1fr);
   }
+  .profile-info-box {
+    margin-bottom: 1.5rem;
+  }
+  .addinfo button {
+    display: none;
+  }
+  .baseinfo button {
+    display: block;
+  }
 }
 
 @media (max-width: 900px) {
@@ -526,6 +535,16 @@ body {
   .delete-btn {
     flex: 1;
   }
+
+  .profile-info-box {
+    margin: 0px;
+  }
+  .baseinfo button {
+    display: none;
+  }
+  .addinfo button {
+    display: block;
+  }
 }
 
 @media (max-width: 640px) {
@@ -536,5 +555,15 @@ body {
   .avatar {
     width: 120px;
     height: 120px;
+  }
+
+  .profile-info-box {
+    margin: 0px;
+  }
+  .baseinfo button {
+    display: none;
+  }
+  .addinfo button {
+    display: block;
   }
 }

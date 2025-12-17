@@ -12,6 +12,16 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
 
+  // 🔥 이미 로그인되어 있으면 대시보드로 리다이렉트
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const user = localStorage.getItem("user");
+    
+    if (token && user) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [navigate]);
+
   const handleLogin = async (e) => {
     e.preventDefault();
     console.log("🔥 로그인 버튼 클릭됨");
