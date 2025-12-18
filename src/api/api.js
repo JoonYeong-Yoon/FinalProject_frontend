@@ -10,6 +10,11 @@ const api = axios.create({
   },
 });
 
+export const api_formdata = axios.create({
+  baseURL: "http://localhost:8000",
+  // baseURL: "http://192.168.0.27:8000", // 🔥 네 PC FastAPI 서버 주소
+});
+
 // 🔥 요청마다 토큰을 자동으로 넣어주는 interceptor
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");

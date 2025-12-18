@@ -2,6 +2,7 @@
 import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Exercise.css";
+import { UploadExerciseVideo } from "../api/exercise";
 
 export default function Exercise() {
   const navigate = useNavigate();
@@ -10,7 +11,7 @@ export default function Exercise() {
   const [selectedRoutine, setSelectedRoutine] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState(null);
-  
+
   const fileInputRef = useRef(null);
   const API_BASE = "http://192.168.0.27:8000";
 
@@ -22,10 +23,10 @@ export default function Exercise() {
       exercises: [
         { name: "푸쉬업", sets: 3, reps: 15 },
         { name: "스쿼트", sets: 4, reps: 20 },
-        { name: "플랭크", sets: 3, duration: "60초" }
+        { name: "플랭크", sets: 3, duration: "60초" },
       ],
       difficulty: "중급",
-      duration: 45
+      duration: 45,
     },
     {
       id: 2,
@@ -33,10 +34,10 @@ export default function Exercise() {
       exercises: [
         { name: "런지", sets: 4, reps: 12 },
         { name: "불가리안 스쿼트", sets: 3, reps: 10 },
-        { name: "힙 쓰러스트", sets: 4, reps: 15 }
+        { name: "힙 쓰러스트", sets: 4, reps: 15 },
       ],
       difficulty: "고급",
-      duration: 50
+      duration: 50,
     },
     {
       id: 3,
@@ -44,66 +45,75 @@ export default function Exercise() {
       exercises: [
         { name: "덤벨 프레스", sets: 4, reps: 12 },
         { name: "바벨로우", sets: 3, reps: 10 },
-        { name: "AB 롤아웃", sets: 3, reps: 12 }
+        { name: "AB 롤아웃", sets: 3, reps: 12 },
       ],
       difficulty: "중급",
-      duration: 40
-    }
+      duration: 40,
+    },
   ];
 
   // 자세 체크포인트
   const postureCheckpoints = [
-    { id: 1, title: "무릎 정렬", status: "good", description: "무릎이 발끝과 일직선" },
-    { id: 2, title: "척추 중립", status: "warning", description: "허리가 약간 구부러짐" },
-    { id: 3, title: "어깨 위치", status: "good", description: "어깨가 바르게 정렬됨" },
-    { id: 4, title: "골반 각도", status: "good", description: "골반이 안정적" }
+    {
+      id: 1,
+      title: "무릎 정렬",
+      status: "good",
+      description: "무릎이 발끝과 일직선",
+    },
+    {
+      id: 2,
+      title: "척추 중립",
+      status: "warning",
+      description: "허리가 약간 구부러짐",
+    },
+    {
+      id: 3,
+      title: "어깨 위치",
+      status: "good",
+      description: "어깨가 바르게 정렬됨",
+    },
+    { id: 4, title: "골반 각도", status: "good", description: "골반이 안정적" },
   ];
 
   // AI 피드백 메시지
   const feedbackMessages = [
     "✅ 훌륭합니다! 자세가 완벽해요",
     "⚠️ 무릎을 조금 더 안쪽으로 모아주세요",
-    "⚠️ 등을 곧게 펴주세요"
+    "⚠️ 등을 곧게 펴주세요",
   ];
 
+  console.log(isAnalyzing);
   // 파일 업로드 처리
   const handleMediaSelect = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+    setIsAnalyzing(true);
 
+    const file = e.target.files[0];
+    console.log(file);
+
+    if (!file) return;
     setUploadedMedia({
       url: URL.createObjectURL(file),
       type: file.type,
     });
 
-    setIsAnalyzing(true);
-
-    const formData = new FormData();
-    formData.append("file", file);
-
     try {
-      const res = await fetch(`${API_BASE}/web/video/upload`, {
-        method: "POST",
-        body: formData,
+      const res = await UploadExerciseVideo(file);
+      const videoBlob = res;
+      const videoUrl = URL.createObjectURL(videoBlob);
+      setUploadedMedia({
+        url: videoUrl,
+        type: file.type,
       });
 
-if (!res.ok) {
-  const errText = await res.text();
-  console.error("업로드 실패:", errText);
-  alert("업로드 실패! 콘솔 확인");
-  setIsAnalyzing(false);
-  return;
-}
+      // const res = await fetch(`${API_BASE}/web/video/upload`, {
+      //   method: "POST",
+      //   body: formData,
+      // });
+      setAiAnalysis(videoBlob);
 
-
-      const data = await res.json();
-      console.log("AI 분석 결과:", data);
-
-      setAiAnalysis(data);
-
-      if (data.ai_result?.knee_warning) {
-        alert("⚠ 무릎 위험: 자세 교정이 필요합니다!");
-      }
+      // if (data.ai_result?.knee_warning) {
+      //   alert("⚠ 무릎 위험: 자세 교정이 필요합니다!");
+      // }
     } catch (error) {
       console.error(error);
       alert("서버 연결 실패");
@@ -126,13 +136,13 @@ if (!res.ok) {
     if (window.confirm("운동을 종료하고 기록을 저장하시겠습니까?")) {
       const record = {
         routine: selectedRoutine?.name,
-        date: new Date().toISOString()
+        date: new Date().toISOString(),
       };
       console.log("운동 기록:", record);
-      
+
       setSelectedRoutine(null);
       setUploadedMedia(null);
-      
+
       alert("운동 기록이 저장되었습니다! 🎉");
     }
   };
@@ -142,21 +152,24 @@ if (!res.ok) {
       {/* 상단 헤더 */}
       <div className="exercise-header">
         <h1 className="exercise-title">🏋️‍♂️ AI 자세 교정 시스템</h1>
-        <p className="exercise-subtitle">실시간으로 운동 자세를 분석하고 피드백을 받아보세요</p>
+        <p className="exercise-subtitle">
+          실시간으로 운동 자세를 분석하고 피드백을 받아보세요
+        </p>
       </div>
 
       {/* 메인 레이아웃 */}
       <div className="exercise-grid">
-
         {/* 왼쪽 패널 - 루틴 및 피드백 */}
         <div className="panel-left">
           <h2 className="panel-header">📋 운동 루틴 선택</h2>
-          
+
           <div className="routine-list">
-            {routines.map(routine => (
+            {routines.map((routine) => (
               <div
                 key={routine.id}
-                className={`routine-card ${selectedRoutine?.id === routine.id ? 'selected' : ''}`}
+                className={`routine-card ${
+                  selectedRoutine?.id === routine.id ? "selected" : ""
+                }`}
                 onClick={() => setSelectedRoutine(routine)}
               >
                 <div className="routine-header">
@@ -224,9 +237,7 @@ if (!res.ok) {
             >
               <div className="upload-icon">📤</div>
               <div className="upload-label">이미지 / 영상 업로드하기</div>
-              <p className="upload-hint">
-                클릭하거나 파일을 드래그하여 업로드
-              </p>
+              <p className="upload-hint">클릭하거나 파일을 드래그하여 업로드</p>
               <div className="upload-formats">
                 <span>지원 형식: JPG, PNG, MP4, MOV</span>
               </div>
@@ -241,11 +252,19 @@ if (!res.ok) {
               )}
 
               {uploadedMedia.type.includes("image") && (
-                <img src={uploadedMedia.url} className="preview-media" alt="preview" />
+                <img
+                  src={uploadedMedia.url}
+                  className="preview-media"
+                  alt="preview"
+                />
               )}
 
               {uploadedMedia.type.includes("video") && (
-                <video src={uploadedMedia.url} className="preview-media" controls />
+                <video
+                  src={uploadedMedia.url}
+                  className="preview-media"
+                  controls
+                />
               )}
 
               <div className="preview-controls">
@@ -282,7 +301,7 @@ if (!res.ok) {
           <div className="checkpoint-section">
             <h3 className="section-title">자세 체크포인트</h3>
             <div className="checkpoint-list">
-              {postureCheckpoints.map(checkpoint => (
+              {postureCheckpoints.map((checkpoint) => (
                 <div key={checkpoint.id} className="checkpoint-item">
                   <div className="checkpoint-header">
                     <span className={`status-dot ${checkpoint.status}`}></span>
@@ -299,7 +318,12 @@ if (!res.ok) {
             <h3 className="section-title">💬 실시간 코칭</h3>
             <div className="feedback-messages">
               {feedbackMessages.map((msg, idx) => (
-                <div key={idx} className={`feedback-message ${msg.includes('⚠️') ? 'warning' : 'success'}`}>
+                <div
+                  key={idx}
+                  className={`feedback-message ${
+                    msg.includes("⚠️") ? "warning" : "success"
+                  }`}
+                >
                   <span>{msg}</span>
                 </div>
               ))}
@@ -312,7 +336,10 @@ if (!res.ok) {
               <div className="warning-icon">⚠️</div>
               <div className="warning-content">
                 <h4>무릎 위치 주의</h4>
-                <p>무릎이 발끝을 넘어가고 있습니다. 부상 위험이 있으니 자세를 교정해주세요.</p>
+                <p>
+                  무릎이 발끝을 넘어가고 있습니다. 부상 위험이 있으니 자세를
+                  교정해주세요.
+                </p>
               </div>
             </div>
           )}
