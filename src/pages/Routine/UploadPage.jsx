@@ -201,8 +201,6 @@ function UploadPage() {
     <div
       style={{
         padding: "40px",
-        background: "#111",
-        minHeight: "100vh",
         color: "white",
       }}
     >

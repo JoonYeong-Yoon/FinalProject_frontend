@@ -3,13 +3,14 @@ import React, { useState } from "react";
 const BACKEND_URL = "http://localhost:8001";
 
 export default function AnalysisPage() {
-  const [userId, setUserId] = useState("");
+  // const [userId, setUserId] = useState("");
   const [difficulty, setDifficulty] = useState("중");
   const [duration, setDuration] = useState(30);
 
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
+  const userId = localStorage.getItem("user");
 
   // 분석 결과 가져오기
   const fetchAnalysis = async () => {
@@ -46,8 +47,6 @@ export default function AnalysisPage() {
   return (
     <div
       style={{
-        minHeight: "100vh",
-        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
         padding: "40px 20px",
       }}
     >
@@ -100,7 +99,7 @@ export default function AnalysisPage() {
 
           {/* User ID */}
           <div style={{ marginBottom: "20px" }}>
-            <label
+            {/* <label
               style={{
                 display: "block",
                 marginBottom: "8px",
@@ -109,8 +108,8 @@ export default function AnalysisPage() {
               }}
             >
               User ID (이메일)
-            </label>
-            <input
+            </label> */}
+            {/* <input
               type="text"
               value={userId}
               onChange={(e) => setUserId(e.target.value)}
@@ -126,7 +125,7 @@ export default function AnalysisPage() {
               }}
               onFocus={(e) => (e.target.style.borderColor = "#667eea")}
               onBlur={(e) => (e.target.style.borderColor = "#e0e0e0")}
-            />
+            /> */}
           </div>
 
           {/* 난이도 & 시간 */}

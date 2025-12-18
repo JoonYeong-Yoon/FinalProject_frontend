@@ -32,25 +32,53 @@ const features = [
     title: "AI 맞춤 운동 계획",
     description:
       "인공지능이 당신의 체력 수준, 목표, 선호도를 분석하여 최적화된 운동 루틴을 자동으로 생성합니다. 매일 변화하는 컨디션에 맞춰 실시간으로 조정됩니다.",
-    items: ["체력 분석", "목표 설정", "자동 루틴 생성", "실시간 조정", "진행도 추적", "성과 분석"],
+    items: [
+      "체력 분석",
+      "목표 설정",
+      "자동 루틴 생성",
+      "실시간 조정",
+      "진행도 추적",
+      "성과 분석",
+    ],
   },
   {
     title: "빅데이터 기반 분석",
     description:
       "수백만 건의 트레이닝 데이터를 기반으로 가장 효과적인 운동 방법을 제안합니다. 당신과 유사한 사용자들의 성공 사례를 참고하여 최적의 결과를 도출합니다.",
-    items: ["데이터 분석", "패턴 인식", "성공 사례 학습", "효과 예측", "개인화 추천", "통계 리포트"],
+    items: [
+      "데이터 분석",
+      "패턴 인식",
+      "성공 사례 학습",
+      "효과 예측",
+      "개인화 추천",
+      "통계 리포트",
+    ],
   },
   {
     title: "실시간 피드백",
     description:
       "AI 코치가 운동 중 자세와 동작을 실시간으로 분석하고 피드백을 제공합니다. 부상 위험을 줄이고 운동 효과를 극대화할 수 있습니다.",
-    items: ["자세 분석", "동작 교정", "음성 피드백", "부상 예방", "운동 효율 향상", "실시간 코칭"],
+    items: [
+      "자세 분석",
+      "동작 교정",
+      "음성 피드백",
+      "부상 예방",
+      "운동 효율 향상",
+      "실시간 코칭",
+    ],
   },
   {
     title: "영양 관리",
     description:
       "운동 목표에 맞는 식단을 AI가 자동으로 계획합니다. 칼로리, 영양소 균형을 고려한 맞춤형 식단 추천으로 건강한 식습관을 만들어갑니다.",
-    items: ["식단 계획", "칼로리 계산", "영양소 분석", "레시피 추천", "식사 기록", "영양 밸런스"],
+    items: [
+      "식단 계획",
+      "칼로리 계산",
+      "영양소 분석",
+      "레시피 추천",
+      "식사 기록",
+      "영양 밸런스",
+    ],
   },
 ];
 
@@ -61,7 +89,12 @@ const pricingPlans = [
     price: "₩0",
     period: "14일",
     description: "AI 트레이닝을 무료로 체험해보세요",
-    features: ["기본 운동 계획", "AI 자세 분석", "진행도 추적", "커뮤니티 접근"],
+    features: [
+      "기본 운동 계획",
+      "AI 자세 분석",
+      "진행도 추적",
+      "커뮤니티 접근",
+    ],
     cta: "무료로 시작하기",
     popular: false,
   },
@@ -111,6 +144,15 @@ const Home = () => {
   const menuRef = useRef();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const user = localStorage.getItem("user");
+
+    if (token && user) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [navigate]);
+
   // 로컬스토리지에서 유저 정보 불러오기
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -120,7 +162,8 @@ const Home = () => {
   // 메뉴 외부 클릭 시 닫기
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false);
+      if (menuRef.current && !menuRef.current.contains(e.target))
+        setMenuOpen(false);
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -136,10 +179,14 @@ const Home = () => {
       const scrolled = docHeight > 0 ? (scrollY / docHeight) * 100 : 0;
       setScrollProgress(scrolled);
 
-      const phraseIndex = Math.min(Math.floor(scrollY / (windowHeight * 0.5)), heroMessages.length - 1);
+      const phraseIndex = Math.min(
+        Math.floor(scrollY / (windowHeight * 0.5)),
+        heroMessages.length - 1
+      );
       setCurrentPhrase(phraseIndex);
 
-      const scrollProgressLocal = (scrollY % (windowHeight * 0.5)) / (windowHeight * 0.5);
+      const scrollProgressLocal =
+        (scrollY % (windowHeight * 0.5)) / (windowHeight * 0.5);
       setOpacity(1 - scrollProgressLocal * 0.6);
       setTextOpacity(Math.max(0.3, 1 - scrollProgressLocal * 0.8));
     };
@@ -175,8 +222,9 @@ const Home = () => {
   const currentContent = heroMessages[currentPhrase];
 
   return (
-    <div className={`home-container ${isDarkMode ? "dark-mode" : "light-mode"}`}>
-      
+    <div
+      className={`home-container ${isDarkMode ? "dark-mode" : "light-mode"}`}
+    >
       {/* 애니메이션 배경 */}
       <div
         className="animated-background-container"
@@ -229,13 +277,33 @@ const Home = () => {
         <svg
           className="animation-element yoga-mat"
           style={{
-            transform: `rotate(${scrollProgress * 1.8}deg) translateX(${parallaxX * 0.5}px)`,
+            transform: `rotate(${scrollProgress * 1.8}deg) translateX(${
+              parallaxX * 0.5
+            }px)`,
           }}
           viewBox="0 0 200 100"
         >
-          <rect x="10" y="20" width="180" height="60" rx="10" fill="none" stroke="currentColor" strokeWidth="2" />
+          <rect
+            x="10"
+            y="20"
+            width="180"
+            height="60"
+            rx="10"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          />
           {[30, 50, 70, 90, 110, 130, 150, 170].map((x, i) => (
-            <line key={i} x1={x} y1="20" x2={x} y2="80" stroke="currentColor" strokeWidth="1" opacity="0.5" />
+            <line
+              key={i}
+              x1={x}
+              y1="20"
+              x2={x}
+              y2="80"
+              stroke="currentColor"
+              strokeWidth="1"
+              opacity="0.5"
+            />
           ))}
         </svg>
 
@@ -243,13 +311,30 @@ const Home = () => {
         <svg
           className="animation-element resistance-band"
           style={{
-            transform: `scale(${kettlebell2Scale}) translateX(${-parallaxX * 0.5}px) translateY(${parallaxY}px)`,
+            transform: `scale(${kettlebell2Scale}) translateX(${
+              -parallaxX * 0.5
+            }px) translateY(${parallaxY}px)`,
           }}
           viewBox="0 0 100 100"
         >
-          <path d="M 20 30 Q 50 20 80 30" fill="none" stroke="currentColor" strokeWidth="3" />
-          <path d="M 20 50 Q 50 40 80 50" fill="none" stroke="currentColor" strokeWidth="3" />
-          <path d="M 20 70 Q 50 60 80 70" fill="none" stroke="currentColor" strokeWidth="3" />
+          <path
+            d="M 20 30 Q 50 20 80 30"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="3"
+          />
+          <path
+            d="M 20 50 Q 50 40 80 50"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="3"
+          />
+          <path
+            d="M 20 70 Q 50 60 80 70"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="3"
+          />
           <circle cx="20" cy="30" r="4" fill="currentColor" />
           <circle cx="80" cy="30" r="4" fill="currentColor" />
           <circle cx="20" cy="70" r="4" fill="currentColor" />
@@ -260,7 +345,9 @@ const Home = () => {
         <svg
           className="animation-element heart-graph"
           style={{
-            transform: `translateX(${parallaxX * 0.3}px) translateY(${-scrollProgress * 0.5}px)`,
+            transform: `translateX(${parallaxX * 0.3}px) translateY(${
+              -scrollProgress * 0.5
+            }px)`,
           }}
           viewBox="0 0 300 100"
         >
@@ -270,18 +357,36 @@ const Home = () => {
             stroke="currentColor"
             strokeWidth="2"
           />
-          <line x1="10" y1="80" x2="290" y2="80" stroke="currentColor" strokeWidth="1" opacity="0.3" />
+          <line
+            x1="10"
+            y1="80"
+            x2="290"
+            y2="80"
+            stroke="currentColor"
+            strokeWidth="1"
+            opacity="0.3"
+          />
         </svg>
 
         {/* 하단 우측 - 진행 원형 */}
         <svg
           className="animation-element progress-circle"
           style={{
-            transform: `rotate(${scrollProgress * 3.6}deg) translateX(${-parallaxX * 0.5}px)`,
+            transform: `rotate(${scrollProgress * 3.6}deg) translateX(${
+              -parallaxX * 0.5
+            }px)`,
           }}
           viewBox="0 0 100 100"
         >
-          <circle cx="50" cy="50" r="35" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.3" />
+          <circle
+            cx="50"
+            cy="50"
+            r="35"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            opacity="0.3"
+          />
           <circle
             cx="50"
             cy="50"
@@ -291,9 +396,19 @@ const Home = () => {
             strokeWidth="2"
             strokeDasharray={`${220 * (0.3 + scrollProgress * 0.007)} 220`}
             strokeLinecap="round"
-            style={{ transform: "rotate(-90deg)", transformOrigin: "50px 50px" }}
+            style={{
+              transform: "rotate(-90deg)",
+              transformOrigin: "50px 50px",
+            }}
           />
-          <text x="50" y="55" textAnchor="middle" fontSize="16" fill="currentColor" opacity="0.6">
+          <text
+            x="50"
+            y="55"
+            textAnchor="middle"
+            fontSize="16"
+            fill="currentColor"
+            opacity="0.6"
+          >
             {progressPercent}%
           </text>
         </svg>
@@ -323,20 +438,29 @@ const Home = () => {
         </div>
 
         <nav className="nav-menu">
-          <a href="#features" className="nav-link">기능</a>
-          <a href="#about" className="nav-link">소개</a>
-          <a href="#pricing" className="nav-link">요금</a>
+          <a href="#features" className="nav-link">
+            기능
+          </a>
+          <a href="#about" className="nav-link">
+            소개
+          </a>
+          <a href="#pricing" className="nav-link">
+            요금
+          </a>
         </nav>
 
         <div className="header-right">
-          <button className="theme-toggle" onClick={toggleDarkMode} title="테마 전환">
+          <button
+            className="theme-toggle"
+            onClick={toggleDarkMode}
+            title="테마 전환"
+          >
             {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
           </button>
 
           {/* 로그인 상태 */}
           {user ? (
             <div className="user-menu" ref={menuRef}>
-              
               {/* ★ 여기만 수정됨 — header-avatar 추가 ★ */}
               <img
                 src={
@@ -356,34 +480,36 @@ const Home = () => {
                   onClick={toggleMenu}
                   style={{ cursor: "pointer", userSelect: "none" }}
                 >
-                  {user.name} <span className={`arrow ${menuOpen ? "open" : ""}`}>▼</span>
+                  {user.name}{" "}
+                  <span className={`arrow ${menuOpen ? "open" : ""}`}>▼</span>
                 </span>
               </div>
 
               {menuOpen && (
-  <ul className="user-dropdown">
+                <ul className="user-dropdown">
+                  {/* 프로필 */}
+                  <li onClick={() => navigate("/profile")}>프로필 수정</li>
 
-    {/* 프로필 */}
-    <li onClick={() => navigate("/profile")}>프로필 수정</li>
+                  {/* ★ 관리자 전용 메뉴 */}
+                  {user?.email === "admin@test.com" && (
+                    <li
+                      style={{ color: "#ffeb70", fontWeight: "600" }}
+                      onClick={() => navigate("/admin")}
+                    >
+                      관리자 페이지
+                    </li>
+                  )}
 
-    {/* ★ 관리자 전용 메뉴 */}
-    {user?.email === "admin@test.com" && (
-      <li
-        style={{ color: "#ffeb70", fontWeight: "600" }}
-        onClick={() => navigate("/admin")}
-      >
-        관리자 페이지
-      </li>
-    )}
-
-    {/* 로그아웃 */}
-    <li onClick={logout}>로그아웃</li>
-  </ul>
-)}
-
+                  {/* 로그아웃 */}
+                  <li onClick={logout}>로그아웃</li>
+                </ul>
+              )}
             </div>
           ) : (
-            <button className="btn login-btn" onClick={() => navigate("/login")}>
+            <button
+              className="btn login-btn"
+              onClick={() => navigate("/login")}
+            >
               로그인
             </button>
           )}
@@ -401,7 +527,7 @@ const Home = () => {
             className="hero-title-mantis"
             style={{
               opacity,
-              transform: `translateY(${(1 - opacity) * 20}px)`
+              transform: `translateY(${(1 - opacity) * 20}px)`,
             }}
           >
             {currentContent.main}
@@ -411,7 +537,7 @@ const Home = () => {
             className="hero-subtitle-mantis"
             style={{
               opacity: textOpacity,
-              transform: `translateY(${(1 - textOpacity) * 10}px)`
+              transform: `translateY(${(1 - textOpacity) * 10}px)`,
             }}
           >
             {currentContent.sub}
@@ -422,10 +548,13 @@ const Home = () => {
               className="hero-buttons-mantis"
               style={{
                 opacity: textOpacity,
-                transform: `scale(${0.9 + textOpacity * 0.1})`
+                transform: `scale(${0.9 + textOpacity * 0.1})`,
               }}
             >
-              <button className="btn primary-btn" onClick={() => navigate("/signup")}>
+              <button
+                className="btn primary-btn"
+                onClick={() => navigate("/signup")}
+              >
                 <span>무료로 시작하기</span>
                 <span className="btn-arrow">→</span>
               </button>
@@ -450,7 +579,10 @@ const Home = () => {
         <div className="section-container">
           <div className="section-header">
             <h2>AI 트레이닝의 힘</h2>
-            <p>최첨단 인공지능과 빅데이터 기술로 당신만의 퍼스널 트레이너를 경험하세요</p>
+            <p>
+              최첨단 인공지능과 빅데이터 기술로 당신만의 퍼스널 트레이너를
+              경험하세요
+            </p>
           </div>
         </div>
       </section>
@@ -490,7 +622,10 @@ const Home = () => {
 
           <div className="pricing-grid">
             {pricingPlans.map((plan, index) => (
-              <div key={index} className={`pricing-card ${plan.popular ? "popular" : ""}`}>
+              <div
+                key={index}
+                className={`pricing-card ${plan.popular ? "popular" : ""}`}
+              >
                 {plan.popular && <div className="popular-badge">⭐ 인기</div>}
 
                 <h3>{plan.name}</h3>
