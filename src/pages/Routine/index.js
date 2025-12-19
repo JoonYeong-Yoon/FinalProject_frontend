@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import "../../styles/Routine.css";
 import AnalysisPage from "./AnalysisPage";
 import UploadPage from "./UploadPage";
+import Recommend from "./Recommend";
 
 export default function Routine() {
   const navigate = useNavigate();
@@ -868,7 +869,8 @@ export default function Routine() {
         {/* -------------------- AI 추천 -------------------- */}
         {tab === 2 && (
           <div className="content-box ai fade">
-            <div className="section-header">
+            <Recommend />
+            {/* <div className="section-header">
               <div className="ai-badge">
                 <svg
                   width="16"
@@ -1066,7 +1068,7 @@ export default function Routine() {
                 <line x1="5" y1="12" x2="19" y2="12"></line>
                 <polyline points="12 5 19 12 12 19"></polyline>
               </svg>
-            </button>
+            </button> */}
           </div>
         )}
       </div>
