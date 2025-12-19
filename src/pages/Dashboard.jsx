@@ -7,6 +7,7 @@ import ParticleHuman from "../components/ParticleHuman";
 import { EXERCISE_DB } from "../data/EXERCISE_DB";
 import { MUSCLE_INDEXES } from "../data/MUSCLE_INDEXES";
 import ChatBot from "../components/ChatBot";
+import { ChatMain } from "../api/exercise";
 
 // ============================
 // ⭐ 복근 KEY 정의
@@ -240,13 +241,14 @@ export default function Dashboard() {
     setInputMessage("");
 
     try {
-      const res = await fetch("http://localhost:8001/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
+      const data = await ChatMain(body);
+      // const res = await fetch("http://localhost:8001/api/chat", {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify(body),
+      // });
 
-      const data = await res.json();
+      // const data = await res.json();
       addMessage("bot", data.response);
     } catch (error) {
       addMessage("bot", "⚠️ 서버 연결 오류 발생");

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { ChatFix } from "../api/exercise";
 // ================================
 // 고정형 질문 버튼 목록
 // ================================
@@ -21,7 +22,6 @@ const ChatBot = ({
 }) => {
   //   const [messages, setMessages] = useState([]); // 대화 히스토리
   //   const [input, setInput] = useState("");
-  console.log(character);
   // 메시지 추가 함수
   const addMessage = (sender, text) => {
     setMessages((prev) => [...prev, { sender, text }]);
@@ -40,13 +40,7 @@ const ChatBot = ({
     };
 
     try {
-      const res = await fetch("http://localhost:8001/api/chat/fixed", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-
-      const data = await res.json();
+      const data = await ChatFix(body);
       addMessage("bot", data.response);
     } catch (e) {
       addMessage("bot", "⚠️ 고정형 질문 처리 중 에러 발생");

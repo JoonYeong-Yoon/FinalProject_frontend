@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:8000",
+  baseURL: "http://192.168.0.32:8000",
   // baseURL: "http://192.168.0.27:8000", // 🔥 네 PC FastAPI 서버 주소
   withCredentials: true,
   headers: {
@@ -10,9 +10,13 @@ const api = axios.create({
   },
 });
 
-export const api_formdata = axios.create({
-  baseURL: "http://localhost:8000",
+export const wearable_api = axios.create({
+  baseURL: "http://192.168.0.32:8001",
   // baseURL: "http://192.168.0.27:8000", // 🔥 네 PC FastAPI 서버 주소
+  withCredentials: true,
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
 // 🔥 요청마다 토큰을 자동으로 넣어주는 interceptor
