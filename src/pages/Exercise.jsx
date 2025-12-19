@@ -116,6 +116,7 @@ export default function Exercise() {
       // }
     } catch (error) {
       console.error(error);
+      setIsAnalyzing(false);
       alert("서버 연결 실패");
     } finally {
       setIsAnalyzing(false);
