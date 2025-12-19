@@ -1,6 +1,5 @@
-const SelectTime = ({ setSelectedTime }) => {
+const SelectTime = ({ handleOnClick }) => {
   const times = [20, 30, 40, 60];
-
   return (
     <div
       style={{
@@ -14,7 +13,7 @@ const SelectTime = ({ setSelectedTime }) => {
         <button
           key={time}
           type="button"
-          onClick={() => setSelectedTime(time)}
+          onClick={() => handleOnClick(time)}
           style={{
             padding: "12px 20px",
             fontSize: "16px",

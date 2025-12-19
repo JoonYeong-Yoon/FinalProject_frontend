@@ -30,6 +30,7 @@ export default function Login() {
     try {
       // 1️⃣ 로그인 요청
       const data = await LoginAPI(email, pw);
+      console.log(data);
 
       const token = data.access_token;
 
@@ -38,6 +39,7 @@ export default function Login() {
 
       // 3️⃣ 로그인한 유저 정보 불러오기
       const userData = await getMyInfo();
+      console.log(userData);
       console.log("📊 유저 데이터:", userData); // 디버깅용
 
       // 4️⃣ user 정보 저장
