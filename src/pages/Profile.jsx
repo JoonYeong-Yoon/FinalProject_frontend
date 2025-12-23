@@ -30,7 +30,7 @@ export default function Profile() {
   const [profile, setProfile] = useState({
     name: "",
     email: "",
-    birth_date: "",
+    birthdate: "",
     height_cm: "",
     weight_kg: "",
     body_fat: "",
@@ -105,7 +105,7 @@ export default function Profile() {
       const updated = {
         name: editData.name || null,
         email: editData.email || null,
-        birth_date: editData.birth_date || null,
+        birthdate: editData.birthdate || null,
         height_cm: editData.height_cm ? parseFloat(editData.height_cm) : null,
         weight_kg: editData.weight_kg ? parseFloat(editData.weight_kg) : null,
         body_fat: editData.body_fat ? parseFloat(editData.body_fat) : null,
@@ -333,8 +333,8 @@ export default function Profile() {
                 <input
                   type="date"
                   className={editing ? "body-input" : "body-input readonly"}
-                  value={editData.birth_date || ""}
-                  onChange={(e) => change("birth_date", e.target.value)}
+                  value={editData.birthdate || ""}
+                  onChange={(e) => change("birthdate", e.target.value)}
                   disabled={!editing}
                 />
               </div>
