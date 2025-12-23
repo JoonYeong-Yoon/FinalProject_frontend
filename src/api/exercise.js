@@ -7,7 +7,7 @@ export const UploadExerciseVideo = async (file) => {
     const formData = new FormData();
     formData.append("video", file);
     const res = await axios.post(
-      "http://192.168.0.32:8000/ai/analyze-video",
+      "http://localhost:8000/ai/analyze-video",
       formData,
       {
         responseType: "blob",
