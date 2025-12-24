@@ -1,5 +1,5 @@
 // src/pages/Exercise.jsx
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Exercise.css";
 import { UploadExerciseVideo } from "../api/exercise";
@@ -11,12 +11,15 @@ export default function Exercise() {
   const [selectedRoutine, setSelectedRoutine] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState(null);
+  
+  // AI 추천 루틴 상태 추가
+  const [aiRecommendedRoutine, setAiRecommendedRoutine] = useState(null);
 
   const fileInputRef = useRef(null);
   const API_BASE = "http://192.168.0.27:8000";
 
-  // 운동 루틴 목록
-  const routines = [
+  // 기본 운동 루틴 목록
+  const defaultRoutines = [
     {
       id: 1,
       name: "풀바디 루틴 A",
@@ -52,6 +55,53 @@ export default function Exercise() {
     },
   ];
 
+  // 표시할 루틴 목록 (AI 추천이 있으면 맨 앞에 추가)
+  const [routines, setRoutines] = useState(defaultRoutines);
+
+  // AI 분석 결과가 들어왔을 때 루틴 목록 업데이트
+  useEffect(() => {
+    // 로컬 스토리지나 API 응답에서 AI 추천 루틴을 가져오는 로직
+    // 여기서는 예시로 첫 번째 파일(pasted_content.txt)의 구조를 참고하여 매핑합니다.
+    const fetchAiRoutine = async () => {
+      try {
+        // 실제 환경에서는 API 호출 결과나 전역 상태에서 가져옵니다.
+        // 예시 데이터 구조 매핑:
+        /*
+        const mockAiData = {
+          total_time_min: 15,
+          items: [
+            { exercise_name: "standing side crunch", set_count: 3, duration_sec: 45, met: 4 },
+            { exercise_name: "plank", set_count: 3, duration_sec: 60, met: 3 }
+          ]
+        };
+        */
+        
+        // 만약 aiAnalysis나 특정 상태에 데이터가 있다면 변환하여 routines에 추가
+        if (aiRecommendedRoutine) {
+          const formattedAiRoutine = {
+            id: "ai-custom",
+            name: "✨ AI 맞춤 추천 루틴",
+            exercises: aiRecommendedRoutine.items.map(item => ({
+              name: item.exercise_name, // 필요시 exerciseNameKo 매핑 사용
+              sets: item.set_count,
+              reps: item.duration_sec > 0 ? `${item.duration_sec}초` : `${item.reps}회`
+            })),
+            difficulty: "중급", // AI 분석에 따라 가변 가능
+            duration: aiRecommendedRoutine.total_time_min,
+            isAiGenerated: true
+          };
+          
+          setRoutines([formattedAiRoutine, ...defaultRoutines]);
+          setSelectedRoutine(formattedAiRoutine); // 자동으로 AI 루틴 선택
+        }
+      } catch (error) {
+        console.error("AI 루틴 로드 실패:", error);
+      }
+    };
+
+    fetchAiRoutine();
+  }, [aiRecommendedRoutine]);
+
   // 자세 체크포인트
   const postureCheckpoints = [
     {
@@ -82,15 +132,13 @@ export default function Exercise() {
     "⚠️ 등을 곧게 펴주세요",
   ];
 
-  console.log(isAnalyzing);
   // 파일 업로드 처리
   const handleMediaSelect = async (e) => {
     setIsAnalyzing(true);
 
     const file = e.target.files[0];
-    console.log(file);
-
     if (!file) return;
+    
     setUploadedMedia({
       url: URL.createObjectURL(file),
       type: file.type,
@@ -98,25 +146,18 @@ export default function Exercise() {
 
     try {
       const res = await UploadExerciseVideo(file);
-      const videoBlob = res;
-      const videoUrl = URL.createObjectURL(videoBlob);
-      setUploadedMedia({
-        url: videoUrl,
-        type: file.type,
-      });
-
-      // const res = await fetch(`${API_BASE}/web/video/upload`, {
-      //   method: "POST",
-      //   body: formData,
-      // });
-      setAiAnalysis(videoBlob);
-
-      // if (data.ai_result?.knee_warning) {
-      //   alert("⚠ 무릎 위험: 자세 교정이 필요합니다!");
-      // }
+      // res에 AI 분석 결과와 추천 루틴이 포함되어 있다고 가정
+      // 만약 res가 Blob이라면 별도의 JSON 데이터를 받는 API 구조 확인 필요
+      
+      setAiAnalysis(res);
+      
+      // 예시: 서버 응답에 ai_recommended_routine이 포함된 경우
+      if (res.ai_recommended_routine) {
+        setAiRecommendedRoutine(res.ai_recommended_routine);
+      }
+      
     } catch (error) {
       console.error(error);
-      setIsAnalyzing(false);
       alert("서버 연결 실패");
     } finally {
       setIsAnalyzing(false);
@@ -129,7 +170,7 @@ export default function Exercise() {
       alert("루틴을 먼저 선택해주세요!");
       return;
     }
-    alert("운동을 시작합니다! 🏋️‍♂️");
+    alert(`${selectedRoutine.name} 운동을 시작합니다! 🏋️‍♂️`);
   };
 
   // 운동 완료
@@ -170,7 +211,7 @@ export default function Exercise() {
                 key={routine.id}
                 className={`routine-card ${
                   selectedRoutine?.id === routine.id ? "selected" : ""
-                }`}
+                } ${routine.isAiGenerated ? "ai-routine" : ""}`}
                 onClick={() => setSelectedRoutine(routine)}
               >
                 <div className="routine-header">
@@ -349,5 +390,3 @@ export default function Exercise() {
     </div>
   );
 }
-
-console.log(localStorage.getItem("access_token"));
