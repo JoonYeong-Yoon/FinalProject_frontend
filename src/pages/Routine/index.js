@@ -453,7 +453,7 @@ export default function Routine() {
             {!showCustomCreator ? (
               <>
                 <UploadPage />
-                {/*<AnalysisPage /> */}
+                {/*<AnalysisPage />`*/}
                 {/* <button
                   className="create-routine-btn"
                   onClick={() => setShowCustomCreator(true)}
