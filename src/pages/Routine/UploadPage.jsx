@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 
 function UploadPage() {
   const [file, setFile] = useState(null);
@@ -11,12 +11,15 @@ function UploadPage() {
   const [duration, setDuration] = useState(30);
   const [uploadMode, setUploadMode] = useState("manual_file");
   const [watchType, setWatchType] = useState("galaxy");
-  const [rawJsonInput, setRawJsonInput] = useState("");
+  const [serverData, setServerData] = useState(null);  // 서버에서 받아온 데이터
   
   // Chat state
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
   const [selectedCharacter, setSelectedCharacter] = useState("default");
+
+  // 파일 입력 ref 추가
+  const fileInputRef = useRef(null);
 
   const BACKEND_URL = "http://localhost:8001";
 
@@ -30,22 +33,22 @@ function UploadPage() {
     "cross lunge": "크로스 런지",
     "good morning exercise": "굿모닝 운동",
     "lying leg raise": "레그레이즈",
-    crunch: "크런치",
+    "crunch": "크런치",
     "bicycle crunch": "바이시클 크런치",
     "scissor cross": "시저스 크로스",
     "hip thrust": "힙 쓰러스트",
-    plank: "플랭크",
+    "plank": "플랭크",
     "push up": "푸시업",
     "knee push up": "니 푸시업",
     "Y-exercise": "Y-운동",
   };
 
   const characters = [
-    { id: "default", name: "헬스 코치 지니", color: "bg-pink-500" },
-    { id: "trainer", name: "근육맨 트레이너", color: "bg-blue-500" },
-    { id: "yoga", name: "요가 마스터", color: "bg-green-500" },
-    { id: "cardio", name: "유산소 전문가", color: "bg-orange-500" },
-    { id: "diet", name: "영양사 민희", color: "bg-purple-500" },
+  { id: "default", name: "💪 헬스 코치 지니", specialty: "종합 피트니스", color: "#ec4899" },
+  { id: "trainer", name: "🏋️ 근육맨 트레이너", specialty: "근력/벌크업", color: "#3b82f6" },
+  { id: "yoga", name: "🧘 요가 마스터 수련", specialty: "유연성/명상", color: "#22c55e" },
+  { id: "cardio", name: "🏃 유산소 전문가", specialty: "유산소/심폐지구력", color: "#f97316" },
+  { id: "diet", name: "🥗 영양사 민희", specialty: "식단/영양", color: "#a855f7" },
   ];
 
   const callApi = async (url, options) => {
@@ -94,13 +97,41 @@ function UploadPage() {
     });
   };
 
-  const handleAutoSubmit = async () => {
-    let parsedJson;
-
+  // 서버에서 앱이 보낸 데이터 받아오기
+  const handleFetchFromServer = async () => {
+    const validUserId = userId && userId.trim() ? userId : "test123";
+    
+    setLoading(true);
+    setError(null);
+    
     try {
-      parsedJson = JSON.parse(rawJsonInput);
-    } catch (e) {
-      alert("❌ JSON 파싱 오류: 올바른 JSON 형식인지 확인하세요.");
+      // 서버에서 최신 앱 전송 데이터 조회
+      const response = await fetch(`${BACKEND_URL}/api/app/latest?user_id=${validUserId}&watch_type=${watchType}`);
+      
+      if (!response.ok) {
+        throw new Error(`서버 응답 오류 (${response.status})`);
+      }
+      
+      const data = await response.json();
+      
+      if (data && data.raw_json) {
+        setServerData(data.raw_json);
+        alert("✅ 서버에서 데이터를 성공적으로 받아왔습니다!");
+      } else {
+        throw new Error("서버에 저장된 데이터가 없습니다. 앱에서 먼저 데이터를 전송해주세요.");
+      }
+    } catch (err) {
+      setError(err.message);
+      setServerData(null);
+    }
+    
+    setLoading(false);
+  };
+
+  // 서버 데이터로 분석 실행
+  const handleServerDataAnalyze = async () => {
+    if (!serverData) {
+      alert("먼저 서버에서 데이터를 받아오세요.");
       return;
     }
 
@@ -108,7 +139,7 @@ function UploadPage() {
 
     const body = {
       user_id: validUserId,
-      raw_json: parsedJson,
+      raw_json: serverData,
       summary: null,
       difficulty,
       duration,
@@ -134,7 +165,22 @@ function UploadPage() {
     if (uploadMode === "manual_file") {
       handleFileSubmit();
     } else {
-      handleAutoSubmit();
+      handleServerDataAnalyze();
+    }
+  };
+
+  // 파일 업로드 버튼 클릭 핸들러
+  const handleFileButtonClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  // 파일 선택 핸들러
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setFile(selectedFile);
     }
   };
 
@@ -146,10 +192,76 @@ function UploadPage() {
     return `${m}분 ${s}초`;
   };
 
-  const handleSendChat = () => {
+  // 고정형 질문 핸들러 (백엔드 /api/chat/fixed 호출)
+  const handleFixedQuestion = async (questionType) => {
+    const validUserId = userId && userId.trim() ? userId : "test123";
+    
+    // 사용자 메시지 추가 (UI 표시용)
+    const questionLabels = {
+      // 기존 건강 분석 6개
+      weekly_report: "📊 이번 주 건강 리포트 보여줘",
+      today_recommendation: "🏋️ 오늘 운동 추천해줘",
+      weekly_steps: "👟 지난주 걸음수 분석해줘",
+      sleep_report: "😴 수면 패턴 분석해줘",
+      heart_rate: "❤️ 심박수 분석해줘",
+      health_score: "🏅 건강 점수 알려줘",
+      // 목표별 운동 추천 5개
+      muscle_gain: "💪 근육 증가 목표로 운동 추천해줘",
+      diet_goal: "🔥 다이어트 목표로 운동 추천해줘",
+      endurance: "🏃 지구력 향상 목표로 운동 추천해줘",
+      flexibility: "🧘 유연성 향상 목표로 운동 추천해줘",
+      mindfulness: "🧠 마음챙김/스트레스 해소 운동 추천해줘",
+    };
+    
+    const userMessage = questionLabels[questionType] || questionType;
+    setChatMessages(prev => [...prev, { role: "user", content: userMessage }]);
+    
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/chat/fixed`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: validUserId,
+          question_type: questionType,
+          character: selectedCharacter,
+        }),
+      });
+      
+      const data = await response.json();
+      const botMessage = data.response || data.message || "응답을 받지 못했습니다.";
+      setChatMessages(prev => [...prev, { role: "assistant", content: botMessage }]);
+    } catch (err) {
+      setChatMessages(prev => [...prev, { role: "assistant", content: `⚠️ 오류: ${err.message}` }]);
+    }
+  };
+
+  // 자유형 채팅 핸들러 (백엔드 /api/chat 호출)
+  const handleSendChat = async () => {
     if (!chatInput.trim()) return;
-    setChatMessages([...chatMessages, { role: "user", content: chatInput }]);
+    
+    const validUserId = userId && userId.trim() ? userId : "test123";
+    const userMessage = chatInput;
+    
+    setChatMessages(prev => [...prev, { role: "user", content: userMessage }]);
     setChatInput("");
+    
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: validUserId,
+          message: userMessage,
+          character: selectedCharacter,
+        }),
+      });
+      
+      const data = await response.json();
+      const botMessage = data.response || data.message || "응답을 받지 못했습니다.";
+      setChatMessages(prev => [...prev, { role: "assistant", content: botMessage }]);
+    } catch (err) {
+      setChatMessages(prev => [...prev, { role: "assistant", content: `⚠️ 오류: ${err.message}` }]);
+    }
   };
 
   const getMETBadgeColor = (met) => {
@@ -165,6 +277,15 @@ function UploadPage() {
       color: "white",
       padding: window.innerWidth >= 768 ? "24px" : "16px"
     }}>
+      {/* 숨겨진 파일 입력 */}
+      <input
+        type="file"
+        accept=".db,.zip"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        style={{ display: "none" }}
+      />
+
       <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
         {/* Header */}
         <div style={{
@@ -226,7 +347,7 @@ function UploadPage() {
               if (uploadMode !== "manual_file") e.currentTarget.style.borderColor = "#4b5563";
             }}
           >
-            zip/db 데이터 파일 업로드
+            워치 데이터 파일 업로드
           </button>
           <button
             onClick={() => setUploadMode("app_upload")}
@@ -268,30 +389,80 @@ function UploadPage() {
             alignItems: "center",
             gap: "16px"
           }}>
-            <button
-              onClick={fetchLatestData}
-              style={{
-                padding: "8px 16px",
-                background: "#0d0d0d",
-                border: "1px solid #4b5563",
-                borderRadius: "8px",
-                fontSize: "13px",
-                color: "#d1d5db",
-                transition: "all 0.3s",
-                cursor: "pointer",
-                whiteSpace: "nowrap"
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = "#c084fc";
-                e.currentTarget.style.color = "#c084fc";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = "#4b5563";
-                e.currentTarget.style.color = "#d1d5db";
-              }}
-            >
-              파일 업로드<br/>(클릭하세요)
-            </button>
+            {/* 모드별 버튼 - 파일 업로드 또는 서버 데이터 전송 */}
+            {uploadMode === "manual_file" ? (
+              <button
+                onClick={handleFileButtonClick}
+                style={{
+                  padding: "8px 16px",
+                  background: file ? "linear-gradient(to right, #10b981, #059669)" : "#0d0d0d",
+                  border: file ? "none" : "1px solid #4b5563",
+                  borderRadius: "8px",
+                  fontSize: "13px",
+                  color: file ? "white" : "#d1d5db",
+                  transition: "all 0.3s",
+                  cursor: "pointer",
+                  whiteSpace: "nowrap",
+                  minWidth: "120px"
+                }}
+                onMouseEnter={(e) => {
+                  if (!file) {
+                    e.currentTarget.style.borderColor = "#c084fc";
+                    e.currentTarget.style.color = "#c084fc";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!file) {
+                    e.currentTarget.style.borderColor = "#4b5563";
+                    e.currentTarget.style.color = "#d1d5db";
+                  }
+                }}
+              >
+                {file ? (
+                  <>
+                    ✅ {file.name.length > 15 ? file.name.substring(0, 15) + "..." : file.name}
+                  </>
+                ) : (
+                  <>
+                    파일 업로드<br/>(클릭하세요)
+                  </>
+                )}
+              </button>
+            ) : (
+              <button
+                onClick={handleFetchFromServer}
+                style={{
+                  padding: "8px 16px",
+                  background: serverData ? "linear-gradient(to right, #10b981, #059669)" : "#0d0d0d",
+                  border: serverData ? "none" : "1px solid #4b5563",
+                  borderRadius: "8px",
+                  fontSize: "13px",
+                  color: serverData ? "white" : "#d1d5db",
+                  transition: "all 0.3s",
+                  cursor: "pointer",
+                  whiteSpace: "nowrap",
+                  minWidth: "140px"
+                }}
+                onMouseEnter={(e) => {
+                  if (!serverData) {
+                    e.currentTarget.style.borderColor = "#c084fc";
+                    e.currentTarget.style.color = "#c084fc";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!serverData) {
+                    e.currentTarget.style.borderColor = "#4b5563";
+                    e.currentTarget.style.color = "#d1d5db";
+                  }
+                }}
+              >
+                {serverData ? (
+                  <>✅ 데이터 수신 완료</>
+                ) : (
+                  <>서버에서 데이터 전송<br/>(클릭하세요)</>
+                )}
+              </button>
+            )}
 
             {uploadMode === "app_upload" && (
               <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
@@ -359,18 +530,18 @@ function UploadPage() {
 
             <button
               onClick={handleAnalyze}
-              disabled={loading || (uploadMode === "manual_file" ? !file : !rawJsonInput)}
+              disabled={loading || (uploadMode === "manual_file" ? !file : !serverData)}
               style={{
                 padding: "8px 24px",
-                background: loading || (uploadMode === "manual_file" ? !file : !rawJsonInput)
+                background: loading || (uploadMode === "manual_file" ? !file : !serverData)
                   ? "#4b5563"
                   : "linear-gradient(to right, #eab308, #f59e0b)",
                 border: "none",
                 borderRadius: "8px",
-                color: loading || (uploadMode === "manual_file" ? !file : !rawJsonInput) ? "#9ca3af" : "#000",
+                color: loading || (uploadMode === "manual_file" ? !file : !serverData) ? "#9ca3af" : "#000",
                 fontSize: "14px",
                 fontWeight: "600",
-                cursor: loading || (uploadMode === "manual_file" ? !file : !rawJsonInput) ? "not-allowed" : "pointer",
+                cursor: loading || (uploadMode === "manual_file" ? !file : !serverData) ? "not-allowed" : "pointer",
                 transition: "all 0.3s"
               }}
             >
@@ -392,73 +563,6 @@ function UploadPage() {
           </div>
         )}
 
-        {/* File Upload Section (when manual_file mode) */}
-        {uploadMode === "manual_file" && (
-          <div style={{
-            background: "#1a1a1a",
-            borderRadius: "12px",
-            border: "1px solid #374151",
-            padding: "16px",
-            marginBottom: "24px"
-          }}>
-            <div style={{
-              border: "2px dashed #4b5563",
-              borderRadius: "8px",
-              padding: "24px",
-              textAlign: "center",
-              transition: "border-color 0.3s"
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.borderColor = "#a855f7"}
-            onMouseLeave={(e) => e.currentTarget.style.borderColor = "#4b5563"}>
-              <input
-                type="file"
-                accept=".db,.zip"
-                onChange={(e) => setFile(e.target.files[0])}
-                style={{ display: "none" }}
-                id="file-upload"
-              />
-              <label htmlFor="file-upload" style={{ cursor: "pointer" }}>
-                <div style={{ fontSize: "32px", marginBottom: "8px" }}>📁</div>
-                <p style={{ color: "#9ca3af", fontSize: "14px" }}>
-                  {file ? file.name : "ZIP/DB 파일을 선택하세요"}
-                </p>
-              </label>
-            </div>
-          </div>
-        )}
-
-        {/* JSON Input Section */}
-        {uploadMode === "app_upload" && (
-          <div style={{
-            background: "#1a1a1a",
-            borderRadius: "12px",
-            border: "1px solid #374151",
-            padding: "16px",
-            marginBottom: "24px"
-          }}>
-            <textarea
-              placeholder="Health Data JSON을 입력하세요..."
-              value={rawJsonInput}
-              onChange={(e) => setRawJsonInput(e.target.value)}
-              style={{
-                width: "100%",
-                height: "128px",
-                padding: "12px",
-                background: "#0d0d0d",
-                border: "1px solid #4b5563",
-                borderRadius: "8px",
-                color: "#4ade80",
-                fontFamily: "monospace",
-                fontSize: "14px",
-                resize: "none",
-                outline: "none"
-              }}
-              onFocus={(e) => e.target.style.borderColor = "#a855f7"}
-              onBlur={(e) => e.target.style.borderColor = "#4b5563"}
-            />
-          </div>
-        )}
-
         {/* Main Content Grid */}
         <div style={{
           display: "grid",
@@ -472,7 +576,9 @@ function UploadPage() {
               color: "white",
               borderRadius: "12px",
               padding: "20px",
-              height: "fit-content"
+              height: "600px",
+              display: "flex",
+              flexDirection: "column"
             }}>
               <h3 style={{
                 fontWeight: "bold",
@@ -528,7 +634,10 @@ function UploadPage() {
               border: "1px solid #374151",
               color: "white",
               borderRadius: "12px",
-              padding: "20px"
+              padding: "20px",
+              height: "600px",           // ← 추가
+              display: "flex",           // ← 추가
+              flexDirection: "column"    // ← 추가
             }}>
               <h3 style={{
                 fontWeight: "bold",
@@ -694,32 +803,53 @@ function UploadPage() {
                 </select>
               </div>
               
-              {/* Character Tags */}
+              {/* Fixed Question Buttons - 기존 분석 6개 + 목표별 추천 5개 */}
               <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-                {["근육 증가 목표", "다이어트", "지구력 향상", "유연성", "마음챙김"].map((tag, idx) => (
-                  <span
+                {[
+                  // 기존 건강 분석 6개
+                  { label: "주간 리포트", type: "weekly_report" },
+                  { label: "지난주 걸음수", type: "weekly_steps" },
+                  { label: "수면 분석", type: "sleep_report" },
+                  { label: "심박수 분석", type: "heart_rate" },
+                  { label: "건강 점수", type: "health_score" },
+                  { label: "오늘 운동 추천", type: "today_recommendation" },
+                  // 목표별 운동 추천 5개
+                  { label: "근육증가", type: "muscle_gain" },
+                  { label: "다이어트", type: "diet_goal" },
+                  { label: "지구력", type: "endurance" },
+                  { label: "유연성", type: "flexibility" },
+                  { label: "마음챙김", type: "mindfulness" },
+                ].map((item, idx) => (
+                  <button
                     key={idx}
+                    onClick={() => handleFixedQuestion(item.type)}
                     style={{
-                      padding: "4px 8px",
-                      borderRadius: "4px",
-                      fontSize: "12px",
+                      padding: "5px 10px",
+                      borderRadius: "6px",
+                      fontSize: "11px",
                       cursor: "pointer",
-                      transition: "background-color 0.3s",
-                      background: idx === 0 ? "#9333ea" : "#374151",
-                      color: idx === 0 ? "white" : "#d1d5db"
+                      transition: "all 0.3s",
+                      background: "#374151",
+                      border: "1px solid #4b5563",
+                      color: "#d1d5db"
                     }}
                     onMouseEnter={(e) => {
-                      if (idx !== 0) e.currentTarget.style.background = "#4b5563";
+                      e.currentTarget.style.background = "#9333ea";
+                      e.currentTarget.style.borderColor = "#9333ea";
+                      e.currentTarget.style.color = "white";
                     }}
                     onMouseLeave={(e) => {
-                      if (idx !== 0) e.currentTarget.style.background = "#374151";
+                      e.currentTarget.style.background = "#374151";
+                      e.currentTarget.style.borderColor = "#4b5563";
+                      e.currentTarget.style.color = "#d1d5db";
                     }}
                   >
-                    {tag}
-                  </span>
+                    {item.label}
+                  </button>
                 ))}
               </div>
             </div>
+
 
             {/* Chat Messages */}
             <div style={{
