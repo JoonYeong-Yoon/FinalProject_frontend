@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Calendar, Clock, Flame, Trophy, Edit, Sparkles, SkipForward, X } from 'lucide-react';
+import { recommendedByTime, CoachingStart,CoachingNext, CoachingCancel } from "../../api/recommend";
 
 const SelectTime = ({ handleOnClick }) => {
-  const timeOptions = [20, 30, 40, 60];
+  const timeOptions = [20, 30, 40, 50, 60];
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
-      <div style={{ display: 'flex', gap: '16px' }}>
+    <div style={{ display: 'flex', minHeight: '400px', flexDirection:"column", justifyContent: 'center', alignItems: 'center' }}>
+      <h2> 운동시간을 선택하세요.</h2>
+      <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', alignItems: 'center' }}>
         {timeOptions.map((time) => (
           <button
             key={time}
@@ -37,110 +39,11 @@ const SelectTime = ({ handleOnClick }) => {
     </div>
   );
 };
-
-const Card = ({ card, selectedTime, selected, onSelect, onReset }) => {
-  return (
-    <div
-      onClick={() => !selected && onSelect && onSelect(card)}
-      style={{
-        border: selected ? '2px solid #a855f7' : '2px solid #374151',
-        borderRadius: '16px',
-        padding: '24px',
-        backgroundColor: selected ? 'rgba(31, 41, 55, 0.5)' : 'rgba(31, 41, 55, 0.3)',
-        cursor: selected ? 'default' : 'pointer',
-        transition: 'all 0.2s'
-      }}
-      onMouseEnter={(e) => {
-        if (!selected) {
-          e.currentTarget.style.borderColor = 'rgba(168, 85, 247, 0.5)';
-        }
-      }}
-      onMouseLeave={(e) => {
-        if (!selected) {
-          e.currentTarget.style.borderColor = '#374151';
-        }
-      }}
-    >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '16px' }}>
-        <h3 style={{ fontSize: '24px', fontWeight: 'bold', color: 'white' }}>{card.name}</h3>
-        {selected && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onReset();
-            }}
-            style={{
-              padding: '4px',
-              background: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              borderRadius: '8px'
-            }}
-            onMouseEnter={(e) => e.target.style.backgroundColor = '#374151'}
-            onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
-          >
-            <X style={{ width: '20px', height: '20px', color: '#9ca3af' }} />
-          </button>
-        )}
-      </div>
-      
-      <div style={{ display: 'flex', gap: '8px', fontSize: '14px', color: '#9ca3af', marginBottom: '16px' }}>
-        <span>점수 {card.total_time}분</span>
-        <span>·</span>
-        <span>{card.total_sets}세트</span>
-        <span>·</span>
-        <span>{card.total_calories} kcal</span>
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        {card.exercises?.map((exercise, idx) => (
-          <div key={idx} style={{ borderLeft: '2px solid #a855f7', paddingLeft: '12px' }}>
-            <div style={{ fontWeight: '600', color: 'white', marginBottom: '4px' }}>
-              {idx + 1}. {exercise.name}
-            </div>
-            <div style={{ fontSize: '14px', color: '#9ca3af' }}>
-              {exercise.type} · {exercise.sets}세트 × {exercise.reps}회 · 운동 {exercise.work}초 · 휴식 {exercise.rest}초
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {selected && (
-        <button
-          onClick={onReset}
-          style={{
-            width: '100%',
-            marginTop: '16px',
-            padding: '12px',
-            backgroundColor: '#374151',
-            border: 'none',
-            borderRadius: '12px',
-            fontWeight: '500',
-            color: 'white',
-            cursor: 'pointer',
-            transition: 'all 0.2s'
-          }}
-          onMouseEnter={(e) => e.target.style.backgroundColor = '#4b5563'}
-          onMouseLeave={(e) => e.target.style.backgroundColor = '#374151'}
-        >
-          다른 루틴 보기
-        </button>
-      )}
-    </div>
-  );
+const STRATEGY_KR = {
+  efficiency_based: "효율 기반",
+  time_based: "시간 기반",
+  balance_based: "균형 기반",
 };
-
-const Recommend = () => {
-  const [selectedTime, setSelectedTime] = useState(null);
-  const [selectedCard, setSelectedCard] = useState(null);
-  const [cards, setCards] = useState([]);
-  const [TtsData, setTtsData] = useState("");
-  const [TtsText, setTtsText] = useState("");
-  const [coachingId, setCoachingId] = useState("");
-  const [open, setOpen] = useState(false);
-  const [isFinish, setIsFinish] = useState(false);
-  const [reason, setReason] = useState("");
-  const [injuryPart, setInjuryPart] = useState("");
 
   const options = [
     { value: "TOO_HARD", label: "너무 어려움" },
@@ -164,9 +67,7 @@ const Recommend = () => {
     calories: 1250,
     streak: 12,
   };
-
-  const handleTimeSelect = async (time) => {
-    const mockCards = [
+   const mockCards = [
       {
         id: 1,
         name: "효율 집중",
@@ -208,16 +109,61 @@ const Recommend = () => {
       },
     ];
     
-    setCards(mockCards);
+const Recommend = () => {
+  const [selectedTime, setSelectedTime] = useState(null);
+  const [selectedCard, setSelectedCard] = useState(null);
+  const [cards, setCards] = useState([]);
+  const [TtsData, setTtsData] = useState("");
+  const [TtsText, setTtsText] = useState("");
+  const [coachingId, setCoachingId] = useState('aaa');
+  const [open, setOpen] = useState(false);
+  const [isFinish, setIsFinish] = useState(false);
+  const [reason, setReason] = useState("");
+  const [injuryPart, setInjuryPart] = useState("");
+  const [selectedExIdx, setSelectedExIdx] = useState(null)
+  
+  const handleTimeSelect = async (time) => {
+    try{
+      const res = await recommendedByTime(time);
+      console.log(res, time)
+    setCards(res);
     setSelectedTime(time);
     setSelectedCard(null);
+
+    }catch(err){
+      console.error(err);
+      setSelectedTime(null);
+      setSelectedCard(null);
+      setCards([]);
+    }
   };
 
   const handleCardSelect = async (card) => {
+
+    try{
+
     setSelectedCard(card);
-    setCoachingId("mock-session-id");
-    setTtsText("운동을 시작하겠습니다. 준비되셨나요?");
-    setTtsData("data:audio/mp3;base64,mock-data");
+    // setCoachingId("mock-session-id");
+    // setTtsText("운동을 시작하겠습니다. 준비되셨나요?");
+    // setTtsData("data:audio/mp3;base64,mock-data");
+      console.log(card.ai_routine_id)
+      const res = await CoachingStart(card.ai_routine_id);
+      console.log("res",res)
+      if(selectedCard){
+        setSelectedExIdx(res.current_index)
+      }
+      if (res?.tts_text && res?.tts_audio){
+        setCoachingId(res.coaching_session_id)
+      setTtsText(res.tts_text)
+      let data = res.tts_audio
+      setTtsData(`data:audio/mp3;base64,${data}`);
+      // const res = await selectedRoutine(card.ai_routine_id);
+      // console.log("res", res);
+      // console.log("선택된 카드:", card.ai_routine_id);
+      }
+    }catch(error){
+console.error("코칭 시작 실패:", error);
+    }
   };
 
   const handleResetCard = () => {
@@ -232,124 +178,159 @@ const Recommend = () => {
     // 실제로는 CoachingNext API 호출
     // const res = await CoachingNext(coachingId)
     
-    // Mock: 다음 운동으로 넘어가기
-    const currentIndex = cards.findIndex(c => c.id === selectedCard.id);
-    const nextCard = cards[currentIndex + 1];
+    // // Mock: 다음 운동으로 넘어가기
+    // const currentIndex = cards.findIndex(c => c.id === selectedCard.id);
+    // const nextCard = cards[currentIndex + 1];
     
-    if (nextCard) {
-      // 다음 카드가 있으면
-      setTtsText(`다음 운동: ${nextCard.exercises[0].name}`);
-      setSelectedCard(nextCard);
-    } else {
-      // 마지막 운동이면
-      setIsFinish(true);
-      setCoachingId("");
-      setTtsText("모든 운동을 완료했습니다! 수고하셨습니다!");
+    // if (nextCard) {
+    //   // 다음 카드가 있으면
+    //   setTtsText(`다음 운동: ${nextCard.exercises[0].name}`);
+    //   setSelectedCard(nextCard);
+    // } else {
+    //   // 마지막 운동이면
+    //   setIsFinish(true);
+    //   setCoachingId("");
+    //   setTtsText("모든 운동을 완료했습니다! 수고하셨습니다!");
+    // }
+   try{
+      const res = await CoachingNext(coachingId)
+            console.log("res",res)
+      if(selectedCard){
+        setSelectedExIdx(res.current_index)
+      }
+
+      setCoachingId(res.coaching_session_id)
+      setTtsText(res.tts_text)
+      setTtsData(`data:audio/mp3;base64,${res.tts_audio}`);
+
+      console.log("res", res)
+      if (res.coaching_session_id === undefined) {
+        setIsFinish(true)
+        // 👉 coaching_session_id가 없을 때 처리
+      }
+    }catch(error){
+      console.error("코칭 다음 실패:", error);
     }
+
   };
 
   const handleCancel = async () => {
     setOpen(false);
     handleResetCard();
+    try{
+      const res = await CoachingCancel(coachingId,reason,injuryPart)
+      console.log("res",res)
+    }catch(error){
+      console.error("운동 중단 실패", error)
+    }finally{
+      setOpen(false)
+    }
   };
+useEffect(()=>{
+      if(!selectedCard){
+        setSelectedExIdx(null)
+      }
+},[selectedCard])
 
+const Card = ({ card, selectedTime, selected, onSelect, onReset }) => {
+  return (
+    <div
+      onClick={() => !selected && onSelect && onSelect(card)}
+      style={{
+        border: selected ? '2px solid #a855f7' : '2px solid #374151',
+        borderRadius: '16px',
+        padding: '24px',
+        backgroundColor: selected ? 'rgba(31, 41, 55, 0.5)' : 'rgba(31, 41, 55, 0.3)',
+        cursor: selected ? 'default' : 'pointer',
+        transition: 'all 0.2s'
+      }}
+      onMouseEnter={(e) => {
+        if (!selected) {
+          e.currentTarget.style.borderColor = 'rgba(168, 85, 247, 0.5)';
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!selected) {
+          e.currentTarget.style.borderColor = '#374151';
+        }
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '16px'}}>
+        <h3 style={{ fontSize: '24px', fontWeight: 'bold', color: 'white', margin:"4px" }}>{STRATEGY_KR[card.strategy]??card.strategy}</h3>
+        {selected && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onReset();
+            }}
+            style={{
+              padding: '4px',
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              borderRadius: '8px'
+            }}
+            onMouseEnter={(e) => e.target.style.backgroundColor = '#374151'}
+            onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+          >
+            <X style={{ width: '20px', height: '20px', color: '#9ca3af' }} />
+          </button>
+        )}
+      </div>
+      
+      <div style={{ display: 'flex', gap: '0px', fontSize: '14px', color: '#9ca3af', marginBottom: '16px' ,flexDirection:"column"}}>
+        {/* <span>·</span> */}
+        <span>소요시간: {card.total_time_min}분</span>
+        {/* <span>·</span> */}
+        <span>예상칼로리: {card.total_calories} kcal</span>
+        <span>점수: {card.score}점</span>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        {card.exercises?.map((exercise, idx) => (
+          <div key={idx} style={{ borderLeft: '2px solid #a855f7', paddingLeft: '12px' }}>
+            <div style={{ fontWeight: '600', 
+            color: selectedExIdx === idx ? '#FFD700' : 'white',
+               marginBottom: '4px' }}>
+              {idx + 1}. {exercise.name} 
+            </div>
+            <div style={{ fontSize: '14px', color: '#9ca3af' }}>
+              <p style={{margin:"0px"}}>· 총 {exercise.sets}세트 × {exercise.reps}회</p>
+              <p style={{margin:"0px"}}>· 세트별 시간 {exercise.duration_sec}초</p>
+              <p style={{margin:"0px"}}>· 휴식 {exercise.rest_sec}초</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {selected && (
+        <button
+          onClick={onReset}
+          style={{
+            width: '100%',
+            marginTop: '16px',
+            padding: '12px',
+            backgroundColor: '#374151',
+            border: 'none',
+            borderRadius: '12px',
+            fontWeight: '500',
+            color: 'white',
+            cursor: 'pointer',
+            transition: 'all 0.2s'
+          }}
+          onMouseEnter={(e) => e.target.style.backgroundColor = '#4b5563'}
+          onMouseLeave={(e) => e.target.style.backgroundColor = '#374151'}
+        >
+          다른 루틴 보기
+        </button>
+      )}
+    </div>
+  );
+};
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#000' }}>
       {/* 상단 통계 */}
-      <div style={{ padding: '16px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '16px' }}>
-          <div style={{ backgroundColor: 'rgba(17, 24, 39, 0.6)', border: '1px solid #1f2937', borderRadius: '16px', padding: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-              <Calendar style={{ width: '20px', height: '20px', color: '#a855f7' }} />
-              <span style={{ fontSize: '12px', color: '#9ca3af' }}>이번 주 운동</span>
-            </div>
-            <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'white' }}>
-              {stats.weekWorkouts}
-              <span style={{ fontSize: '14px', color: '#9ca3af', marginLeft: '4px' }}>회</span>
-            </div>
-          </div>
 
-          <div style={{ backgroundColor: 'rgba(17, 24, 39, 0.6)', border: '1px solid #1f2937', borderRadius: '16px', padding: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-              <Clock style={{ width: '20px', height: '20px', color: '#60a5fa' }} />
-              <span style={{ fontSize: '12px', color: '#9ca3af' }}>총 운동 시간</span>
-            </div>
-            <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'white' }}>
-              {stats.totalTime}
-              <span style={{ fontSize: '14px', color: '#9ca3af', marginLeft: '4px' }}>시간</span>
-            </div>
-          </div>
-
-          <div style={{ backgroundColor: 'rgba(17, 24, 39, 0.6)', border: '1px solid #1f2937', borderRadius: '16px', padding: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-              <Flame style={{ width: '20px', height: '20px', color: '#fb923c' }} />
-              <span style={{ fontSize: '12px', color: '#9ca3af' }}>소모 칼로리</span>
-            </div>
-            <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'white' }}>
-              {stats.calories}
-              <span style={{ fontSize: '14px', color: '#9ca3af', marginLeft: '4px' }}>kcal</span>
-            </div>
-          </div>
-
-          <div style={{ backgroundColor: 'rgba(17, 24, 39, 0.6)', border: '1px solid #1f2937', borderRadius: '16px', padding: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-              <Trophy style={{ width: '20px', height: '20px', color: '#fbbf24' }} />
-              <span style={{ fontSize: '12px', color: '#9ca3af' }}>연속 운동</span>
-            </div>
-            <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'white' }}>
-              {stats.streak}
-              <span style={{ fontSize: '14px', color: '#9ca3af', marginLeft: '4px' }}>일</span>
-            </div>
-          </div>
-        </div>
-
-        {/* 액션 버튼 */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', marginBottom: '24px' }}>
-          <button style={{
-            backgroundColor: 'rgba(17, 24, 39, 0.6)',
-            border: '1px solid #1f2937',
-            borderRadius: '16px',
-            padding: '16px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            color: 'white',
-            cursor: 'pointer',
-            transition: 'all 0.2s'
-          }}
-          onMouseEnter={(e) => e.target.style.borderColor = 'rgba(168, 85, 247, 0.5)'}
-          onMouseLeave={(e) => e.target.style.borderColor = '#1f2937'}
-          >
-            <Edit style={{ width: '20px', height: '20px' }} />
-            <span style={{ fontWeight: '500' }}>웨어러블 추천</span>
-          </button>
-          <button style={{
-            background: 'linear-gradient(to right, #9333ea, #7c3aed)',
-            border: 'none',
-            borderRadius: '16px',
-            padding: '16px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            color: 'white',
-            cursor: 'pointer',
-            boxShadow: '0 10px 25px rgba(147, 51, 234, 0.3)',
-            transition: 'all 0.2s'
-          }}
-          onMouseEnter={(e) => {
-            e.target.style.background = 'linear-gradient(to right, #a855f7, #9333ea)';
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.background = 'linear-gradient(to right, #9333ea, #7c3aed)';
-          }}
-          >
-            <Sparkles style={{ width: '20px', height: '20px' }} />
-            <span style={{ fontWeight: '500' }}>AI 트레이너 추천</span>
-          </button>
-        </div>
-      </div>
 
       {/* 메인 컨텐츠 */}
       <div style={{ backgroundColor: '#111827', borderTopLeftRadius: '24px', borderTopRightRadius: '24px', minHeight: 'calc(100vh - 280px)', padding: '24px' }}>
