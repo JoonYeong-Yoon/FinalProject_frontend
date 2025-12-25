@@ -146,11 +146,12 @@ export default function Exercise() {
 
     try {
       const res = await UploadExerciseVideo(file);
+      console.log(res)
       // res에 AI 분석 결과와 추천 루틴이 포함되어 있다고 가정
       // 만약 res가 Blob이라면 별도의 JSON 데이터를 받는 API 구조 확인 필요
       
-      setAiAnalysis(res);
-      
+      // setAiAnalysis(res);
+        setUploadedMedia(res)
       // 예시: 서버 응답에 ai_recommended_routine이 포함된 경우
       if (res.ai_recommended_routine) {
         setAiRecommendedRoutine(res.ai_recommended_routine);
