@@ -111,7 +111,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  box-shadow: 0 4px 12px #0e5c0bff;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
   cursor: pointer;
   z-index: 99;
   transition: all 0.3s ease;
