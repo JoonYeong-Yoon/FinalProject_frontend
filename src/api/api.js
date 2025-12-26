@@ -2,8 +2,8 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:8000",
-  // baseURL: "http://192.168.0.32:8000", // 🔥 네 PC FastAPI 서버 주소
+  // baseURL: "http://localhost:8000",
+  baseURL: "http://192.168.0.38:8000", // 🔥 네 PC FastAPI 서버 주소
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
@@ -11,8 +11,8 @@ const api = axios.create({
 });
 
 export const wearable_api = axios.create({
-  baseURL: "http://localhost:8001",
-  // baseURL: "http://192.168.0.32:8001", // 🔥 네 PC FastAPI 서버 주소
+  // baseURL: "http://localhost:8001",
+  baseURL: "http://192.168.0.38:8001", // 🔥 네 PC FastAPI 서버 주소
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",

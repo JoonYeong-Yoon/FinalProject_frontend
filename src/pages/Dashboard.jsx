@@ -259,248 +259,12 @@ export default function Dashboard() {
   // ============================
   return (
     <div className="dashboard-wrapper">
-      {/* 좌측 */}
-      <div style={{ marginLeft: "40px" }}>
-        <div className="title-area">
-          <h1>Welcome, Trainer!</h1>
-          <p>운동 부위를 선택해보세요</p>
-          {/* CHATBOT - UploadPage 스타일 적용 */}
-          <div
-            style={{
-              position: "fixed",
-              bottom: "80px",
-              left: "260px",
-              width: "380px",
-              height: "650px",
-              zIndex: 1001,
-            }}
-          >
-            <div
-              style={{
-                background: "linear-gradient(135deg, #1a1a2e 0%, #2a1a3e 100%)",
-                borderRadius: "16px",
-                border: "1px solid #0e5c0bff",
-                display: "flex",
-                flexDirection: "column",
-                height: "100%",
-                overflow: "hidden",
-              }}
-            >
-              {/* 제목 헤더 */}
-              <div
-                style={{
-                  background:
-                    "linear-gradient(135deg, #043d11ff 0%, #071f02ff 100%)",
-                  padding: "12px 16px",
-                  borderBottom: "1px solid #0e5c0bff",
-                }}
-              >
-                <h3
-                  style={{
-                    fontWeight: "bold",
-                    fontSize: "14px",
-                    margin: 0,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    color: "#ffffff",
-                  }}
-                >
-                  💬 AI Trainer
-                </h3>
-              </div>
-
-              {/* Character Selection */}
-              <div
-                style={{
-                  padding: "12px",
-                  borderBottom: "1px solid #0e5c0bff",
-                  background: "#0f1f0a",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    marginBottom: "10px",
-                  }}
-                >
-                  <span style={{ fontSize: "12px", color: "#9ca3af" }}>
-                    캐릭터 선택:
-                  </span>
-                  <select
-                    value={character}
-                    onChange={(e) => setCharacter(e.target.value)}
-                    style={{
-                      flex: 1,
-                      padding: "5px 10px",
-                      background: "#0d0d0d",
-                      border: "1px solid #4b5563",
-                      borderRadius: "6px",
-                      color: "white",
-                      fontSize: "12px",
-                      outline: "none",
-                    }}
-                  >
-                    <option value="booster_coach">💪 텐션 끝판왕 코치</option>
-                    <option value="trainer">🏋️ 근육맨 트레이너</option>
-                    <option value="yoga">🧘 요가 마스터 수련</option>
-                    <option value="cardio">🏃 유산소 전문가</option>
-                    <option value="diet">🥗 영양사 민희</option>
-                  </select>
-                </div>
-
-                {/* Fixed Question Buttons */}
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-                  {[
-                    { label: "주간 리포트", type: "weekly_report" },
-                    { label: "주간 걸음수", type: "weekly_steps" },
-                    { label: "수면 분석", type: "sleep_report" },
-                    { label: "심박수 분석", type: "heart_rate" },
-                    { label: "건강점수", type: "health_score" },
-                    { label: "오늘 운동 추천", type: "today_recommendation" },
-                    //목표별 운동 추천 5개
-                    { label: "근육증가 운동추천", type: "muscle_gain" },
-                    { label: "다이어트 운동추천", type: "diet_goal" },
-                    { label: "지구력증가 운동추천", type: "endurance" },
-                    { label: "유연성향상 운동추천", type: "flexibility" },
-                    { label: "마음챙김 운동추천", type: "mindfulness" },
-                  ].map((item, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => {
-                        const userMsg = item.label;
-                        setMessages((prev) => [
-                          ...prev,
-                          { sender: "user", text: userMsg },
-                        ]);
-                        // 고정 질문 API 호출 로직 추가 가능
-                      }}
-                      style={{
-                        padding: "4px 8px",
-                        borderRadius: "6px",
-                        fontSize: "10px",
-                        cursor: "pointer",
-                        transition: "all 0.3s",
-                        background: "#1b6904d8",
-                        border: "1px solid #272727ff",
-                        color: "#d1d5db",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = "#044107ff";
-                        e.currentTarget.style.borderColor = "#0e5c0bff";
-                        e.currentTarget.style.color = "white";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = "#1b6904d8";
-                        e.currentTarget.style.borderColor = "#272727ff";
-                        e.currentTarget.style.color = "#d1d5db";
-                      }}
-                    >
-                      {item.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Chat Messages */}
-              <div
-                ref={chatMessagesRef}
-                style={{
-                  flex: 1,
-                  padding: "12px",
-                  overflowY: "auto",
-                  background: "#0a0a0a",
-                }}
-              >
-                {messages.length === 0 ? (
-                  <p
-                    style={{
-                      color: "#6b7280",
-                      fontSize: "12px",
-                      textAlign: "center",
-                      paddingTop: "30px",
-                      paddingBottom: "30px",
-                    }}
-                  >
-                    AI 코치에게 질문해보세요!
-                  </p>
-                ) : (
-                  messages.map((msg, idx) => (
-                    <div
-                      key={idx}
-                      style={{
-                        padding: "10px",
-                        borderRadius: "8px",
-                        fontSize: "12px",
-                        marginBottom: "10px",
-                        background:
-                          msg.sender === "user" ? "#9333ea" : "#374151",
-                        color: msg.sender === "user" ? "white" : "#e5e7eb",
-                        marginLeft: msg.sender === "user" ? "24px" : "0",
-                        marginRight: msg.sender === "user" ? "0" : "24px",
-                      }}
-                    >
-                      {msg.text}
-                    </div>
-                  ))
-                )}
-              </div>
-
-              {/* Chat Input */}
-              <div
-                style={{
-                  padding: "12px",
-                  borderTop: "1px solid #0b5c1dff",
-                  background: "#0f1f0a",
-                }}
-              >
-                <div style={{ display: "flex", gap: "8px" }}>
-                  <input
-                    type="text"
-                    value={inputMessage}
-                    onChange={(e) => setInputMessage(e.target.value)}
-                    onKeyPress={(e) => e.key === "Enter" && sendMessage()}
-                    placeholder="메시지를 입력하세요..."
-                    style={{
-                      flex: 1,
-                      padding: "8px 10px",
-                      background: "#0d0d0d",
-                      border: "1px solid #4b5563",
-                      borderRadius: "6px",
-                      color: "white",
-                      fontSize: "12px",
-                      outline: "none",
-                    }}
-                  />
-                  <button
-                    onClick={sendMessage}
-                    style={{
-                      width: "36px",
-                      height: "36px",
-                      background:
-                        "linear-gradient(to right, #0a4408ff, #0a4408ff)",
-                      border: "none",
-                      borderRadius: "6px",
-                      color: "white",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "16px",
-                    }}
-                  >
-                    ➤
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div className="title-area">
+        <h1>Welcome, Trainer!</h1>
+        <p>운동 부위를 선택해보세요</p>
       </div>
-      {/* 우측 */}
-      <div style={{ marginRight: "400px" }}>
+
+      <div className="dashboard-container">
         {/* LEFT 상단 패널 */}
         <div className="left-top-panel">
           <div
@@ -570,9 +334,7 @@ export default function Dashboard() {
             )}
           </div>
         </div>
-      </div>
-      {/* 중앙 */}
-      <div className="dashboard-container">
+
         {/* RIGHT 3D 모델 */}
         <div className="dashboard-right">
           <div className="human-wrapper">
@@ -583,6 +345,238 @@ export default function Dashboard() {
               hoverMuscle={hoverMain}
               highlightMuscles={highlightMuscles}
             />
+          </div>
+        </div>
+      </div>
+
+      {/* CHATBOT - UploadPage 스타일 적용 */}
+      <div
+        style={{
+          position: "fixed",
+          bottom: "80px",
+          left: "260px",
+          width: "380px",
+          height: "660px",
+          zIndex: 1001,
+        }}
+      >
+        <div
+          style={{
+            background: "linear-gradient(135deg, #1a1a2e 0%, #2a1a3e 100%)",
+            borderRadius: "16px",
+            border: "1px solid #0e5c0bff",
+            display: "flex",
+            flexDirection: "column",
+            height: "100%",
+            overflow: "hidden",
+          }}
+        >
+          {/* 제목 헤더 */}
+          <div
+            style={{
+              background:
+                "linear-gradient(135deg, #043d11ff 0%, #071f02ff 100%)",
+              padding: "12px 16px",
+              borderBottom: "1px solid #0e5c0bff",
+            }}
+          >
+            <h3
+              style={{
+                fontWeight: "bold",
+                fontSize: "14px",
+                margin: 0,
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                color: "#ffffff",
+              }}
+            >
+              💬 AI Trainer
+            </h3>
+          </div>
+
+          {/* Character Selection */}
+          <div
+            style={{
+              padding: "12px",
+              borderBottom: "1px solid #0e5c0bff",
+              background: "#0f1f0a",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                marginBottom: "10px",
+              }}
+            >
+              <span style={{ fontSize: "12px", color: "#9ca3af" }}>
+                캐릭터 선택:
+              </span>
+              <select
+                value={character}
+                onChange={(e) => setCharacter(e.target.value)}
+                style={{
+                  flex: 1,
+                  padding: "5px 10px",
+                  background: "#0d0d0d",
+                  border: "1px solid #4b5563",
+                  borderRadius: "6px",
+                  color: "white",
+                  fontSize: "12px",
+                  outline: "none",
+                }}
+              >
+                <option value="booster_coach">💪 텐션 끝판왕 코치</option>
+                <option value="trainer">🏋️ 근육맨 트레이너</option>
+                <option value="yoga">🧘 요가 마스터 수련</option>
+                <option value="cardio">🏃 유산소 전문가</option>
+                <option value="diet">🥗 영양사 민희</option>
+              </select>
+            </div>
+
+            {/* Fixed Question Buttons */}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+              {[
+                // { label: "주간 리포트", type: "weekly_report" },
+                // { label: "주간 걸음수", type: "weekly_steps" },
+                // { label: "수면 분석", type: "sleep_report" },
+                // { label: "심박수 분석", type: "heart_rate" },
+                // { label: "건강점수", type: "health_score" },
+                // { label: "오늘 운동 추천", type: "today_recommendation" },
+                //목표별 운동 추천 5개
+                // { label: "근육증가 운동추천", type: "muscle_gain" },
+                // { label: "다이어트 운동추천", type: "diet_goal" },
+                // { label: "지구력증가 운동추천", type: "endurance" },
+                // { label: "유연성향상 운동추천", type: "flexibility" },
+                // { label: "마음챙김 운동추천", type: "mindfulness" },
+              ].map((item, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    const userMsg = item.label;
+                    setMessages((prev) => [
+                      ...prev,
+                      { sender: "user", text: userMsg },
+                    ]);
+                    // 고정 질문 API 호출 로직 추가 가능
+                  }}
+                  style={{
+                    padding: "4px 8px",
+                    borderRadius: "6px",
+                    fontSize: "10px",
+                    cursor: "pointer",
+                    transition: "all 0.3s",
+                    background: "#1b6904d8",
+                    border: "1px solid #272727ff",
+                    color: "#d1d5db",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = "#044107ff";
+                    e.currentTarget.style.borderColor = "#0e5c0bff";
+                    e.currentTarget.style.color = "white";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = "#1b6904d8";
+                    e.currentTarget.style.borderColor = "#272727ff";
+                    e.currentTarget.style.color = "#d1d5db";
+                  }}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Chat Messages */}
+          <div
+            ref={chatMessagesRef}
+            style={{
+              flex: 1,
+              padding: "12px",
+              overflowY: "auto",
+              background: "#0a0a0a",
+            }}
+          >
+            {messages.length === 0 ? (
+              <p
+                style={{
+                  color: "#6b7280",
+                  fontSize: "12px",
+                  textAlign: "center",
+                  paddingTop: "150px",
+                  paddingBottom: "30px",
+                }}
+              >
+                AI 코치에게 질문해보세요!
+              </p>
+            ) : (
+              messages.map((msg, idx) => (
+                <div
+                  key={idx}
+                  style={{
+                    padding: "10px",
+                    borderRadius: "8px",
+                    fontSize: "12px",
+                    marginBottom: "10px",
+                    background: msg.sender === "user" ? "#9333ea" : "#374151",
+                    color: msg.sender === "user" ? "white" : "#e5e7eb",
+                    marginLeft: msg.sender === "user" ? "24px" : "0",
+                    marginRight: msg.sender === "user" ? "0" : "24px",
+                  }}
+                >
+                  {msg.text}
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Chat Input */}
+          <div
+            style={{
+              padding: "12px",
+              borderTop: "1px solid #0b5c1dff",
+              background: "#0f1f0a",
+            }}
+          >
+            <div style={{ display: "flex", gap: "8px" }}>
+              <input
+                type="text"
+                value={inputMessage}
+                onChange={(e) => setInputMessage(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && sendMessage()}
+                placeholder="메시지를 입력하세요..."
+                style={{
+                  flex: 1,
+                  padding: "8px 10px",
+                  background: "#0d0d0d",
+                  border: "1px solid #4b5563",
+                  borderRadius: "6px",
+                  color: "white",
+                  fontSize: "12px",
+                  outline: "none",
+                }}
+              />
+              <button
+                onClick={sendMessage}
+                style={{
+                  width: "36px",
+                  height: "36px",
+                  background: "linear-gradient(to right, #0a4408ff, #0a4408ff)",
+                  border: "none",
+                  borderRadius: "6px",
+                  color: "white",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "16px",
+                }}
+              >
+                ➤
+              </button>
+            </div>
           </div>
         </div>
       </div>
