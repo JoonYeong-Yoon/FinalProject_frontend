@@ -354,7 +354,7 @@ export default function Dashboard() {
 <div style={{
   position: "fixed",
   bottom: "80px",
-  left: "120px",
+  left: "260px",
   width: "380px",
   height: "700px",
   zIndex: 1001
