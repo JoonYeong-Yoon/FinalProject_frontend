@@ -425,18 +425,18 @@ export default function Dashboard() {
       {/* Fixed Question Buttons */}
       <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
         {[
-          { label: "주간 리포트", type: "weekly_report" },
-          { label: "주간 걸음수", type: "weekly_steps" },
-          { label: "수면 분석", type: "sleep_report" },
-          { label: "심박수 분석", type: "heart_rate" },
-          { label: "건강점수", type: "health_score" },
-          { label: "오늘 운동 추천", type: "today_recommendation" },
+          // { label: "주간 리포트", type: "weekly_report" },
+          // { label: "주간 걸음수", type: "weekly_steps" },
+          // { label: "수면 분석", type: "sleep_report" },
+          // { label: "심박수 분석", type: "heart_rate" },
+          // { label: "건강점수", type: "health_score" },
+          // { label: "오늘 운동 추천", type: "today_recommendation" },
           //목표별 운동 추천 5개
-          { label: "근육증가 운동추천", type: "muscle_gain" },
-          { label: "다이어트 운동추천", type: "diet_goal" },
-          { label: "지구력증가 운동추천", type: "endurance" },
-          { label: "유연성향상 운동추천", type: "flexibility" },
-          { label: "마음챙김 운동추천", type: "mindfulness" },
+          // { label: "근육증가 운동추천", type: "muscle_gain" },
+          // { label: "다이어트 운동추천", type: "diet_goal" },
+          // { label: "지구력증가 운동추천", type: "endurance" },
+          // { label: "유연성향상 운동추천", type: "flexibility" },
+          // { label: "마음챙김 운동추천", type: "mindfulness" },
         ].map((item, idx) => (
           <button
             key={idx}
@@ -487,7 +487,7 @@ export default function Dashboard() {
           color: "#6b7280",
           fontSize: "12px",
           textAlign: "center",
-          paddingTop: "30px",
+          paddingTop: "150px",
           paddingBottom: "30px"
         }}>
           AI 코치에게 질문해보세요!

@@ -43,7 +43,7 @@ function UploadPage() {
   // 파일 입력 ref 추가
   const fileInputRef = useRef(null);
 
-  const BACKEND_URL = "http://localhost:8001";
+  const BACKEND_URL = "http://192.168.0.38:8001";
 
   const exerciseNameKo = {
     "standing side crunch": "스탠딩 사이드 크런치",
