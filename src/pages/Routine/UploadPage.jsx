@@ -370,7 +370,14 @@ function UploadPage() {
           marginBottom: "24px"
         }}>
           <button
-            onClick={() => setUploadMode("manual_file")}
+            onClick={() => {
+              setUploadMode("manual_file");
+              setResult(null);
+              setError(null);
+              setFile(null);
+              setServerData(null);
+              setChatMessages([]);
+            }}
             style={{
               padding: "10px 24px",
               borderRadius: "9999px",
@@ -394,7 +401,14 @@ function UploadPage() {
             파일 업로드 (.zip/.db)
           </button>
           <button
-            onClick={() => setUploadMode("app_upload")}
+            onClick={() => {
+              setUploadMode("app_upload");
+              setResult(null);
+              setError(null);
+              setFile(null);
+              setServerData(null);
+              setChatMessages([]);
+            }}
             style={{
               padding: "10px 24px",
               borderRadius: "9999px",
@@ -616,7 +630,7 @@ function UploadPage() {
         }}>
           {/* AI Analysis Card */}
           <div style={{
-            background: "linear-gradient(135deg, #1a1a2e 0%, #1e1e30 100%)",
+            background: "#0a0a0a",
             border: "1px solid #80220bff",
             color: "white",
             borderRadius: "16px",
@@ -669,9 +683,11 @@ function UploadPage() {
                   lineHeight: "1.7",
                   maxHeight: "500px",
                   overflowY: "auto",
-                  background: "#0f1f0a",
+                  background: "#0a0a0a",
                   padding: "16px",
-                  borderRadius: "8px"
+                  borderRadius: "0",
+                  margin: "0",
+                  flex: 1
                 }}>
                   {result.llm_result.analysis}
                 </div>

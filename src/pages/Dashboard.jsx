@@ -414,7 +414,7 @@ export default function Dashboard() {
             outline: "none"
           }}
         >
-          <option value="booster_coach">💪 텐션 끝판왕 코치</option>
+          <option value="default">💪 헬스 코치 지니</option>
           <option value="trainer">🏋️ 근육맨 트레이너</option>
           <option value="yoga">🧘 요가 마스터 수련</option>
           <option value="cardio">🏃 유산소 전문가</option>
