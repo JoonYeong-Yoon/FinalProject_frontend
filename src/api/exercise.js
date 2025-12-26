@@ -6,6 +6,7 @@ export const UploadExerciseVideo = async (file) => {
   try {
     const formData = new FormData();
     formData.append("video", file);
+    console.log("formData", formData);
     const res = await axios.post(
       "http://localhost:8000/ai/analyze-video",
       // "http://192.168.0.32:8000/ai/analyze-video",
@@ -14,7 +15,7 @@ export const UploadExerciseVideo = async (file) => {
         responseType: "blob",
       }
     );
-    console.log(res.data);
+    console.log(res);
     return res.data;
   } catch (err) {
     console.error("유저 정보 가져오기 실패", err);

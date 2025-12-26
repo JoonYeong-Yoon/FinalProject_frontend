@@ -11,7 +11,7 @@ export default function Exercise() {
   const [selectedRoutine, setSelectedRoutine] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState(null);
-  
+
   // AI 추천 루틴 상태 추가
   const [aiRecommendedRoutine, setAiRecommendedRoutine] = useState(null);
 
@@ -75,22 +75,25 @@ export default function Exercise() {
           ]
         };
         */
-        
+
         // 만약 aiAnalysis나 특정 상태에 데이터가 있다면 변환하여 routines에 추가
         if (aiRecommendedRoutine) {
           const formattedAiRoutine = {
             id: "ai-custom",
             name: "✨ AI 맞춤 추천 루틴",
-            exercises: aiRecommendedRoutine.items.map(item => ({
+            exercises: aiRecommendedRoutine.items.map((item) => ({
               name: item.exercise_name, // 필요시 exerciseNameKo 매핑 사용
               sets: item.set_count,
-              reps: item.duration_sec > 0 ? `${item.duration_sec}초` : `${item.reps}회`
+              reps:
+                item.duration_sec > 0
+                  ? `${item.duration_sec}초`
+                  : `${item.reps}회`,
             })),
             difficulty: "중급", // AI 분석에 따라 가변 가능
             duration: aiRecommendedRoutine.total_time_min,
-            isAiGenerated: true
+            isAiGenerated: true,
           };
-          
+
           setRoutines([formattedAiRoutine, ...defaultRoutines]);
           setSelectedRoutine(formattedAiRoutine); // 자동으로 AI 루틴 선택
         }
@@ -131,6 +134,7 @@ export default function Exercise() {
     "⚠️ 무릎을 조금 더 안쪽으로 모아주세요",
     "⚠️ 등을 곧게 펴주세요",
   ];
+  console.log(uploadedMedia);
 
   // 파일 업로드 처리
   const handleMediaSelect = async (e) => {
@@ -138,25 +142,24 @@ export default function Exercise() {
 
     const file = e.target.files[0];
     if (!file) return;
-    
+
     setUploadedMedia({
       url: URL.createObjectURL(file),
       type: file.type,
     });
-
     try {
       const res = await UploadExerciseVideo(file);
-      console.log(res)
-      // res에 AI 분석 결과와 추천 루틴이 포함되어 있다고 가정
-      // 만약 res가 Blob이라면 별도의 JSON 데이터를 받는 API 구조 확인 필요
-      
-      // setAiAnalysis(res);
-        setUploadedMedia(res)
+      const videoBlob = res;
+      const videoUrl = URL.createObjectURL(videoBlob);
+      setUploadedMedia({
+        url: videoUrl,
+        type: file.type,
+      });
+      setAiAnalysis(videoBlob);
       // 예시: 서버 응답에 ai_recommended_routine이 포함된 경우
-      if (res.ai_recommended_routine) {
-        setAiRecommendedRoutine(res.ai_recommended_routine);
-      }
-      
+      // if (res.ai_recommended_routine) {
+      //   setAiRecommendedRoutine(res.ai_recommended_routine);
+      // }
     } catch (error) {
       console.error(error);
       alert("서버 연결 실패");
@@ -307,6 +310,11 @@ export default function Exercise() {
                   src={uploadedMedia.url}
                   className="preview-media"
                   controls
+                  style={{
+                    height: "100%",
+                    width: "100%",
+                    objectFit: "contain",
+                  }}
                 />
               )}
 
