@@ -465,7 +465,7 @@ const Card = ({ card, selectedTime, selected, onSelect, onReset }) => {
                         backgroundColor: '#1f2937',
                         border: '1px solid #374151',
                         borderRadius: '16px',
-                        padding: '24px',
+                        padding: '5px',
                         width: '400px',
                         zIndex: 51,
                         boxShadow: '0 25px 50px rgba(0, 0, 0, 0.5)'

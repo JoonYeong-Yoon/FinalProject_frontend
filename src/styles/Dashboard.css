@@ -113,7 +113,7 @@
 =========================================================== */
 .title-area {
   position: fixed;
-  left: 62px;
+  left: 120px;
   top: 115px;
   z-index: 100;
 }
@@ -139,7 +139,7 @@
 =========================================================== */
 .left-top-panel {
   position: fixed;
-  right: 20px;
+  right: 80px;
   top: 140px;
   width: 280px;
   height: 425px;
@@ -169,7 +169,7 @@
 =========================================================== */
 .left-bottom-panel {
   position: fixed;
-  right: 20px;
+  right: 80px;
   top: 580px;
   width: 280px;
   height: calc(100vh - 505px);

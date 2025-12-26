@@ -151,14 +151,14 @@
 }
 
 .stat-value {
-  font-size: 1.125rem;
+  font-size: 1.7rem;
   font-weight: 700;
   color: #fff;
 }
 
 .stat-label {
-  font-size: 0.875rem;
-  color: #9ca3af;
+  font-size: 0.95rem;
+  color: #c7cbd3;
 }
 
 /* Profile Tabs */
@@ -174,7 +174,8 @@
   padding: 1rem;
   background: transparent;
   border: none;
-  color: #9ca3af;
+  /* color: #9ca3af; */
+  color: #fafafa;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
@@ -183,7 +184,7 @@
   justify-content: center;
   gap: 0.5rem;
   border-bottom: 2px solid transparent;
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
 }
 
 .tab-btn:hover {
@@ -192,7 +193,7 @@
 }
 
 .tab-btn.active {
-  color: #a78bfa;
+  color: #fdfdfd;
   border-bottom-color: #a78bfa;
 }
 

@@ -87,7 +87,7 @@ body {
 
 .avatar:hover {
   border-color: rgba(139, 92, 246, 0.6);
-  box-shadow: 0 0 30px rgba(139, 92, 246, 0.4);
+  box-shadow: 0 0 30px rgba(246, 92, 105, 0.4);
   transform: scale(1.05);
 }
 
@@ -111,7 +111,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+  box-shadow: 0 4px 12px #0e5c0bff;
   cursor: pointer;
   z-index: 99;
   transition: all 0.3s ease;

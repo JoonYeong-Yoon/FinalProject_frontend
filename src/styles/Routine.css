@@ -179,9 +179,9 @@
   align-items: center;
   gap: 0.875rem;
   padding: 1rem;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.103));
+  border: 1px solid #777777;
+  border-radius: 12px;
   transition: all var(--transition-normal);
 }
 
@@ -1490,7 +1490,7 @@
 .input-group input:focus {
   outline: none;
   background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(139, 92, 246, 0.5);
+  border-color: rgba(246, 92, 92, 0.5);
 }
 
 .input-group input::-webkit-outer-spin-button,
@@ -1501,6 +1501,7 @@
 
 .input-group input[type=number] {
   -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 .unit {

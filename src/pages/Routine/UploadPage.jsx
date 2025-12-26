@@ -69,7 +69,7 @@ function UploadPage() {
     { id: "default", name: "💪 헬스 코치 지니", specialty: "종합 피트니스", color: "#ec4899" },
     { id: "trainer", name: "🏋️ 근육맨 트레이너", specialty: "근력/벌크업", color: "#3b82f6" },
     { id: "yoga", name: "🧘 요가 마스터 수련", specialty: "유연성/명상", color: "#22c55e" },
-    { id: "cardio", name: "🏃 카디오 퀸", specialty: "유산소/심폐지구력", color: "#f97316" },
+    { id: "cardio", name: "🏃 유산소 전문가", specialty: "유산소/심폐지구력", color: "#f97316" },
     { id: "diet", name: "🥗 영양사 민희", specialty: "식단/영양", color: "#a855f7" },
   ];
 
@@ -319,7 +319,7 @@ function UploadPage() {
       minHeight: "100vh",
       background: "#0d0d0d",
       color: "white",
-      padding: window.innerWidth >= 768 ? "24px" : "16px"
+      padding: window.innerWidth >= 768 ? "1px" : "16px"
     }}>
       {/* 숨겨진 파일 입력 */}
       <input
@@ -378,7 +378,7 @@ function UploadPage() {
               fontSize: "14px",
               transition: "all 0.3s",
               background: uploadMode === "manual_file" 
-                ? "linear-gradient(to right, #ec4899, #d946ef)" 
+                ? "linear-gradient(to right, #741711ff 0%, #3d0909ff 100%)" 
                 : "#1a1a1a",
               border: uploadMode === "manual_file" ? "none" : "1px solid #4b5563",
               color: "white",
@@ -391,7 +391,7 @@ function UploadPage() {
               if (uploadMode !== "manual_file") e.currentTarget.style.borderColor = "#4b5563";
             }}
           >
-            zip/db 데이터 파일 업로드
+            파일 업로드 (.zip/.db)
           </button>
           <button
             onClick={() => setUploadMode("app_upload")}
@@ -402,9 +402,9 @@ function UploadPage() {
               fontSize: "14px",
               transition: "all 0.3s",
               background: uploadMode === "app_upload" 
-                ? "linear-gradient(to right, #8b5cf6, #3b82f6)" 
+                ? "linear-gradient(to right,  #741711ff 0%, #3d0909ff 100%)"
                 : "#1a1a1a",
-              border: uploadMode === "app_upload" ? "none" : "1px solid #4b5563",
+              border: uploadMode === "app_upload" ? "none" : "1px solid #63524bff",
               color: "white",
               cursor: "pointer"
             }}
@@ -415,23 +415,24 @@ function UploadPage() {
               if (uploadMode !== "app_upload") e.currentTarget.style.borderColor = "#4b5563";
             }}
           >
-            워치 데이터 앱 전송
+            앱에서 전송 (JSON)
           </button>
         </div>
 
         {/* Control Bar */}
         <div style={{
-          background: "#1a1a1a",
-          border: "1px solid #374151",
+          background: "linear-gradient(135deg, #11115c23 0%, #09043817 100%)",
+          border: "1px solid #cf0b0bff",
           borderRadius: "12px",
-          padding: "16px",
+          padding: "16px 50px",
           marginBottom: "24px"
-        }}>
+          }}>
           <div style={{
             display: "flex",
             flexWrap: "wrap",
             alignItems: "center",
-            gap: "16px"
+            justifyContent: "space-between",
+            gap: "15x"
           }}>
             {/* 모드별 버튼 - 파일 업로드 또는 서버 데이터 전송 */}
             {uploadMode === "manual_file" ? (
@@ -440,14 +441,14 @@ function UploadPage() {
                 style={{
                   padding: "8px 16px",
                   background: file ? "linear-gradient(to right, #10b981, #059669)" : "#0d0d0d",
-                  border: file ? "none" : "1px solid #4b5563",
+                  border: file ? "none" : "4px solid #7a3d96ff",
                   borderRadius: "8px",
                   fontSize: "13px",
                   color: file ? "white" : "#d1d5db",
                   transition: "all 0.3s",
                   cursor: "pointer",
                   whiteSpace: "nowrap",
-                  minWidth: "120px"
+                  minWidth: "145px"
                 }}
                 onMouseEnter={(e) => {
                   if (!file) {
@@ -478,7 +479,7 @@ function UploadPage() {
                 style={{
                   padding: "8px 16px",
                   background: serverData ? "linear-gradient(to right, #10b981, #059669)" : "#0d0d0d",
-                  border: serverData ? "none" : "1px solid #4b5563",
+                  border: serverData ? "none" : "4px solid #7a3d96ff",
                   borderRadius: "8px",
                   fontSize: "13px",
                   color: serverData ? "white" : "#d1d5db",
@@ -542,7 +543,7 @@ function UploadPage() {
                   borderRadius: "6px",
                   color: "white",
                   fontSize: "14px",
-                  outline: "none"
+                  outline: "none"                 
                 }}
               >
                 <option value="하">하(쉬움)</option>
@@ -574,18 +575,18 @@ function UploadPage() {
 
             <button
               onClick={handleAnalyze}
-              disabled={loading || (uploadMode === "manual_file" && !file)}
+              disabled={loading}
               style={{
                 padding: "8px 24px",
-                background: loading || (uploadMode === "manual_file" && !file)
+                background: loading
                   ? "#4b5563"
                   : "linear-gradient(to right, #eab308, #f59e0b)",
                 border: "none",
                 borderRadius: "8px",
-                color: loading || (uploadMode === "manual_file" && !file) ? "#9ca3af" : "#000",
+                color: loading ? "#9ca3af" : "#000",
                 fontSize: "14px",
                 fontWeight: "600",
-                cursor: loading || (uploadMode === "manual_file" && !file) ? "not-allowed" : "pointer",
+                cursor: loading ? "not-allowed" : "pointer",
                 transition: "all 0.3s"
               }}
             >
@@ -615,26 +616,35 @@ function UploadPage() {
         }}>
           {/* AI Analysis Card */}
           <div style={{
-              background: "#1a1a1a",
-              border: "1px solid #374151",
-              color: "white",
-              borderRadius: "12px",
-              padding: "20px",
-              height: "600px",
-              display: "flex",
-              flexDirection: "column"
+            background: "linear-gradient(135deg, #1a1a2e 0%, #1e1e30 100%)",
+            border: "1px solid #80220bff",
+            color: "white",
+            borderRadius: "16px",
+            padding: "0",
+            height: "600px",
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden"
+          }}>
+            {/* 제목 헤더 */} 
+            <div style={{
+              background: "linear-gradient(135deg, #741711ff 0%, #3d0909ff 100%)",
+              padding: "14px 20px",
+              borderBottom: "1px solid #80220bff"
             }}>
               <h3 style={{
                 fontWeight: "bold",
                 fontSize: "16px",
-                marginBottom: "16px",
+                margin: 0,
                 display: "flex",
                 alignItems: "center",
                 gap: "8px",
-                color: "#e5e7eb"
+                color: "#ffffff"
               }}>
-                <span>🤖</span> AI 분석
+                <span>🤖</span> 웨어러블 데이터 AI 분석
               </h3>
+            </div>           
+        
               {loading ? (
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 0" }}>
                   <div style={{
@@ -659,7 +669,7 @@ function UploadPage() {
                   lineHeight: "1.7",
                   maxHeight: "500px",
                   overflowY: "auto",
-                  background: "#0d0d0d",
+                  background: "#0f1f0a",
                   padding: "16px",
                   borderRadius: "8px"
                 }}>
@@ -674,77 +684,101 @@ function UploadPage() {
 
           {/* Exercise Routine Card */}
           <div style={{
-              background: "#1a1a1a",
-              border: "1px solid #374151",
-              color: "white",
-              borderRadius: "12px",
-              padding: "20px",
-              height: "600px",
-              display: "flex",
-              flexDirection: "column"
+            background: "linear-gradient(135deg, #1a1a2e 0%, #1e1e30 100%)",
+            border: "1px solid #80220bff",
+            color: "white",
+            borderRadius: "16px",
+            padding: "0",
+            height: "600px",
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden"
+          }}>
+            {/* 제목 헤더 */}
+            <div style={{
+              background: "linear-gradient(135deg,  #741711ff 0%, #3d0909ff 100%)",
+              padding: "14px 20px",
+              borderBottom: "1px solid #80220bff"
             }}>
               <h3 style={{
                 fontWeight: "bold",
                 fontSize: "16px",
-                marginBottom: "16px",
+                margin: 0,
                 display: "flex",
                 alignItems: "center",
                 gap: "8px",
-                color: "#e5e7eb"
+                color: "#ffffff"
               }}>
                 <span>🔥</span> 맞춤 운동 루틴
               </h3>
+            </div>
 
               {result?.llm_result?.ai_recommended_routine ? (
                 <>
                   {/* Stats Cards */}
                   <div style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(3, 1fr)",
-                    gap: "12px",
+                    display: "flex",
+                    justifyContent: "center",
+                    gap: "15px",
+                    height:"90px",
+                    marginTop: "20px",
                     marginBottom: "20px"
                   }}>
                     <div style={{
-                      background: "linear-gradient(to bottom right, #facc15, #fb923c)",
-                      borderRadius: "12px",
-                      padding: "12px",
+                      alignItems: "center",
+                      background: "linear-gradient(to bottom right, #d82626ff, #720505ff)",
+                      borderRadius: "10px",
+                      padding: "22px 5px",
+                      lineHeight: "0.7",
                       textAlign: "center",
-                      color: "white"
+                      color: "white",
+                      flex: "1 1 0",
+                      maxWidth: "110px"           
                     }}>
-                      <p style={{ fontSize: "24px", fontWeight: "bold" }}>
+                      <p style={{ fontSize: "22px", fontWeight: "bold", margin: "2px 0 0 0" }}>
                         {result.llm_result.ai_recommended_routine.total_time_min}분
                       </p>
                       <p style={{ fontSize: "12px", opacity: 0.9 }}>총 운동 시간</p>
                     </div>
+
                     <div style={{
-                      background: "linear-gradient(to bottom right, #f472b6, #ef4444)",
-                      borderRadius: "12px",
-                      padding: "12px",
+                      alignItems: "center",
+                      background: "linear-gradient(to bottom right, #2d66cfff, #04244bff)",
+                      borderRadius: "10px",
+                      padding: "22px 12px",
+                      lineHeight: "0.7",
                       textAlign: "center",
-                      color: "white"
+                      color: "white",
+                      flex: "1 1 0",
+                      maxWidth: "110px"
                     }}>
-                      <p style={{ fontSize: "24px", fontWeight: "bold" }}>
-                        {result.llm_result.ai_recommended_routine.total_calories}
-                      </p>
-                      <p style={{ fontSize: "12px", opacity: 0.9 }}>예상 칼로리 소모</p>
-                    </div>
-                    <div style={{
-                      background: "linear-gradient(to bottom right, #c084fc, #60a5fa)",
-                      borderRadius: "12px",
-                      padding: "12px",
-                      textAlign: "center",
-                      color: "white"
-                    }}>
-                      <p style={{ fontSize: "24px", fontWeight: "bold" }}>
+                      <p style={{ fontSize: "22px", fontWeight: "bold", margin: "2px 0 0 0" }}>
                         {result.llm_result.ai_recommended_routine.items?.length || 0}개
                       </p>
                       <p style={{ fontSize: "12px", opacity: 0.9 }}>운동 종목 수</p>
                     </div>
+
+                    <div style={{
+                      alignItems: "center",
+                      background: "linear-gradient(to bottom right, #91680fff, #532703ff)",
+                      borderRadius: "10px",
+                      padding: "22px 12px",
+                      lineHeight: "0.7",
+                      textAlign: "center",
+                      color: "white",
+                      flex: "1 1 0",
+                      maxWidth: "110px" 
+                    }}>
+                      <p style={{ fontSize: "22px", fontWeight: "bold", margin: "2px 0 0 0" }}>
+                        {result.llm_result.ai_recommended_routine.total_calories}kcal
+                      </p>
+                      <p style={{ fontSize: "12px", opacity: 0.9 }}>예상 소모 칼로리</p>
+                    </div>                    
                   </div>
 
                   {/* Exercise List */}
                   <div style={{ maxHeight: "400px", overflowY: "auto" }}>
-                    <h4 style={{ fontWeight: "600", color: "#9ca3af", fontSize: "13px", marginBottom: "12px" }}>
+                    <h4 style={{ fontWeight: "600", color: "#9ca3af", fontSize: "15px", marginTop: "8px", marginBottom: "12px", paddingLeft: "8px" }}>
                       운동 상세
                     </h4>
                     {result.llm_result.ai_recommended_routine.items?.map((item, idx) => (
@@ -806,17 +840,37 @@ function UploadPage() {
 
           {/* Right Column - Chat Panel */}
           <div style={{
-            background: "#1a1a1a",
-            borderRadius: "12px",
-            border: "1px solid #374151",
+            background: "linear-gradient(135deg, #1a1a2e 0%, #2a1a3e 100%)",
+            borderRadius: "16px",
+            border: "1px solid #0e5c0bff",
             display: "flex",
             flexDirection: "column",
-            height: "600px"
+            height: "600px",
+            overflow: "hidden"
           }}>
+            {/* 제목 헤더 */}
+            <div style={{
+              background: "linear-gradient(135deg, #043d11ff 0%, #071f02ff 100%)",
+              padding: "14px 20px",
+              borderBottom: "1px solid #0e5c0bff"
+            }}>
+              <h3 style={{
+                fontWeight: "bold",
+                fontSize: "16px",
+                margin: 0,
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                color: "#ffffff"
+              }}>
+                💬 피트니스 챗봇
+              </h3>
+            </div>
             {/* Character Selection */}
             <div style={{
               padding: "16px",
-              borderBottom: "1px solid #374151"
+              borderBottom: "1px solid #0e5c0bff",
+              background: "#0f1f0a"
             }}>
               <div style={{
                 display: "flex",
@@ -851,18 +905,18 @@ function UploadPage() {
               <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                 {[
                   // 기존 건강 분석 6개
-                  { label: "📊 주간 리포트", type: "weekly_report" },
-                  { label: "👟 걸음수", type: "weekly_steps" },
-                  { label: "😴 수면", type: "sleep_report" },
-                  { label: "❤️ 심박수", type: "heart_rate" },
-                  { label: "🏅 건강점수", type: "health_score" },
-                  { label: "🏋️ 오늘 추천", type: "today_recommendation" },
+                  { label: "주간 리포트", type: "weekly_report" },
+                  // { label: "주간 걸음수", type: "weekly_steps" },
+                  { label: "수면 분석", type: "sleep_report" },
+                  // { label: "심박수 분석", type: "heart_rate" },
+                  // { label: "건강점수", type: "health_score" },
+                  { label: "오늘 운동 추천", type: "today_recommendation" },
                   // 목표별 운동 추천 5개
-                  { label: "💪 근육증가", type: "muscle_gain" },
-                  { label: "🔥 다이어트", type: "diet_goal" },
-                  { label: "🏃 지구력", type: "endurance" },
-                  { label: "🧘 유연성", type: "flexibility" },
-                  { label: "🧠 마음챙김", type: "mindfulness" },
+                  { label: "근육증가 운동추천", type: "muscle_gain" },
+                  // { label: "다이어트 운동추천", type: "diet_goal" },
+                  // { label: "지구력증가 운동추천", type: "endurance" },
+                  // { label: "유연성향상 운동추천", type: "flexibility" },
+                  // { label: "마음챙김 운동추천", type: "mindfulness" },
                 ].map((item, idx) => (
                   <button
                     key={idx}
@@ -873,18 +927,18 @@ function UploadPage() {
                       fontSize: "11px",
                       cursor: "pointer",
                       transition: "all 0.3s",
-                      background: "#374151",
-                      border: "1px solid #4b5563",
+                      background: "#1b6904d8",
+                      border: "1px solid #272727ff",
                       color: "#d1d5db"
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.background = "#9333ea";
-                      e.currentTarget.style.borderColor = "#9333ea";
+                      e.currentTarget.style.background = "#044107ff";
+                      e.currentTarget.style.borderColor = "#0e5c0bff"
                       e.currentTarget.style.color = "white";
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.background = "#374151";
-                      e.currentTarget.style.borderColor = "#4b5563";
+                      e.currentTarget.style.borderColor = "#15bb2bff";
                       e.currentTarget.style.color = "#d1d5db";
                     }}
                   >
@@ -898,7 +952,8 @@ function UploadPage() {
             <div style={{
               flex: 1,
               padding: "16px",
-              overflowY: "auto"
+              overflowY: "auto",
+              background: "#0a0a0a"
             }}>
               {chatMessages.length === 0 ? (
                 <p style={{
@@ -934,7 +989,8 @@ function UploadPage() {
             {/* Chat Input */}
             <div style={{
               padding: "16px",
-              borderTop: "1px solid #374151"
+              borderTop: "1px solid #0b5c1dff",              
+              background: "#0f1f0a"
             }}>
               <div style={{ display: "flex", gap: "8px" }}>
                 <input
@@ -959,7 +1015,7 @@ function UploadPage() {
                   style={{
                     width: "40px",
                     height: "40px",
-                    background: "linear-gradient(to right, #9333ea, #db2777)",
+                    background: "linear-gradient(to right, #0a4408ff)",
                     border: "none",
                     borderRadius: "6px",
                     color: "white",
